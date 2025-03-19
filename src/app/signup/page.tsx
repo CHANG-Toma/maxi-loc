@@ -1,9 +1,8 @@
-
-"use client"
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from 'next/link';
+import Link from "next/link";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { motion } from "framer-motion";
@@ -22,7 +21,9 @@ export default function Signup() {
   const handleSubmit = (e) => {
     e.preventDefault();
     // TODO: Implement signup logic
-    router.push("/dashboard");
+    console.log(formData);
+
+    // router.push("/dashboard");
   };
 
   const handleChange = (e) => {
@@ -62,7 +63,10 @@ export default function Signup() {
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="firstName"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Prénom
                 </label>
                 <div className="mt-1">
@@ -73,12 +77,16 @@ export default function Signup() {
                     required
                     value={formData.firstName}
                     onChange={handleChange}
+                    className="bg-white"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="lastName"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Nom
                 </label>
                 <div className="mt-1">
@@ -89,13 +97,17 @@ export default function Signup() {
                     required
                     value={formData.lastName}
                     onChange={handleChange}
+                    className="bg-white"
                   />
                 </div>
               </div>
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Email
               </label>
               <div className="mt-1">
@@ -106,12 +118,16 @@ export default function Signup() {
                   required
                   value={formData.email}
                   onChange={handleChange}
+                  className="bg-white"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="phone"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Téléphone
               </label>
               <div className="mt-1">
@@ -122,12 +138,16 @@ export default function Signup() {
                   required
                   value={formData.phone}
                   onChange={handleChange}
+                  className="bg-white"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Mot de passe
               </label>
               <div className="mt-1">
@@ -138,12 +158,15 @@ export default function Signup() {
                   required
                   value={formData.password}
                   onChange={handleChange}
+                  className="bg-white"
                 />
               </div>
             </div>
 
             <div>
-              <Button type="submit" className="w-full bg-primary text-white hover:bg-primary/90">
+              <Button
+                type="submit"
+                className="cursor-pointer w-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">
                 S'inscrire
               </Button>
             </div>
@@ -165,7 +188,7 @@ export default function Signup() {
               <Button
                 type="button"
                 onClick={() => router.push("/login")}
-                className="w-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                className="cursor-pointer w-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
               >
                 Se connecter
               </Button>

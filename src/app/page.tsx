@@ -1,12 +1,29 @@
+"use client";
 
-"use client"
-
-import { motion, useScroll, useTransform, useMotionValue, useSpring } from "framer-motion";
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useMotionValue,
+  useSpring,
+  AnimatePresence,
+} from "framer-motion";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useRef, useEffect } from "react";
-import { ArrowDown, LineChart, Rocket, Star, Shield, Globe2, Laptop2, CircuitBoard, Atom } from "lucide-react";
+import {
+  ArrowDown,
+  LineChart,
+  Rocket,
+  Star,
+  Shield,
+  Globe2,
+  Laptop2,
+  CircuitBoard,
+  Atom,
+} from "lucide-react";
 import { Button } from "../components/ui/button";
+import Footer from "../components/ui/footer";
 
 export default function HomePage() {
   const router = useRouter();
@@ -20,7 +37,7 @@ export default function HomePage() {
   });
 
   useEffect(() => {
-    const handleMouseMove = (e) => {
+    const handleMouseMove = (e: MouseEvent) => {
       const { clientX, clientY } = e;
       mouseX.set(clientX);
       mouseY.set(clientY);
@@ -30,8 +47,12 @@ export default function HomePage() {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [mouseX, mouseY]);
 
-  const rotateX = useSpring(useTransform(mouseY, [0, window.innerHeight], [10, -10]));
-  const rotateY = useSpring(useTransform(mouseX, [0, window.innerWidth], [-10, 10]));
+  const rotateX = useSpring(
+    useTransform(mouseY, [0, window.innerHeight], [10, -10])
+  );
+  const rotateY = useSpring(
+    useTransform(mouseX, [0, window.innerWidth], [-10, 10])
+  );
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8]);
   const y = useTransform(scrollYProgress, [0, 0.5], [0, -50]);
@@ -41,61 +62,71 @@ export default function HomePage() {
       icon: <Rocket className="w-8 h-8" />,
       title: "Innovation Constante",
       description: "Technologies de pointe pour une gestion optimale",
-      color: "from-blue-500 to-cyan-400",
+      color: "from-cyan-500 to-blue-600",
     },
     {
       icon: <Atom className="w-8 h-8" />,
       title: "IA Intelligente",
       description: "Prédictions et analyses automatisées",
-      color: "from-violet-500 to-purple-500",
+      color: "from-fuchsia-500 to-violet-600",
     },
     {
       icon: <CircuitBoard className="w-8 h-8" />,
       title: "Automatisation",
       description: "Processus automatisés pour plus d'efficacité",
-      color: "from-rose-500 to-pink-500",
+      color: "from-teal-400 to-emerald-600",
     },
     {
       icon: <Star className="w-8 h-8" />,
       title: "Performance",
       description: "Maximisez vos revenus locatifs",
-      color: "from-amber-400 to-orange-500",
+      color: "from-indigo-400 to-blue-600",
     },
   ];
 
   const floatingIcons = [
-    { Icon: Globe2, delay: 0 },
-    { Icon: Laptop2, delay: 0.2 },
-    { Icon: LineChart, delay: 0.4 },
-    { Icon: Shield, delay: 0.6 },
+    { Icon: Globe2, delay: 0, rotate: 20 },
+    { Icon: Laptop2, delay: 0.2, rotate: -15 },
+    { Icon: LineChart, delay: 0.4, rotate: 10 },
+    { Icon: Shield, delay: 0.6, rotate: -20 },
   ];
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
       {/* Background with Interactive Grid */}
       <div className="fixed inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.1)_0%,transparent_100%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f1a_1px,transparent_1px)] bg-[size:40px] bg-[position:center]" 
-             style={{ transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)` }} />
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,#4f4f4f1a_1px,transparent_1px)] bg-[size:40px] bg-[position:center]"
-             style={{ transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)` }} />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(56,189,248,0.1)_0%,transparent_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.05)_0%,transparent_100%)]" />
+        <div
+          className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f1a_1px,transparent_1px)] bg-[size:30px] bg-[position:center]"
+          style={{
+            transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
+          }}
+        />
+        <div
+          className="absolute inset-0 bg-[linear-gradient(to_bottom,#4f4f4f1a_1px,transparent_1px)] bg-[size:30px] bg-[position:center]"
+          style={{
+            transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
+          }}
+        />
       </div>
 
-      {/* Hero Section */}
-      <div ref={targetRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Section héro */}
+      <div
+        ref={targetRef}
+        className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      >
+        {/* Contenu principal de la section héro */}
         <div className="relative container px-4 mx-auto text-center z-10">
-          <motion.div
-            style={{ opacity, scale, y }}
-            className="relative"
-          >
+          <motion.div style={{ opacity, scale, y }} className="relative">
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8 }}
-              className="absolute -inset-2 bg-gradient-to-r from-primary/30 to-purple-500/30 rounded-lg blur-xl"
+              className="absolute -inset-2 bg-gradient-to-r from-cyan-500/30 to-fuchsia-500/30 rounded-lg blur-xl"
             />
-            <h1 className="relative text-5xl md:text-7xl font-bold tracking-tight text-white mb-8">
-              <span className="inline-block bg-gradient-to-r from-primary to-purple-500 text-transparent bg-clip-text">
+            <h1 className="relative text-5xl md:text-7xl font-bold tracking-tight text-white mb-8 glitch-text">
+              <span className="inline-block bg-gradient-to-r from-cyan-400 via-blue-500 to-fuchsia-500 text-transparent bg-clip-text">
                 Révolutionnez
               </span>{" "}
               <br />
@@ -103,15 +134,18 @@ export default function HomePage() {
             </h1>
           </motion.div>
 
+          {/* Description de la plateforme */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
             className="mt-6 text-xl leading-8 text-gray-300 max-w-2xl mx-auto"
           >
-            Propulsez votre activité vers le futur avec notre plateforme révolutionnaire
+            Propulsez votre activité vers le futur avec notre plateforme
+            révolutionnaire
           </motion.p>
 
+          {/* Bouton pour commencer gratuitement et se connecter */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -120,7 +154,7 @@ export default function HomePage() {
           >
             <Button
               size="lg"
-              onClick={() => router.push('/signup')}
+              onClick={() => router.push("/signup")}
               className="relative group overflow-hidden bg-primary/80 hover:bg-primary/90 text-white transition-all duration-300"
             >
               <motion.span
@@ -130,55 +164,79 @@ export default function HomePage() {
                   rotate: 45,
                 }}
               />
-              <span className="relative">Commencer Gratuitement</span>
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => router.push("/signup")}
+                className="border-white bg-white text-black hover:bg-white/10 backdrop-blur-sm transition-all duration-300 cursor-pointer"
+              >
+                Commencer Gratuitement
+              </Button>
             </Button>
             <Button
               variant="outline"
               size="lg"
-              onClick={() => router.push('/login')}
-              className="border-gray-500 text-white hover:bg-white/10 backdrop-blur-sm transition-all duration-300"
+              onClick={() => router.push("/login")}
+              className="border-gray-500 text-white hover:bg-white/10 backdrop-blur-sm transition-all duration-300 cursor-pointer"
             >
               Se Connecter
             </Button>
           </motion.div>
         </div>
 
-        {/* Floating Elements */}
-        {floatingIcons.map(({ Icon, delay }, index) => (
+        {/* Éléments flottants pour la présentation de la plateforme */}
+        {floatingIcons.map(({ Icon, delay, rotate }, index) => (
           <motion.div
             key={index}
             initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
+            animate={{
+              opacity: [0.2, 0.8, 0.2],
+              scale: [1, 1.2, 1],
+              rotate: [0, rotate, 0],
+            }}
             transition={{
-              duration: 1,
+              duration: 3,
               delay,
               repeat: Infinity,
               repeatType: "reverse",
-              repeatDelay: 2,
             }}
             className="absolute hidden md:block"
             style={{
               top: `${20 + index * 20}%`,
               left: `${10 + index * 25}%`,
-              color: "rgba(255, 255, 255, 0.2)",
+              color: "rgba(56, 189, 248, 0.3)",
             }}
           >
             <Icon className="w-12 h-12" />
           </motion.div>
         ))}
 
+        {/* Bouton pour scroller vers les fonctionnalités */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 1 }}
           className="absolute bottom-10 left-1/2 transform -translate-x-1/2 cursor-pointer"
         >
-          <ArrowDown className="w-6 h-6 text-white animate-bounce" />
+          <div
+            onClick={() => {
+              document.getElementById("features")?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
+            }}
+            className="cursor-pointer"
+          >
+            <ArrowDown className="w-6 h-6 text-white animate-bounce" />
+          </div>
         </motion.div>
       </div>
 
-      {/* Features Grid */}
-      <div className="relative py-24 bg-black/50 backdrop-blur-xl">
+      {/* Fonctionnalités principales et objectifs de la plateforme */}
+      <div
+        id="features"
+        className="relative py-24 bg-black/50 backdrop-blur-xl"
+      >
         <div className="container px-4 mx-auto">
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {features.map((feature, index) => (
@@ -186,12 +244,14 @@ export default function HomePage() {
                 key={feature.title}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                viewport={{ margin: "-100px" }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 whileHover={{ scale: 1.05, rotateY: 5 }}
                 className="relative p-6 rounded-2xl overflow-hidden group backdrop-blur-xl"
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-10 group-hover:opacity-20 transition-opacity duration-300`} />
+                <div
+                  className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-10 group-hover:opacity-20 transition-opacity duration-300`}
+                />
                 <motion.div
                   initial={false}
                   whileHover={{ scale: 1.2, rotate: 360 }}
@@ -200,13 +260,189 @@ export default function HomePage() {
                 >
                   {feature.icon}
                 </motion.div>
-                <h3 className="relative z-10 text-xl font-semibold mb-2 text-white">{feature.title}</h3>
-                <p className="relative z-10 text-gray-400 text-sm">{feature.description}</p>
+                <h3 className="relative z-10 text-xl font-semibold mb-2 text-white">
+                  {feature.title}
+                </h3>
+                <p className="relative z-10 text-gray-400 text-sm">
+                  {feature.description}
+                </p>
               </motion.div>
             ))}
           </div>
         </div>
       </div>
+
+      {/* Section des fonctionnalités du dashboard */}
+      <div className="relative py-24 bg-black/50 backdrop-blur-xl">
+        <div className="container px-4 mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ margin: "-100px" }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl font-bold text-white mb-4">
+              <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-fuchsia-500 text-transparent bg-clip-text">
+                Votre Dashboard Complet
+              </span>
+            </h2>
+            <p className="text-gray-400 text-lg">
+              Une suite d'outils puissants pour gérer votre activité
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ margin: "-100px" }}
+              transition={{ delay: 0.1 }}
+              className="p-6 rounded-2xl bg-gradient-to-br from-cyan-500/10 to-blue-600/10 backdrop-blur-xl border border-gray-800"
+            >
+              <h3 className="text-xl font-semibold text-white mb-3">
+                🏠 Gestion des Biens
+              </h3>
+              <p className="text-gray-400">
+                Gérez vos propriétés, suivez leur état et optimisez leur
+                rentabilité
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ margin: "-100px" }}
+              transition={{ delay: 0.2 }}
+              className="p-6 rounded-2xl bg-gradient-to-br from-fuchsia-500/10 to-violet-600/10 backdrop-blur-xl border border-gray-800"
+            >
+              <h3 className="text-xl font-semibold text-white mb-3">
+                👥 Gestion des Clients
+              </h3>
+              <p className="text-gray-400">
+                Suivez vos locataires, leurs contrats et leurs informations
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ margin: "-100px" }}
+              transition={{ delay: 0.3 }}
+              className="p-6 rounded-2xl bg-gradient-to-br from-teal-400/10 to-emerald-600/10 backdrop-blur-xl border border-gray-800"
+            >
+              <h3 className="text-xl font-semibold text-white mb-3">
+                📅 Réservations
+              </h3>
+              <p className="text-gray-400">
+                Gérez les locations et le planning de vos biens
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ margin: "-100px" }}
+              transition={{ delay: 0.4 }}
+              className="p-6 rounded-2xl bg-gradient-to-br from-indigo-400/10 to-blue-600/10 backdrop-blur-xl border border-gray-800"
+            >
+              <h3 className="text-xl font-semibold text-white mb-3">
+                💰 Paiements
+              </h3>
+              <p className="text-gray-400">
+                Suivez vos revenus et gérez les paiements des loyers
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ margin: "-100px" }}
+              transition={{ delay: 0.5 }}
+              className="p-6 rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-600/10 backdrop-blur-xl border border-gray-800"
+            >
+              <h3 className="text-xl font-semibold text-white mb-3">
+                📊 Rapports
+              </h3>
+              <p className="text-gray-400">
+                Analysez vos performances et générez des rapports détaillés
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ margin: "-100px" }}
+              transition={{ delay: 0.6 }}
+              className="p-6 rounded-2xl bg-gradient-to-br from-amber-400/10 to-orange-600/10 backdrop-blur-xl border border-gray-800"
+            >
+              <h3 className="text-xl font-semibold text-white mb-3">
+                ⚙️ Paramètres
+              </h3>
+              <p className="text-gray-400">
+                Personnalisez votre expérience et configurez vos préférences
+              </p>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+
+      {/* Ajout du composant Footer */}
+      <Footer />
     </div>
   );
 }
+
+const styles = `
+.glitch-text {
+  text-shadow: 
+    0.05em 0 0 rgba(255,0,0,.75),
+    -0.025em -0.05em 0 rgba(0,255,0,.75),
+    0.025em 0.05em 0 rgba(0,0,255,.75);
+  animation: glitch 500ms infinite;
+}
+
+@keyframes glitch {
+  0% {
+    text-shadow: 
+      0.05em 0 0 rgba(255,0,0,.75),
+      -0.05em -0.025em 0 rgba(0,255,0,.75),
+      -0.025em 0.05em 0 rgba(0,0,255,.75);
+  }
+  14% {
+    text-shadow: 
+      0.05em 0 0 rgba(255,0,0,.75),
+      -0.05em -0.025em 0 rgba(0,255,0,.75),
+      -0.025em 0.05em 0 rgba(0,0,255,.75);
+  }
+  15% {
+    text-shadow: 
+      -0.05em -0.025em 0 rgba(255,0,0,.75),
+      0.025em 0.025em 0 rgba(0,255,0,.75),
+      -0.05em -0.05em 0 rgba(0,0,255,.75);
+  }
+  49% {
+    text-shadow: 
+      -0.05em -0.025em 0 rgba(255,0,0,.75),
+      0.025em 0.025em 0 rgba(0,255,0,.75),
+      -0.05em -0.05em 0 rgba(0,0,255,.75);
+  }
+  50% {
+    text-shadow: 
+      0.025em 0.05em 0 rgba(255,0,0,.75),
+      0.05em 0 0 rgba(0,255,0,.75),
+      0 -0.05em 0 rgba(0,0,255,.75);
+  }
+  99% {
+    text-shadow: 
+      0.025em 0.05em 0 rgba(255,0,0,.75),
+      0.05em 0 0 rgba(0,255,0,.75),
+      0 -0.05em 0 rgba(0,0,255,.75);
+  }
+  100% {
+    text-shadow: 
+      -0.025em 0 0 rgba(255,0,0,.75),
+      -0.025em -0.025em 0 rgba(0,255,0,.75),
+      -0.025em -0.05em 0 rgba(0,0,255,.75);
+  }
+}
+`;
