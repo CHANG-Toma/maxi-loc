@@ -1,41 +1,21 @@
 // Prisma
-import { prisma } from "@/lib/prisma";
-import { Client } from "@prisma/client";
-
 import { NextResponse } from "next/server";
+import { UtilisateurService } from "@/lib/utilisateur";
 
-export class UserRoute {
-  static async getAllUsers() {
-    const users = await prisma.client.findMany();
-    return NextResponse.json(users);
-  }
-
-  static async getUserById(id: string) {
-    const user = await prisma.client.findUnique({
-      where: { id_client: parseInt(id) },
-    });
-    return NextResponse.json(user);
-  }
-
-  static async createUser(user: Client) {
-    const newUser = await prisma.client.create({
-      data: user,
-    });
-    return NextResponse.json(newUser);
-  }
-
-  static async updateUser(id: string, user: Client) {
-    const updatedUser = await prisma.client.update({
-      where: { id_client: parseInt(id) },
-      data: user,
-    });
-    return NextResponse.json(updatedUser);
-  }
-
-  static async deleteUser(id: string) {
-    const deletedUser = await prisma.client.delete({
-      where: { id_client: parseInt(id) },
-    });
-    return NextResponse.json(deletedUser);
-  }
+export async function GET(req: Request) { 
+  const utilisateurService = new UtilisateurService();
+  const utilisateurs = await utilisateurService.getAll();
+  return NextResponse.json(utilisateurs);
 }
+
+export async function POST(req: Request) {
+  const { nom, prenom, email, telephone, mot_de_passe } = await req.json();
+  const utilisateurService = new UtilisateurService();
+  const utilisateur = await utilisateurService.create({ nom, prenom, email, telephone, mot_de_passe });
+  return NextResponse.json(utilisateur);
+}
+
+
+
+
+

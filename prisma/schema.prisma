@@ -8,104 +8,107 @@ datasource db {
 }
 
 model Charge {
-  id_charge      Int      @id @default(autoincrement())
+  id_charge      Int        @id @default(autoincrement())
   date_paiement  DateTime
   montant        Int
   id_type_charge Int
   id_propriete   Int
+  propriete      Propriete  @relation(fields: [id_propriete], references: [id_propriete])
+  typeCharge     TypeCharge @relation(fields: [id_type_charge], references: [id_type_charge])
 
-  typeCharge  TypeCharge  @relation(fields: [id_type_charge], references: [id_type_charge])
-  propriete   Propriete   @relation(fields: [id_propriete], references: [id_propriete])
-
+  @@index([id_propriete], map: "Charge_id_propriete_fkey")
+  @@index([id_type_charge], map: "Charge_id_type_charge_fkey")
   @@map("Charge")
 }
 
 model Plateforme {
-  id_plateforme      Int     @id @default(autoincrement())
-  nom                String? @db.VarChar(25)
-  site_web           String? @db.VarChar(255)
-  proprietes         PlateformePropriete[]
+  id_plateforme Int                   @id @default(autoincrement())
+  nom           String?               @db.VarChar(25)
+  site_web      String?               @db.VarChar(255)
+  proprietes    PlateformePropriete[]
 
   @@map("Plateforme")
 }
 
 model PlateformePropriete {
-  id_propriete   Int
-  id_plateforme  Int
-
-  propriete      Propriete  @relation(fields: [id_propriete], references: [id_propriete])
-  plateforme     Plateforme @relation(fields: [id_plateforme], references: [id_plateforme])
+  id_propriete  Int
+  id_plateforme Int
+  plateforme    Plateforme @relation(fields: [id_plateforme], references: [id_plateforme])
+  propriete     Propriete  @relation(fields: [id_propriete], references: [id_propriete])
 
   @@id([id_propriete, id_plateforme])
+  @@index([id_plateforme], map: "Plateforme_propriete_id_plateforme_fkey")
   @@map("Plateforme_propriete")
 }
 
 model Propriete {
-  id_propriete       Int     @id @default(autoincrement())
-  nom                String  @db.VarChar(25)
-  adresse            String  @db.VarChar(100)
-  ville              String  @db.VarChar(50)
-  pays               String  @db.VarChar(50)
-  capacite           Int
-  superficie         Int
-  description        String? @db.VarChar(255)
-  id_utilisateur     Int
-  id_type_propriete  Int
+  id_propriete      Int                   @id @default(autoincrement())
+  nom               String                @db.VarChar(25)
+  adresse           String                @db.VarChar(100)
+  ville             String                @db.VarChar(50)
+  pays              String                @db.VarChar(50)
+  capacite          Int
+  superficie        Int
+  description       String?               @db.VarChar(255)
+  id_utilisateur    Int
+  id_type_propriete Int
+  charges           Charge[]
+  plateformes       PlateformePropriete[]
+  typePropriete     TypePropriete         @relation(fields: [id_type_propriete], references: [id_type_propriete])
+  utilisateur       Utilisateur           @relation(fields: [id_utilisateur], references: [id_utilisateur])
+  reservations      Reservation[]
 
-  utilisateur        Utilisateur @relation(fields: [id_utilisateur], references: [id_utilisateur])
-  typePropriete      TypePropriete @relation(fields: [id_type_propriete], references: [id_type_propriete])
-  charges            Charge[]
-  reservations       Reservation[]
-  plateformes        PlateformePropriete[]
-
+  @@index([id_type_propriete], map: "Propriete_id_type_propriete_fkey")
+  @@index([id_utilisateur], map: "Propriete_id_utilisateur_fkey")
   @@map("Propriete")
 }
 
 model Reservation {
-  id_reservation        Int      @id @default(autoincrement())
+  id_reservation        Int               @id @default(autoincrement())
   date_debut            DateTime
   date_fin              DateTime
   prix_total            Int?
   id_statut_reservation Int
   id_propriete          Int
-
+  propriete             Propriete         @relation(fields: [id_propriete], references: [id_propriete])
   statutReservation     StatutReservation @relation(fields: [id_statut_reservation], references: [id_statut_reservation])
-  propriete             Propriete @relation(fields: [id_propriete], references: [id_propriete])
 
+  @@index([id_propriete], map: "Reservation_id_propriete_fkey")
+  @@index([id_statut_reservation], map: "Reservation_id_statut_reservation_fkey")
   @@map("Reservation")
 }
 
 model StatutReservation {
-  id_statut_reservation Int     @id @default(autoincrement())
-  libelle               String  @db.VarChar(25)
+  id_statut_reservation Int           @id @default(autoincrement())
+  libelle               String        @db.VarChar(25)
   reservations          Reservation[]
 
   @@map("Statut_reservation")
 }
 
 model TypeCharge {
-  id_type_charge Int     @id @default(autoincrement())
-  libelle        String  @db.VarChar(20)
+  id_type_charge Int      @id @default(autoincrement())
+  libelle        String   @db.VarChar(20)
   charges        Charge[]
 
   @@map("Type_charge")
 }
 
 model TypePropriete {
-  id_type_propriete Int     @id @default(autoincrement())
-  libelle           String  @db.VarChar(20)
+  id_type_propriete Int         @id @default(autoincrement())
+  libelle           String      @db.VarChar(20)
   proprietes        Propriete[]
 
   @@map("Type_propriete")
 }
 
 model Utilisateur {
-  id_utilisateur Int     @id @default(autoincrement())
-  nom            String  @db.VarChar(20)
-  prenom         String  @db.VarChar(20)
-  email          String  @db.VarChar(50)
-  mot_de_passe   String? @db.VarChar(255)
-  telephone      String  @db.VarChar(15)
+  id_utilisateur Int         @id @default(autoincrement())
+  nom            String      @db.VarChar(20)
+  prenom         String      @db.VarChar(20)
+  email          String      @db.VarChar(50)
+  mot_de_passe   String?     @db.VarChar(255)
+  telephone      String      @db.VarChar(15)
   proprietes     Propriete[]
 
   @@map("Utilisateur")
