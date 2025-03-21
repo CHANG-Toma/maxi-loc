@@ -1,36 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
 ## Getting Started
 
-First, run the development server:
+<!-- Titre et description du projet -->
+## Titre et description
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Maxi Loc
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Maxi Loc est une application web de gestion immobilière conçue pour optimiser la rentabilité des investissements locatifs. Cette plateforme permet aux propriétaires et investisseurs de suivre, analyser et maximiser les performances de leurs biens immobiliers en location.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Notre solution offre une vision claire de la rentabilité de chaque bien, avec des outils d'analyse financière, de suivi des loyers, et de gestion des dépenses, le tout dans une interface moderne et intuitive.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Fonctionnalités principales
 
-## Learn More
+- Tableau de bord personnalisé avec vue d'ensemble de tous vos biens
+- Calcul automatique de la rentabilité et du cash flow
+- Suivi des loyers et des charges
+- Gestion des contrats de location
+- Planification des travaux et de la maintenance
+- Rapports financiers détaillés et exportables
 
-To learn more about Next.js, take a look at the following resources:
+## Technologies utilisées
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Frontend: React.js, Next.js, Tailwind CSS
+- Backend: Node.js
+- Base de données: MySQL
+- Déploiement: Vercel
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Auteurs et contributeurs
 
-## Deploy on Vercel
+- **CHANG Toma** - [GitHub](https://github.com/CHANG-Toma)
+- Listez ici les autres contributeurs
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Licence
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Ce projet est sous licence [MIT](LICENSE) - voir le fichier LICENSE pour plus de détails.
+

@@ -32,9 +32,9 @@ const Footer = () => {
   ];
 
   const socialLinks = [
-    { Icon: Facebook, href: "#", label: "Facebook" },
-    { Icon: Twitter, href: "#", label: "Twitter" },
-    { Icon: Instagram, href: "#", label: "Instagram" },
+    { Icon: Facebook, href: "https://www.facebook.com", label: "Facebook" },
+    { Icon: Twitter, href: "https://www.twitter.com", label: "Twitter" },
+    { Icon: Instagram, href: "https://www.instagram.com", label: "Instagram" },
     { Icon: Mail, href: "mailto:toma11chang@gmail.com", label: "Email" },
   ];
 
@@ -142,16 +142,38 @@ const Footer = () => {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex space-x-4">
               {socialLinks.map(({ Icon, href, label }) => (
-                <motion.a
+                <a
                   key={label}
                   href={href}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="text-gray-400 hover:text-primary transition-colors duration-200"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors duration-200 flex items-center gap-1 group p-2 hover:scale-110"
+                  onClick={(e) => {
+                    // Vérifier si le lien commence par un # (lien interne)
+                    if (href.startsWith('#')) {
+                      e.preventDefault();
+                      const targetId = href.substring(1);
+                      const targetElement = document.getElementById(targetId);
+                      
+                      if (targetElement) {
+                        // Animation de scroll douce
+                        window.scrollTo({
+                          top: targetElement.offsetTop,
+                          behavior: 'smooth'
+                        });
+                        
+                        // Animation visuelle supplémentaire
+                        targetElement.classList.add('highlight-section');
+                        setTimeout(() => {
+                          targetElement.classList.remove('highlight-section');
+                        }, 1500);
+                      }
+                    }
+                  }}
                 >
                   <Icon className="w-5 h-5" />
                   <span className="sr-only">{label}</span>
-                </motion.a>
+                </a>
               ))}
             </div>
             <p className="text-gray-400 text-sm">
@@ -160,9 +182,6 @@ const Footer = () => {
           </div>
         </div>
       </div>
-
-      {/* Effet de lueur */}
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
     </footer>
   );
 };
