@@ -1,5 +1,3 @@
-## Getting Started
-
 <!-- Titre et description du projet -->
 ## Titre et description
 
