@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { useState } from "react";
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Overview from "./components/Overview";
 import { Sidebar } from "../../components/sidebar";
@@ -28,8 +27,9 @@ import {
   MenubarMenu,
   MenubarTrigger 
 } from "@/components/ui/menubar";
+import { ReactNode } from "react";
 
-export default function Dashboard() {
+export default function Dashboard({ children }: { children?: ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const pathname = usePathname();
 
@@ -79,7 +79,7 @@ export default function Dashboard() {
 
         {/* Dashboard Content */}
         <main className="p-6">
-          <Overview />
+          {children || <Overview />}  
         </main>
       </div>
     </div>

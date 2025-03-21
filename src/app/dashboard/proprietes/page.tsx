@@ -4,7 +4,7 @@
 import { motion } from "framer-motion";
 import { Building2 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
-import DashboardLayout from "../components/DashboardLayout";
+import Dashboard from "../page";
 
 export default function PropertiesPage() {
   const properties = [
@@ -38,7 +38,7 @@ export default function PropertiesPage() {
   ];
 
   return (
-    <DashboardLayout>
+    <Dashboard>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold">Propriétés</h2>
@@ -111,6 +111,6 @@ export default function PropertiesPage() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </Dashboard>
   );
 }

@@ -1,10 +1,9 @@
-
 "use client"
 
 import { motion } from "framer-motion";
 import { BarChart, LineChart, PieChart } from "lucide-react";
 import { Button } from "../../../components/ui/button";
-import DashboardLayout from "../components/DashboardLayout";
+import Dashboard from "../page";
 import {
   BarChart as RechartsBarChart,
   Bar,
@@ -62,7 +61,7 @@ export default function ReportsPage() {
   const COLORS = ["#007AFF", "#34C759", "#FF9500", "#FF3B30"];
 
   return (
-    <DashboardLayout>
+    <Dashboard>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold">Rapports</h2>
@@ -212,6 +211,6 @@ export default function ReportsPage() {
           </motion.div>
         </div>
       </div>
-    </DashboardLayout>
+    </Dashboard>
   );
 }

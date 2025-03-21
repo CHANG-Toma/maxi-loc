@@ -1,10 +1,9 @@
-
 "use client"
 
 import { motion } from "framer-motion";
 import { Calendar, Users2 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
-import DashboardLayout from "../components/DashboardLayout";
+import Dashboard from "../page";
 
 export default function BookingsPage() {
   const bookings = [
@@ -41,7 +40,7 @@ export default function BookingsPage() {
   ];
 
   return (
-    <DashboardLayout>
+    <Dashboard>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold">Réservations</h2>
@@ -117,6 +116,6 @@ export default function BookingsPage() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </Dashboard>
   );
 }

@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react";
@@ -8,7 +7,7 @@ import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Switch } from "../../../components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs";
-import DashboardLayout from "../components/DashboardLayout";
+import Dashboard from "../page";
 
 export default function SettingsPage() {
   const [profile, setProfile] = useState({
@@ -24,7 +23,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <DashboardLayout>
+    <Dashboard>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold">Paramètres</h2>
@@ -310,6 +309,6 @@ export default function SettingsPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </DashboardLayout>
+    </Dashboard>
   );
 }
