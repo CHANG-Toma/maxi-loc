@@ -41,8 +41,8 @@ export default function PropertiesPage() {
     <Dashboard>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold">Propriétés</h2>
-          <Button className="bg-primary text-white">
+          <h2 className="text-2xl font-bold text-gray-900">Propriétés</h2>
+          <Button className="bg-black text-white hover:bg-primary/90 cursor-pointer">
             Ajouter une propriété
           </Button>
         </div>
@@ -101,7 +101,7 @@ export default function PropertiesPage() {
                         {property.status === 'active' ? 'Actif' : 'Inactif'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-primary">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {property.revenue}
                     </td>
                   </motion.tr>
