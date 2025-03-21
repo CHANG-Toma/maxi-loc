@@ -7,6 +7,7 @@ import { Button } from "../../../components/ui/button";
 import Dashboard from "../page";
 
 export default function PaymentsPage() {
+  // Récupérer les paiements de la base de données ici
   const payments = [
     {
       id: 1,
@@ -41,8 +42,8 @@ export default function PaymentsPage() {
     <Dashboard>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold">Paiements</h2>
-          <Button className="bg-primary text-white">
+          <h2 className="text-2xl font-bold text-gray-900">Paiements</h2>
+          <Button className="bg-black text-white hover:bg-primary/90 cursor-pointer">
             Nouveau paiement
           </Button>
         </div>
@@ -57,7 +58,7 @@ export default function PaymentsPage() {
             <div className="flex justify-between items-start mb-4">
               <div>
                 <p className="text-sm text-gray-500">Total perçu</p>
-                <h3 className="text-2xl font-bold">4,070€</h3>
+                <h3 className="text-2xl font-bold text-gray-900">4,070€</h3>
               </div>
               <div className="p-3 bg-green-100 rounded-full">
                 <DollarSign className="w-6 h-6 text-green-600" />
@@ -79,7 +80,7 @@ export default function PaymentsPage() {
             <div className="flex justify-between items-start mb-4">
               <div>
                 <p className="text-sm text-gray-500">En attente</p>
-                <h3 className="text-2xl font-bold">720€</h3>
+                <h3 className="text-2xl font-bold text-gray-900">720€</h3>
               </div>
               <div className="p-3 bg-yellow-100 rounded-full">
                 <CreditCard className="w-6 h-6 text-yellow-600" />
@@ -101,7 +102,7 @@ export default function PaymentsPage() {
             <div className="flex justify-between items-start mb-4">
               <div>
                 <p className="text-sm text-gray-500">Échec</p>
-                <h3 className="text-2xl font-bold">2,100€</h3>
+                <h3 className="text-2xl font-bold text-gray-900">2,100€</h3>
               </div>
               <div className="p-3 bg-red-100 rounded-full">
                 <CreditCard className="w-6 h-6 text-red-600" />
@@ -152,19 +153,19 @@ export default function PaymentsPage() {
                       <div className="text-sm font-medium text-gray-900">{payment.property}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{payment.client}</div>
+                      <div className="text-sm text-gray-800">{payment.client}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center text-sm text-gray-500">
-                        <Calendar className="w-4 h-4 mr-2 text-gray-400" />
+                      <div className="flex items-center text-sm text-gray-800">
+                        <Calendar className="w-4 h-4 mr-2 text-gray-800" />
                         {new Date(payment.date).toLocaleDateString()}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-primary">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {payment.amount}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center text-sm text-gray-500">
+                      <div className="flex items-center text-sm text-gray-800">
                         <CreditCard className="w-4 h-4 mr-2 text-gray-400" />
                         {payment.method}
                       </div>
