@@ -253,14 +253,7 @@ export default function HomePage() {
                 <div
                   className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-10 group-hover:opacity-20 transition-opacity duration-300`}
                 />
-                <motion.div
-                  initial={false}
-                  whileHover={{ scale: 1.2, rotate: 360 }}
-                  transition={{ duration: 0.6 }}
-                  className="relative z-10 mb-4 text-white"
-                >
                   {feature.icon}
-                </motion.div>
                 <h3 className="relative z-10 text-xl font-semibold mb-2 text-white">
                   {feature.title}
                 </h3>
