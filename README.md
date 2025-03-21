@@ -1,5 +1,3 @@
-## Getting Started
-
 <!-- Titre et description du projet -->
 ## Titre et description
 
@@ -28,7 +26,6 @@ Notre solution offre une vision claire de la rentabilité de chaque bien, avec d
 ## Auteurs et contributeurs
 
 - **CHANG Toma** - [GitHub](https://github.com/CHANG-Toma)
-- Listez ici les autres contributeurs
 
 ## Licence
 
