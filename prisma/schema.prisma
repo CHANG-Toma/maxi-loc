@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,4 +5,122 @@ generator client {
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+model Charge {
+  id_charge      Int      @id @default(autoincrement())
+  date_paiement  DateTime
+  montant        Int
+  id_type_charge Int
+  id_propriete   Int
+
+  typeCharge  TypeCharge  @relation(fields: [id_type_charge], references: [id_type_charge])
+  propriete   Propriete   @relation(fields: [id_propriete], references: [id_propriete])
+
+  @@map("Charge")
+}
+
+model Plateforme {
+  id_plateforme Int     @id @default(autoincrement())
+  nom           String? @db.VarChar(25)
+  site_web      String? @db.VarChar(255)
+  reservations  Reservation[]
+
+  @@map("Plateforme")
+}
+
+model Propriete {
+  id_propriete      Int     @id @default(autoincrement())
+  nom               String? @db.VarChar(255)
+  adresse           String? @db.VarChar(255)
+  id_type_propriete Int
+
+  typePropriete TypePropriete @relation(fields: [id_type_propriete], references: [id_type_propriete])
+  charges       Charge[]
+  contrats      Contrat[]
+  reservations  Reservation[]
+
+  @@map("Propriete")
+}
+
+model TypeCharge {
+  id_type_charge Int     @id @default(autoincrement())
+  nom            String? @db.VarChar(255)
+  charges        Charge[]
+
+  @@map("TypeCharge")
+}
+
+model TypePropriete {
+  id_type_propriete Int     @id @default(autoincrement())
+  nom               String? @db.VarChar(255)
+  proprietes        Propriete[]
+
+  @@map("TypePropriete")
+}
+
+model Client {
+  id_client   Int     @id @default(autoincrement())
+  nom         String? @db.VarChar(255)
+  prenom      String? @db.VarChar(255)
+  email       String? @db.VarChar(255)
+  telephone   String? @db.VarChar(20)
+  contrats    Contrat[]
+  reservations Reservation[]
+  factures     Facture[]
+
+  @@map("Client")
+}
+
+model Contrat {
+  id_contrat     Int      @id @default(autoincrement())
+  date_debut     DateTime
+  date_fin       DateTime
+  montant_loyer  Int
+  id_propriete   Int
+  id_client      Int
+
+  propriete   Propriete @relation(fields: [id_propriete], references: [id_propriete])
+  client      Client    @relation(fields: [id_client], references: [id_client])
+  paiements   Paiement[]
+
+  @@map("Contrat")
+}
+
+model Paiement {
+  id_paiement    Int      @id @default(autoincrement())
+  date_paiement  DateTime
+  montant        Int
+  id_contrat     Int
+
+  contrat     Contrat   @relation(fields: [id_contrat], references: [id_contrat])
+
+  @@map("Paiement")
+}
+
+model Reservation {
+  id_reservation Int      @id @default(autoincrement())
+  date_debut     DateTime
+  date_fin       DateTime
+  montant        Int
+  id_propriete   Int
+  id_client      Int
+  id_plateforme  Int
+
+  propriete   Propriete  @relation(fields: [id_propriete], references: [id_propriete])
+  client      Client     @relation(fields: [id_client], references: [id_client])
+  plateforme  Plateforme @relation(fields: [id_plateforme], references: [id_plateforme])
+
+  @@map("Reservation")
+}
+
+model Facture {
+  id_facture    Int      @id @default(autoincrement())
+  date_emission DateTime
+  montant       Int
+  id_client     Int
+
+  client      Client    @relation(fields: [id_client], references: [id_client])
+
+  @@map("Facture")
 }

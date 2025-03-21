@@ -26,7 +26,7 @@ import {
 import { Button } from "../components/ui/button";
 import Footer from "../components/footer";
 
-export default function HomePage() {
+export default async function HomePage() {
   const router = useRouter();
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
