@@ -6,6 +6,7 @@ import { Button } from "../../../components/ui/button";
 import Dashboard from "../page";
 
 export default function BookingsPage() {
+  // Récupérer les réservations de la base de données ici
   const bookings = [
     {
       id: 1,
@@ -43,8 +44,8 @@ export default function BookingsPage() {
     <Dashboard>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold">Réservations</h2>
-          <Button className="bg-primary text-white">
+          <h2 className="text-2xl font-bold text-gray-900">Réservations</h2>
+          <Button className="bg-black text-white hover:bg-primary/90 cursor-pointer">
             Nouvelle réservation
           </Button>
         </div>
@@ -106,7 +107,7 @@ export default function BookingsPage() {
                         {booking.status === 'confirmed' ? 'Confirmé' : 'En attente'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-primary">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {booking.total}
                     </td>
                   </motion.tr>
