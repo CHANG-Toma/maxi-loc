@@ -23,6 +23,10 @@ Notre solution offre une vision claire de la rentabilité de chaque bien, avec d
 - Base de données: MySQL
 - Déploiement: Vercel
 
+## Logique utilisées
+- lib : Logique métier (getUser, newUser, ...)
+- api : traitement des données récupérées depuis lib (login, register, ...)
+
 ## Auteurs et contributeurs
 
 - **CHANG Toma** - [GitHub](https://github.com/CHANG-Toma)
