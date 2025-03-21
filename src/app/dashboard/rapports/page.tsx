@@ -21,6 +21,7 @@ import {
 } from "recharts";
 
 export default function ReportsPage() {
+  // Récupérer les données des rapports de la base de données ici
   const monthlyRevenue = [
     { name: "Jan", revenue: 4000 },
     { name: "Fév", revenue: 3000 },
@@ -36,6 +37,7 @@ export default function ReportsPage() {
     { name: "Déc", revenue: 3800 }
   ];
 
+  // Récupérer les données des rapports de la base de données ici
   const occupancyRate = [
     { name: "Jan", rate: 65 },
     { name: "Fév", rate: 59 },
@@ -51,6 +53,7 @@ export default function ReportsPage() {
     { name: "Déc", rate: 90 }
   ];
 
+  // Récupérer les données des sources de réservation de la base de données ici
   const bookingSources = [
     { name: "Site web", value: 45 },
     { name: "Airbnb", value: 25 },
@@ -64,8 +67,8 @@ export default function ReportsPage() {
     <Dashboard>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold">Rapports</h2>
-          <Button className="bg-primary text-white">
+          <h2 className="text-2xl font-bold text-gray-900">Rapports</h2>
+          <Button className="bg-black text-white hover:bg-primary/90 cursor-pointer">
             Exporter les données
           </Button>
         </div>
@@ -78,8 +81,8 @@ export default function ReportsPage() {
             className="bg-white p-6 rounded-xl shadow-sm"
           >
             <div className="flex items-center mb-4">
-              <BarChart className="w-5 h-5 mr-2 text-primary" />
-              <h3 className="text-lg font-semibold">Revenus mensuels</h3>
+              <BarChart className="w-5 h-5 mr-2 text-gray-900" />
+              <h3 className="text-lg font-semibold text-gray-900">Revenus mensuels</h3>
             </div>
             <ResponsiveContainer width="100%" height={300}>
               <RechartsBarChart
@@ -108,8 +111,8 @@ export default function ReportsPage() {
             className="bg-white p-6 rounded-xl shadow-sm"
           >
             <div className="flex items-center mb-4">
-              <LineChart className="w-5 h-5 mr-2 text-primary" />
-              <h3 className="text-lg font-semibold">Taux d'occupation</h3>
+              <LineChart className="w-5 h-5 mr-2 text-gray-900" />
+              <h3 className="text-lg font-semibold text-gray-900">Taux d'occupation</h3>
             </div>
             <ResponsiveContainer width="100%" height={300}>
               <RechartsLineChart
@@ -144,8 +147,8 @@ export default function ReportsPage() {
             className="bg-white p-6 rounded-xl shadow-sm"
           >
             <div className="flex items-center mb-4">
-              <PieChart className="w-5 h-5 mr-2 text-primary" />
-              <h3 className="text-lg font-semibold">Sources de réservation</h3>
+              <PieChart className="w-5 h-5 mr-2 text-gray-900" />
+              <h3 className="text-lg font-semibold text-gray-900">Sources de réservation</h3>
             </div>
             <ResponsiveContainer width="100%" height={300}>
               <RechartsPieChart>
@@ -176,14 +179,14 @@ export default function ReportsPage() {
             className="bg-white p-6 rounded-xl shadow-sm"
           >
             <div className="flex items-center mb-4">
-              <BarChart className="w-5 h-5 mr-2 text-primary" />
-              <h3 className="text-lg font-semibold">Performances des propriétés</h3>
+              <BarChart className="w-5 h-5 mr-2 text-gray-900" />
+              <h3 className="text-lg font-semibold text-gray-900">Performances des propriétés</h3>
             </div>
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between mb-1">
-                  <span className="text-sm font-medium">Villa Vue Mer</span>
-                  <span className="text-sm font-medium text-primary">12,500€</span>
+                  <span className="text-sm font-medium text-gray-900">Villa Vue Mer</span>
+                  <span className="text-sm font-medium text-gray-900">12,500€</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div className="bg-primary h-2 rounded-full" style={{ width: "85%" }}></div>
@@ -191,8 +194,8 @@ export default function ReportsPage() {
               </div>
               <div>
                 <div className="flex justify-between mb-1">
-                  <span className="text-sm font-medium">Appartement Haussmannien</span>
-                  <span className="text-sm font-medium text-primary">3,200€</span>
+                  <span className="text-sm font-medium text-gray-900">Appartement Haussmannien</span>
+                  <span className="text-sm font-medium text-gray-900">3,200€</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div className="bg-primary h-2 rounded-full" style={{ width: "45%" }}></div>
@@ -200,8 +203,8 @@ export default function ReportsPage() {
               </div>
               <div>
                 <div className="flex justify-between mb-1">
-                  <span className="text-sm font-medium">Chalet Montagne</span>
-                  <span className="text-sm font-medium text-primary">8,400€</span>
+                  <span className="text-sm font-medium text-gray-900">Chalet Montagne</span>
+                  <span className="text-sm font-medium text-gray-900">8,400€</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div className="bg-primary h-2 rounded-full" style={{ width: "65%" }}></div>
