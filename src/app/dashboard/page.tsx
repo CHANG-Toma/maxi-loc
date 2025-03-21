@@ -5,11 +5,14 @@ import {
   BarChart3, 
   Building2, 
   Calendar, 
+  ChevronDown, 
   CreditCard, 
   DollarSign, 
   Home, 
+  LogOut,
   Menu, 
   Settings, 
+  User,
   Users2 
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
@@ -18,6 +21,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Overview from "./components/Overview";
 import { Sidebar } from "../../components/sidebar";
+import { 
+  Menubar, 
+  MenubarContent, 
+  MenubarItem, 
+  MenubarMenu,
+  MenubarTrigger 
+} from "@/components/ui/menubar";
 
 export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -32,20 +42,38 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <div className={`flex-1 ${isSidebarOpen ? 'ml-64' : 'ml-16'} transition-all duration-300`}>
+
         {/* Top Bar */}
         <header className="bg-white border-b border-gray-200 p-4 flex justify-between items-center">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="text-gray-900 cursor-pointer"
           >
             <Menu className="w-5 h-5" />
           </Button>
           <div className="flex items-center space-x-4">
-            <Button variant="outline" size="sm">
-              Aide
-            </Button>
-            <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+            {/* User Avatar + dropdown menu */}
+            <Menubar className="border-0 bg-white p-0 h-auto">
+              <MenubarMenu>
+                <MenubarTrigger className="p-0 focus:bg-transparent data-[state=open]:bg-transparent">
+                  <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
+                    <User className="w-5 h-5" />
+                  </div>
+                </MenubarTrigger>
+                <MenubarContent className="bg-white">
+                  <MenubarItem className="flex gap-2 text-gray-900">
+                    <User className="w-4 h-4" />
+                    <span>Mon profil</span>
+                  </MenubarItem>
+                  <MenubarItem className="flex gap-2 text-gray-900">
+                    <LogOut className="w-4 h-4" />
+                    <span>Déconnexion</span>
+                  </MenubarItem>
+                </MenubarContent>
+              </MenubarMenu>
+            </Menubar>
           </div>
         </header>
 

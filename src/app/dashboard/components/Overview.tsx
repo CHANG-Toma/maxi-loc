@@ -34,28 +34,28 @@ const Overview = () => {
       title: "Revenus Mensuels",
       value: "12,500€",
       change: "+12%",
-      icon: <DollarSign className="w-4 h-4" />,
+      icon: <DollarSign className="w-4 h-4 text-gray-800" />,
       trend: "up",
     },
     {
       title: "Propriétés Actives",
       value: "25",
       change: "+2",
-      icon: <Building2 className="w-4 h-4" />,
+      icon: <Building2 className="w-4 h-4 text-gray-800" />,
       trend: "up",
     },
     {
       title: "Taux d'Occupation",
       value: "89%",
       change: "+5%",
-      icon: <Users2 className="w-4 h-4" />,
+      icon: <Users2 className="w-4 h-4 text-gray-800" />,
       trend: "up",
     },
     {
       title: "Réservations",
       value: "156",
       change: "+18",
-      icon: <Calendar className="w-4 h-4" />,
+      icon: <Calendar className="w-4 h-4 text-gray-800" />,
       trend: "up",
     },
   ];
@@ -74,8 +74,8 @@ const Overview = () => {
           >
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-sm text-gray-600">{stat.title}</p>
-                <h3 className="text-2xl font-bold mt-2">{stat.value}</h3>
+                <p className="text-sm text-gray-800">{stat.title}</p>
+                <h3 className="text-2xl font-bold mt-2 text-gray-700">{stat.value}</h3>
               </div>
               <div className="p-2 bg-primary/10 rounded-lg text-primary">
                 {stat.icon}
@@ -97,7 +97,7 @@ const Overview = () => {
         animate={{ opacity: 1, y: 0 }}
         className="bg-white p-6 rounded-xl shadow-sm mb-6"
       >
-        <h3 className="text-lg font-semibold mb-4">Revenus Mensuels</h3>
+        <h3 className="text-lg font-semibold mb-4 text-gray-800">Revenus Mensuels</h3>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data}>
@@ -117,7 +117,7 @@ const Overview = () => {
         animate={{ opacity: 1, y: 0 }}
         className="bg-white rounded-xl p-6 shadow-sm"
       >
-        <h3 className="text-lg font-semibold mb-4">Activité Récente</h3>
+        <h3 className="text-lg font-semibold mb-4 text-gray-800">Activité Récente</h3>
         <div className="space-y-4">
           {[1, 2, 3].map((_, index) => (
             <div key={index} className="flex items-center justify-between py-3 border-b last:border-0">
@@ -126,7 +126,7 @@ const Overview = () => {
                   <Calendar className="w-5 h-5 text-gray-600" />
                 </div>
                 <div>
-                  <p className="font-medium">Nouvelle réservation</p>
+                  <p className="font-medium text-gray-800">Nouvelle réservation</p>
                   <p className="text-sm text-gray-500">Appartement Paris 15</p>
                 </div>
               </div>
