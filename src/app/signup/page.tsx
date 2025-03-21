@@ -18,7 +18,7 @@ export default function Signup() {
     phone: "",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // TODO: Implement signup logic
     console.log(formData);
@@ -26,7 +26,7 @@ export default function Signup() {
     // router.push("/dashboard");
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -36,7 +36,7 @@ export default function Signup() {
       <Button
         variant="ghost"
         onClick={() => router.push("/")}
-        className="absolute top-4 left-4 flex items-center gap-2 text-gray-600 hover:text-gray-900"
+        className="absolute top-4 left-4 flex items-center gap-2 text-gray-600 hover:text-gray-900 cursor-pointer"
       >
         <ArrowLeft className="w-4 h-4" />
         Retour

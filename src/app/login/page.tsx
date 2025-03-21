@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react";
@@ -7,14 +6,15 @@ import Link from 'next/link';
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // TODO: Implement login logic
     router.push("/dashboard");
@@ -25,7 +25,7 @@ export default function Login() {
       <Button
         variant="ghost"
         onClick={() => router.push("/")}
-        className="absolute top-4 left-4 flex items-center gap-2 text-gray-600 hover:text-gray-900"
+        className="absolute top-4 left-4 flex items-center gap-2 text-gray-600 hover:text-gray-900 cursor-pointer"
       >
         <ArrowLeft className="w-4 h-4" />
         Retour
@@ -62,7 +62,7 @@ export default function Login() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2"
+                  className="appearance-none block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary text-gray-900"
                 />
               </div>
             </div>
@@ -71,21 +71,31 @@ export default function Login() {
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Mot de passe
               </label>
-              <div className="mt-1">
+              <div className="mt-1 relative">
                 <Input
                   id="password"
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2"
+                  className="appearance-none block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary text-gray-900"
                 />
+                <div 
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-600 cursor-pointer"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </div>
               </div>
             </div>
 
             <div>
-              <Button type="submit" className="w-full bg-primary text-white hover:bg-primary/90">
+              <Button type="submit" className="w-full bg-secondary text-gray-900 hover:bg-secondary/90 border border-gray-300 cursor-pointer">
                 Se connecter
               </Button>
             </div>
