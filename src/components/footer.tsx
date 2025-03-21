@@ -3,7 +3,8 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Facebook, Twitter, Instagram, Mail, ExternalLink } from "lucide-react";
-import { Button } from "./button";
+import { Button } from "./ui/button";
+import { useEffect } from "react";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -22,10 +23,10 @@ const Footer = () => {
     {
       title: "Entreprise",
       links: [
-        { name: "À Propos", href: "/about" },
-        { name: "Contact", href: "/contact" },
-        { name: "Blog", href: "/blog" },
-        { name: "Carrières", href: "/careers" },
+        { name: "Accueil", href: "#hero" },
+        { name: "Fonctionnalités", href: "#features" },
+        { name: "Services", href: "#dashboard" },
+        { name: "Contact", href: "#contact" },
       ],
     },
   ];
@@ -36,6 +37,39 @@ const Footer = () => {
     { Icon: Instagram, href: "#", label: "Instagram" },
     { Icon: Mail, href: "mailto:toma11chang@gmail.com", label: "Email" },
   ];
+
+  // Définition des styles pour l'animation
+  const styles = `
+    .highlight-section {
+      animation: pulse-highlight 1.5s ease-out;
+    }
+
+    @keyframes pulse-highlight {
+      0% {
+        box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4);
+      }
+      50% {
+        box-shadow: 0 0 0 20px rgba(56, 189, 248, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(56, 189, 248, 0);
+      }
+    }
+  `;
+
+  useEffect(() => {
+    // Injecter les styles dans le document
+    const styleElement = document.createElement('style');
+    styleElement.innerHTML = styles;
+    document.head.appendChild(styleElement);
+    
+    return () => {
+      // Nettoyer les styles à la destruction du composant
+      if (document.head.contains(styleElement)) {
+        document.head.removeChild(styleElement);
+      }
+    };
+  }, []);
 
   return (
     <footer className="relative mt-20 border-primary/10 bg-black/90 backdrop-blur-xl">
@@ -66,37 +100,41 @@ const Footer = () => {
               <h3 className="text-white font-semibold">{group.title}</h3>
               <ul className="space-y-2">
                 {group.links.map((link) => (
-                  <li key={link.name}>
-                    <Link 
-                      href={link.href}
-                      className="text-gray-400 hover:text-primary transition-colors duration-200 text-sm flex items-center gap-1 group"
+                  <li key={link.name} className="relative w-full z-10">
+                    <a 
+                      href={link.href} 
+                      className="text-gray-400 hover:text-white transition-colors duration-200 text-sm flex items-center gap-1 group"
+                      onClick={(e) => {
+                        // Vérifier si le lien commence par un # (lien interne)
+                        if (link.href.startsWith('#')) {
+                          e.preventDefault();
+                          const targetId = link.href.substring(1);
+                          const targetElement = document.getElementById(targetId);
+                          
+                          if (targetElement) {
+                            // Animation de scroll douce
+                            window.scrollTo({
+                              top: targetElement.offsetTop,
+                              behavior: 'smooth'
+                            });
+                            
+                            // Animation visuelle supplémentaire
+                            targetElement.classList.add('highlight-section');
+                            setTimeout(() => {
+                              targetElement.classList.remove('highlight-section');
+                            }, 1500);
+                          }
+                        }
+                      }}
                     >
                       {link.name}
                       <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </Link>
+                    </a>
                   </li>
                 ))}
               </ul>
             </div>
           ))}
-
-          {/* Newsletter */}
-          <div className="space-y-4">
-            <h3 className="text-white font-semibold">Newsletter</h3>
-            <div className="flex flex-col gap-2">
-              <input
-                type="email"
-                placeholder="Votre email"
-                className="bg-white/5 border border-primary/10 rounded-md px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
-              <Button
-                variant="outline"
-                className="border-primary/20 text-primary hover:bg-primary/10"
-              >
-                S'abonner
-              </Button>
-            </div>
-          </div>
         </div>
 
         {/* Barre sociale */}
@@ -117,7 +155,7 @@ const Footer = () => {
               ))}
             </div>
             <p className="text-gray-400 text-sm">
-              © {currentYear} VotreEntreprise. Tous droits réservés.
+              © {currentYear} MaxiLoc. Tous droits réservés.
             </p>
           </div>
         </div>

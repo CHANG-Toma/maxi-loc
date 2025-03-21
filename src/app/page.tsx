@@ -23,7 +23,7 @@ import {
   Atom,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
-import Footer from "../components/ui/footer";
+import Footer from "../components/footer";
 
 export default function HomePage() {
   const router = useRouter();
@@ -48,10 +48,10 @@ export default function HomePage() {
   }, [mouseX, mouseY]);
 
   const rotateX = useSpring(
-    useTransform(mouseY, [0, window.innerHeight], [10, -10])
+    useTransform(mouseY, [0, typeof window !== 'undefined' ? window.innerHeight : 0], [10, -10])
   );
   const rotateY = useSpring(
-    useTransform(mouseX, [0, window.innerWidth], [-10, 10])
+    useTransform(mouseX, [0, typeof window !== 'undefined' ? window.innerWidth : 0], [-10, 10])
   );
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8]);
@@ -115,6 +115,7 @@ export default function HomePage() {
       <div
         ref={targetRef}
         className="relative min-h-screen flex items-center justify-center overflow-hidden"
+        id="hero"
       >
         {/* Contenu principal de la section héro */}
         <div className="relative container px-4 mx-auto text-center z-10">
@@ -273,7 +274,7 @@ export default function HomePage() {
       </div>
 
       {/* Section des fonctionnalités du dashboard */}
-      <div className="relative py-24 bg-black/50 backdrop-blur-xl">
+      <div className="relative py-24 bg-black/50 backdrop-blur-xl" id="dashboard">
         <div className="container px-4 mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -386,6 +387,83 @@ export default function HomePage() {
         </div>
       </div>
 
+      {/* Formulaire de contact par mail */}
+      <div className="relative py-24 bg-black/50 backdrop-blur-xl" id="contact">
+        <div className="container px-4 mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ margin: "-100px" }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl font-bold text-white mb-4">
+              <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-fuchsia-500 text-transparent bg-clip-text">
+                Contactez-nous
+              </span>
+            </h2>
+            <p className="text-gray-400 text-lg">
+              Une question ou un projet ? Écrivez-nous
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ margin: "-100px" }}
+            className="max-w-2xl mx-auto p-8 rounded-2xl bg-gradient-to-br from-blue-500/10 to-purple-600/10 backdrop-blur-xl border border-gray-800"
+          >
+            <form className="space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="name" className="text-white mb-2 block">
+                    Nom
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    className="w-full p-3 rounded-md bg-white/5 border border-primary/10 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    placeholder="Votre nom"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="email" className="text-white mb-2 block">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    className="w-full p-3 rounded-md bg-white/5 border border-primary/10 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    placeholder="votre@email.com"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="message" className="text-white mb-2 block">
+                    Message
+                  </label>
+                  <textarea
+                    id="message"
+                    name="message"
+                    rows={5}
+                    className="w-full p-3 rounded-md bg-white/5 border border-primary/10 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    placeholder="Votre message ici..."
+                  />
+                </div>
+              </div>
+              
+              <Button
+                type="submit"
+                className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 transition-all duration-300"
+              >
+                Envoyer le message
+              </Button>
+            </form>
+          </motion.div>
+        </div>
+      </div>
       {/* Ajout du composant Footer */}
       <Footer />
     </div>
