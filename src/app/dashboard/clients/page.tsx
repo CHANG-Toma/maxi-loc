@@ -7,6 +7,7 @@ import { Button } from "../../../components/ui/button";
 import Dashboard from "../page";
 
 export default function ClientsPage() {
+  // Récupérer les clients de la base de données ici
   const clients = [
     {
       id: 1,
@@ -38,8 +39,8 @@ export default function ClientsPage() {
     <Dashboard>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold">Clients</h2>
-          <Button className="bg-primary text-white">
+          <h2 className="text-2xl font-bold text-gray-900">Clients</h2>
+          <Button className="bg-black text-white hover:bg-primary/90 cursor-pointer">
             Ajouter un client
           </Button>
         </div>
@@ -108,7 +109,7 @@ export default function ClientsPage() {
                         }
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-primary">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {client.bookings}
                     </td>
                   </motion.tr>
