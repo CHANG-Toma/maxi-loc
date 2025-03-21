@@ -72,8 +72,8 @@ export function Sidebar({
             <Link
               key={index}
               href={item.path}
-              className={`flex items-center ${isSidebarOpen ? 'space-x-3' : 'justify-center'} text-gray-600 hover:text-primary hover:bg-gray-50 w-full p-2 rounded-lg transition-colors ${
-                pathname === item.path ? "bg-gray-50 text-primary" : ""
+              className={`flex items-center ${isSidebarOpen ? 'space-x-3' : 'justify-center'} text-gray-600 hover:text-gray-700 hover:bg-gray-50 w-full p-2 rounded-lg transition-colors ${
+                pathname === item.path ? "bg-gray-100 text-gray-900" : ""
               }`}
               title={isSidebarOpen ? "" : item.label}
             >

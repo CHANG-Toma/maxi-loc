@@ -57,19 +57,19 @@ export default function Dashboard({ children }: { children?: ReactNode }) {
             {/* User Avatar + dropdown menu */}
             <Menubar className="border-0 bg-white p-0 h-auto">
               <MenubarMenu>
-                <MenubarTrigger className="p-0 focus:bg-transparent data-[state=open]:bg-transparent">
+                <MenubarTrigger className="p-0 focus:bg-transparent data-[state=open]:bg-transparent cursor-pointer">
                   <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
                     <User className="w-5 h-5" />
                   </div>
                 </MenubarTrigger>
                 <MenubarContent className="bg-white">
-                  <MenubarItem className="flex gap-2 text-gray-900">
+                  <MenubarItem className="flex gap-2 text-gray-900 cursor-pointer hover:bg-gray-100">
                     <User className="w-4 h-4" />
-                    <span>Mon profil</span>
+                    <a href="/dashboard/parametres">Mon profil</a>
                   </MenubarItem>
-                  <MenubarItem className="flex gap-2 text-gray-900">
+                  <MenubarItem className="flex gap-2 text-gray-900 cursor-pointer hover:bg-gray-100">
                     <LogOut className="w-4 h-4" />
-                    <span>Déconnexion</span>
+                    <a href="/login">Déconnexion</a>
                   </MenubarItem>
                 </MenubarContent>
               </MenubarMenu>
