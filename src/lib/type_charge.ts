@@ -6,7 +6,7 @@ export class TypeChargeService {
   }
 
   async create(data: { nom: string }) {
-    return await prisma.typeCharge.create({ data });
+    return await prisma.typeCharge.create({ data: { libelle: data.nom } });
   }
 
   async getById(id: number) {
