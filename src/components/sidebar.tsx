@@ -27,11 +27,6 @@ const navigationItems = [
     path: "/dashboard/reservations",
   },
   {
-    icon: <Users2 className="w-5 h-5" />,
-    label: "Clients",
-    path: "/dashboard/clients",
-  },
-  {
     icon: <CreditCard className="w-5 h-5" />,
     label: "Paiements",
     path: "/dashboard/paiements",

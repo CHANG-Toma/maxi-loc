@@ -398,13 +398,6 @@ export default function HomePage() {
                 delay: 0.1,
               },
               {
-                title: "👥 Gestion des Clients",
-                description:
-                  "Suivez vos locataires, leurs contrats et leurs informations",
-                color: "from-fuchsia-500/10 to-violet-600/10",
-                delay: 0.2,
-              },
-              {
                 title: "📅 Réservations",
                 description: "Gérez les locations et le planning de vos biens",
                 color: "from-teal-400/10 to-emerald-600/10",
