@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { useState } from "react";
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Overview from "./components/Overview";
 import { Sidebar } from "../../components/sidebar";
 import { 
@@ -28,10 +28,19 @@ import {
   MenubarTrigger 
 } from "@/components/ui/menubar";
 import { ReactNode } from "react";
+import { logout } from "@/lib/auth";
 
 export default function Dashboard({ children }: { children?: ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    const result = await logout();
+    if (result.success) {
+      router.push("/login");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -67,9 +76,12 @@ export default function Dashboard({ children }: { children?: ReactNode }) {
                     <User className="w-4 h-4" />
                     <a href="/dashboard/parametres">Mon profil</a>
                   </MenubarItem>
-                  <MenubarItem className="flex gap-2 text-gray-900 cursor-pointer hover:bg-gray-100">
+                  <MenubarItem 
+                    className="flex gap-2 text-gray-900 cursor-pointer hover:bg-gray-100"
+                    onClick={handleLogout}
+                  >
                     <LogOut className="w-4 h-4" />
-                    <a href="/login">Déconnexion</a>
+                    <span>Déconnexion</span>
                   </MenubarItem>
                 </MenubarContent>
               </MenubarMenu>

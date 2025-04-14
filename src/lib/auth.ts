@@ -101,8 +101,22 @@ export async function login(data: LoginData) {
 }
 
 export async function logout() {
-  // Suppression du cookie de session
-  const cookieStore = await cookies();
-  cookieStore.delete("session");
-  return { success: true };
+  try {
+    const cookieStore = await cookies();
+    const sessionToken = cookieStore.get("session")?.value;
+
+    // Suppression de la session de la base de données si le token existe
+    if (sessionToken) {
+      await prisma.session.deleteMany({
+        where: { token: sessionToken }
+      });
+    }
+
+    // Suppression du cookie de session
+    cookieStore.delete("session");
+    return { success: true };
+  } catch (error) {
+    console.error("Erreur lors de la déconnexion:", error);
+    return { success: false, error: "Une erreur est survenue lors de la déconnexion" };
+  }
 } 
