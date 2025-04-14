@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { Utilisateur } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { cookies } from "next/headers";
+import { validateSession } from "@/lib/session";
 
 // Schéma de validation pour les données utilisateur
 // Protection contre les attaques par injection (OWASP #1)
@@ -95,21 +97,36 @@ export async function createUtilisateur(data: CreateUtilisateurData) {
   }
 }
 
-export async function updateUtilisateur(id: string, utilisateur: Partial<CreateUtilisateurData>) {
+export async function updateProfile(id: string, utilisateur: Partial<CreateUtilisateurData>) {
   try {
-    // Validation de l'ID (OWASP #1)
-    const userId = parseInt(id);
-    if (isNaN(userId)) {
-      return { success: false, error: "ID invalide" };
+    let userId: number;
+
+    if (id === "current") {
+      const cookieStore = await cookies();
+      const sessionToken = cookieStore.get("session")?.value;
+      
+      if (!sessionToken) {
+        return { success: false, error: "Vous devez être connecté pour modifier votre profil" };
+      }
+
+      const user = await validateSession(sessionToken);
+      if (!user) {
+        return { success: false, error: "Votre session a expiré, veuillez vous reconnecter" };
+      }
+
+      userId = user.id_utilisateur;
+    } else {
+      userId = parseInt(id);
+      if (isNaN(userId)) {
+        return { success: false, error: "L'identifiant de l'utilisateur est invalide" };
+      }
     }
 
-    // Validation des données (OWASP #1)
     const validatedData = utilisateurSchema.partial().parse(utilisateur);
 
-    return await prisma.utilisateur.update({
+    const updatedUser = await prisma.utilisateur.update({
       where: { id_utilisateur: userId },
       data: validatedData,
-      // Ne retourne pas le mot de passe (OWASP #3)
       select: {
         id_utilisateur: true,
         email: true,
@@ -118,25 +135,85 @@ export async function updateUtilisateur(id: string, utilisateur: Partial<CreateU
         telephone: true
       }
     });
+
+    return { 
+      success: true, 
+      message: "Votre profil a été mis à jour avec succès",
+      utilisateur: updatedUser 
+    };
   } catch (error) {
     console.error("Erreur lors de la mise à jour de l'utilisateur:", error);
-    return { success: false, error };
+    if (error instanceof z.ZodError) {
+      return { 
+        success: false, 
+        error: "Les données saisies sont invalides",
+        details: error.errors.map(err => err.message).join(", ")
+      };
+    }
+    return { 
+      success: false, 
+      error: "Une erreur est survenue lors de la mise à jour de votre profil. Veuillez réessayer plus tard." 
+    };
   }
 }
 
-export async function deleteUtilisateur(id: string) {
+export async function updatePassword(
+  currentPassword: string,
+  newPassword: string,
+  confirmPassword: string
+) {
   try {
-    // Validation de l'ID (OWASP #1)
-    const userId = parseInt(id);
-    if (isNaN(userId)) {
-      return { success: false, error: "ID invalide" };
+    // Récupérer l'ID de l'utilisateur connecté
+    const cookieStore = await cookies();
+    const sessionToken = cookieStore.get("session")?.value;
+    
+    if (!sessionToken) {
+      return { success: false, error: "Vous devez être connecté pour modifier votre mot de passe" };
     }
 
-    return await prisma.utilisateur.delete({
-      where: { id_utilisateur: userId }
+    const user = await validateSession(sessionToken);
+    if (!user) {
+      return { success: false, error: "Votre session a expiré, veuillez vous reconnecter" };
+    }
+
+    // Vérifier que le nouveau mot de passe et sa confirmation correspondent
+    if (newPassword !== confirmPassword) {
+      return { success: false, error: "Les mots de passe ne correspondent pas" };
+    }
+
+    // Vérifier que le mot de passe actuel est correct
+    const currentUser = await prisma.utilisateur.findUnique({
+      where: { id_utilisateur: user.id_utilisateur },
+      select: { mot_de_passe: true }
     });
+
+    if (!currentUser || !currentUser.mot_de_passe) {
+      return { success: false, error: "Utilisateur non trouvé ou mot de passe non défini" };
+    }
+
+    const isPasswordValid = await bcrypt.compare(currentPassword, currentUser.mot_de_passe);
+    if (!isPasswordValid) {
+      return { success: false, error: "Le mot de passe actuel est incorrect" };
+    }
+
+    // Hacher le nouveau mot de passe
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Mettre à jour le mot de passe
+    await prisma.utilisateur.update({
+      where: { id_utilisateur: user.id_utilisateur },
+      data: { mot_de_passe: hashedPassword }
+    });
+
+    return { 
+      success: true, 
+      message: "Votre mot de passe a été mis à jour avec succès" 
+    };
   } catch (error) {
-    console.error("Erreur lors de la suppression de l'utilisateur:", error);
-    return { success: false, error };
+    console.error("Erreur lors de la mise à jour du mot de passe:", error);
+    return { 
+      success: false, 
+      error: "Une erreur est survenue lors de la mise à jour de votre mot de passe. Veuillez réessayer plus tard." 
+    };
   }
 }
