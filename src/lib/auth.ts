@@ -61,7 +61,7 @@ export async function login(data: LoginData) {
     cookieStore.set({
       name: "session",
       value: session.token,
-      httpOnly: true,
+      httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",

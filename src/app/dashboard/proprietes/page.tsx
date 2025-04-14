@@ -713,7 +713,7 @@ export default function PropertiesPage() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
                             onClick={() => handleEdit(propriete)}
-                            className="cursor-pointer flex items-center"
+                            className="cursor-pointer flex items-center text-gray-900 hover:text-gray-900"
                           >
                             <Pencil className="mr-2 h-4 w-4" />
                             <span>Modifier</span>
