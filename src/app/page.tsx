@@ -26,7 +26,7 @@ import {
 import { Button } from "../components/ui/button";
 import Footer from "../components/footer";
 
-export default async function HomePage() {
+export default function HomePage() {
   const router = useRouter();
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -53,19 +53,21 @@ export default async function HomePage() {
     useTransform(
       mouseY,
       [0, typeof window !== "undefined" ? window.innerHeight : 0],
-      [10, -10]
+      [10, -10],
+      { clamp: true }
     )
   );
   const rotateY = useSpring(
     useTransform(
       mouseX,
       [0, typeof window !== "undefined" ? window.innerWidth : 0],
-      [-10, 10]
+      [-10, 10],
+      { clamp: true }
     )
   );
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8]);
-  const y = useTransform(scrollYProgress, [0, 0.5], [0, -50]);
+  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0], { clamp: true });
+  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8], { clamp: true });
+  const y = useTransform(scrollYProgress, [0, 0.5], [0, -50], { clamp: true });
 
   const features = [
     {

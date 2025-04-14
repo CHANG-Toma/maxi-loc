@@ -6,7 +6,7 @@ export class TypeProprieteService {
   }
 
   async create(data: { nom: string }) {
-    return await prisma.typePropriete.create({ data });
+    return await prisma.typePropriete.create({ data: { libelle: data.nom } });
   }
 
   async update(id: number, data: { nom: string }) {
