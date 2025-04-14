@@ -54,6 +54,13 @@ export default function SettingsPage() {
   // État pour suivre si l'utilisateur est connecté
   const [isLoading, setIsLoading] = useState(true);
 
+  // État pour la visibilité des mots de passe
+  const [passwordVisibility, setPasswordVisibility] = useState({
+    currentPassword: false,
+    newPassword: false,
+    confirmPassword: false
+  });
+
   // Charger les données de l'utilisateur au montage du composant
   useEffect(() => {
     const loadUserData = async () => {
@@ -168,14 +175,7 @@ export default function SettingsPage() {
     }));
   };
 
-  // Ajoutez un état pour la visibilité des mots de passe
-  const [passwordVisibility, setPasswordVisibility] = useState({
-    currentPassword: false,
-    newPassword: false,
-    confirmPassword: false
-  });
-
-  // Fonction pour basculer la visibilité d'un champ de mot de passe
+  // Fonction pour basculer la visibilité d'un mot de passe
   const togglePasswordVisibility = (field: keyof typeof passwordVisibility) => {
     setPasswordVisibility(prev => ({
       ...prev,
@@ -186,6 +186,24 @@ export default function SettingsPage() {
   // Fonction pour gérer le changement de mot de passe
   const handlePasswordChange = async () => {
     try {
+      // Vérifier que les mots de passe correspondent
+      if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+        setPasswordFeedback({
+          type: "error",
+          message: "Les mots de passe ne correspondent pas"
+        });
+        return;
+      }
+
+      // Vérifier que le nouveau mot de passe est différent de l'ancien
+      if (passwordForm.newPassword === passwordForm.currentPassword) {
+        setPasswordFeedback({
+          type: "error",
+          message: "Le nouveau mot de passe doit être différent de l'ancien"
+        });
+        return;
+      }
+
       const result = await updatePassword(
         passwordForm.currentPassword,
         passwordForm.newPassword,
