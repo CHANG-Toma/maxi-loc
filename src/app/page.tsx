@@ -55,7 +55,8 @@ export default function HomePage() {
       [0, typeof window !== "undefined" ? window.innerHeight : 0],
       [10, -10],
       { clamp: true }
-    )
+    ),
+    { damping: 25, stiffness: 200 }
   );
   const rotateY = useSpring(
     useTransform(
@@ -63,11 +64,16 @@ export default function HomePage() {
       [0, typeof window !== "undefined" ? window.innerWidth : 0],
       [-10, 10],
       { clamp: true }
-    )
+    ),
+    { damping: 25, stiffness: 200 }
   );
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0], { clamp: true });
   const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.8], { clamp: true });
   const y = useTransform(scrollYProgress, [0, 0.5], [0, -50], { clamp: true });
+
+  const transformStyle = {
+    transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
+  };
 
   const features = [
     {
@@ -151,9 +157,7 @@ export default function HomePage() {
               ? "bg-[linear-gradient(to_right,#4f4f4f1a_1px,transparent_1px)]"
               : "bg-[linear-gradient(to_right,#4f4f4f33_1px,transparent_1px)]"
           } bg-[size:30px] bg-[position:center]`}
-          style={{
-            transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
-          }}
+          style={transformStyle}
         />
         <div
           className={`absolute inset-0 ${
@@ -161,9 +165,7 @@ export default function HomePage() {
               ? "bg-[linear-gradient(to_bottom,#4f4f4f1a_1px,transparent_1px)]"
               : "bg-[linear-gradient(to_bottom,#4f4f4f33_1px,transparent_1px)]"
           } bg-[size:30px] bg-[position:center]`}
-          style={{
-            transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
-          }}
+          style={transformStyle}
         />
       </div>
 

@@ -7,6 +7,7 @@ import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
+import { createUtilisateur } from "../../lib/utilisateur";
 
 export default function Signup() {
   const router = useRouter();
@@ -17,18 +18,65 @@ export default function Signup() {
     lastName: "",
     phone: "",
   });
+  const [message, setMessage] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // TODO: Implement signup logic
-    console.log(formData);
+    setErrors({});
+    setIsLoading(true);
 
-    // router.push("/dashboard");
+    try {
+      const result = await createUtilisateur({
+        email: formData.email,
+        mot_de_passe: formData.password,
+        nom: formData.lastName,
+        prenom: formData.firstName,
+        telephone: formData.phone
+      });
+
+      if (result.success) {
+        setMessage('Utilisateur créé avec succès ! 🎉');
+        setFormData({
+          email: "",
+          password: "",
+          firstName: "",
+          lastName: "",
+          phone: "",
+        });
+        router.push("/login");
+      } else {
+        if (result.details) {
+          // Gestion des erreurs de validation
+          const validationErrors: Record<string, string> = {};
+          result.details.forEach((error: any) => {
+            const field = error.path[0];
+            validationErrors[field] = error.message;
+          });
+          setErrors(validationErrors);
+        } else {
+          setMessage(result.error || 'Erreur lors de la création.');
+        }
+      }
+    } catch (error) {
+      setMessage('Une erreur est survenue lors de la création du compte.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Effacer l'erreur du champ quand l'utilisateur modifie sa valeur
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
   return (
@@ -61,6 +109,12 @@ export default function Signup() {
       >
         <div className="bg-white py-8 px-4 shadow-sm rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
+            {message && (
+              <div className={`p-3 rounded-md ${message.includes('succès') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                {message}
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label
@@ -77,8 +131,11 @@ export default function Signup() {
                     required
                     value={formData.firstName}
                     onChange={handleChange}
-                    className="bg-white"
+                    className={`bg-white ${errors.prenom ? 'border-red-500' : ''}`}
                   />
+                  {errors.prenom && (
+                    <p className="mt-1 text-sm text-red-600">{errors.prenom}</p>
+                  )}
                 </div>
               </div>
 
@@ -97,8 +154,11 @@ export default function Signup() {
                     required
                     value={formData.lastName}
                     onChange={handleChange}
-                    className="bg-white"
+                    className={`bg-white ${errors.nom ? 'border-red-500' : ''}`}
                   />
+                  {errors.nom && (
+                    <p className="mt-1 text-sm text-red-600">{errors.nom}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -118,8 +178,11 @@ export default function Signup() {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className="bg-white"
+                  className={`bg-white ${errors.email ? 'border-red-500' : ''}`}
                 />
+                {errors.email && (
+                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                )}
               </div>
             </div>
 
@@ -138,8 +201,11 @@ export default function Signup() {
                   required
                   value={formData.phone}
                   onChange={handleChange}
-                  className="bg-white"
+                  className={`bg-white ${errors.telephone ? 'border-red-500' : ''}`}
                 />
+                {errors.telephone && (
+                  <p className="mt-1 text-sm text-red-600">{errors.telephone}</p>
+                )}
               </div>
             </div>
 
@@ -158,16 +224,21 @@ export default function Signup() {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="bg-white"
+                  className={`bg-white ${errors.mot_de_passe ? 'border-red-500' : ''}`}
                 />
+                {errors.mot_de_passe && (
+                  <p className="mt-1 text-sm text-red-600">{errors.mot_de_passe}</p>
+                )}
               </div>
             </div>
 
             <div>
               <Button
                 type="submit"
-                className="cursor-pointer w-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50">
-                S'inscrire
+                disabled={isLoading}
+                className={`w-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                {isLoading ? 'Création en cours...' : "S'inscrire"}
               </Button>
             </div>
           </form>
@@ -188,7 +259,7 @@ export default function Signup() {
               <Button
                 type="button"
                 onClick={() => router.push("/login")}
-                className="cursor-pointer w-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                className="w-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
               >
                 Se connecter
               </Button>
