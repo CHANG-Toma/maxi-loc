@@ -7,6 +7,57 @@ import { z } from "zod";
 import { cookies } from "next/headers";
 import { validateSession } from "@/lib/session";
 
+// Liste de mots de passe courants
+const commonPasswords = new Set([
+  'password',
+  '123456',
+  'qwerty',
+  'admin',
+  'welcome',
+  'letmein',
+  // ... ajouter d'autres mots de passe courants
+]);
+
+// Fonction pour vérifier la force du mot de passe
+function validatePasswordStrength(password: string): { valid: boolean; message: string } {
+  const minLength = 12;
+  const hasUpperCase = /[A-Z]/.test(password);
+  const hasLowerCase = /[a-z]/.test(password);
+  const hasNumbers = /\d/.test(password);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  const hasNoSpaces = !/\s/.test(password);
+  const hasNoSequentialChars = !/(.)\1{2,}/.test(password);
+
+  if (password.length < minLength) {
+    return { valid: false, message: `Le mot de passe doit contenir au moins ${minLength} caractères` };
+  }
+  if (!hasUpperCase) {
+    return { valid: false, message: "Le mot de passe doit contenir au moins une majuscule" };
+  }
+  if (!hasLowerCase) {
+    return { valid: false, message: "Le mot de passe doit contenir au moins une minuscule" };
+  }
+  if (!hasNumbers) {
+    return { valid: false, message: "Le mot de passe doit contenir au moins un chiffre" };
+  }
+  if (!hasSpecialChar) {
+    return { valid: false, message: "Le mot de passe doit contenir au moins un caractère spécial" };
+  }
+  if (!hasNoSpaces) {
+    return { valid: false, message: "Le mot de passe ne doit pas contenir d'espaces" };
+  }
+  if (!hasNoSequentialChars) {
+    return { valid: false, message: "Le mot de passe ne doit pas contenir de caractères répétés" };
+  }
+
+  return { valid: true, message: "Mot de passe valide" };
+}
+
+// Fonction pour vérifier si le mot de passe est courant
+function isCommonPassword(password: string): boolean {
+  return commonPasswords.has(password.toLowerCase());
+}
+
 // Schéma de validation pour les données utilisateur
 // Protection contre les attaques par injection (OWASP #1)
 const utilisateurSchema = z.object({
@@ -161,27 +212,43 @@ export async function updatePassword(
   currentPassword: string,
   newPassword: string,
   confirmPassword: string
-) {
+): Promise<{ success: boolean; message?: string; error?: string }> {
   try {
-    // Récupérer l'ID de l'utilisateur connecté
+    // Récupérer le token de session
     const cookieStore = await cookies();
     const sessionToken = cookieStore.get("session")?.value;
-    
     if (!sessionToken) {
       return { success: false, error: "Vous devez être connecté pour modifier votre mot de passe" };
     }
 
+    // Valider la session
     const user = await validateSession(sessionToken);
     if (!user) {
-      return { success: false, error: "Votre session a expiré, veuillez vous reconnecter" };
+      return { success: false, error: "Session invalide" };
     }
 
-    // Vérifier que le nouveau mot de passe et sa confirmation correspondent
+    // Vérifier que les mots de passe correspondent
     if (newPassword !== confirmPassword) {
       return { success: false, error: "Les mots de passe ne correspondent pas" };
     }
 
-    // Vérifier que le mot de passe actuel est correct
+    // Vérifier que le nouveau mot de passe est différent de l'ancien
+    if (newPassword === currentPassword) {
+      return { success: false, error: "Le nouveau mot de passe doit être différent de l'ancien" };
+    }
+
+    // Vérifier la force du mot de passe
+    const passwordStrength = validatePasswordStrength(newPassword);
+    if (!passwordStrength.valid) {
+      return { success: false, error: passwordStrength.message };
+    }
+
+    // Vérifier si le mot de passe est courant
+    if (isCommonPassword(newPassword)) {
+      return { success: false, error: "Ce mot de passe est trop courant. Veuillez en choisir un autre." };
+    }
+
+    // Récupérer l'utilisateur avec son mot de passe
     const currentUser = await prisma.utilisateur.findUnique({
       where: { id_utilisateur: user.id_utilisateur },
       select: { mot_de_passe: true }
@@ -191,18 +258,19 @@ export async function updatePassword(
       return { success: false, error: "Utilisateur non trouvé ou mot de passe non défini" };
     }
 
+    // Vérifier que l'ancien mot de passe est correct
     const isPasswordValid = await bcrypt.compare(currentPassword, currentUser.mot_de_passe);
     if (!isPasswordValid) {
-      return { success: false, error: "Le mot de passe actuel est incorrect" };
+      return { success: false, error: "Mot de passe actuel incorrect" };
     }
 
-    // Hacher le nouveau mot de passe
+    // Hasher le nouveau mot de passe
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // Mettre à jour le mot de passe
+    // Mettre à jour le mot de passe dans la base de données
     await prisma.utilisateur.update({
       where: { id_utilisateur: user.id_utilisateur },
-      data: { mot_de_passe: hashedPassword }
+      data: { mot_de_passe: hashedPassword },
     });
 
     return { 
@@ -213,7 +281,7 @@ export async function updatePassword(
     console.error("Erreur lors de la mise à jour du mot de passe:", error);
     return { 
       success: false, 
-      error: "Une erreur est survenue lors de la mise à jour de votre mot de passe. Veuillez réessayer plus tard." 
+      error: "Une erreur est survenue lors de la mise à jour du mot de passe" 
     };
   }
 }
