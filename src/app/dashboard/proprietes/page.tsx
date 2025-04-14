@@ -2,11 +2,17 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Building2, Plus, Trash2, Loader2, X } from "lucide-react";
+import { Building2, Plus, Trash2, Loader2, X, MoreVertical, Pencil } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
-import { getProprietes, createPropriete, deletePropriete } from "@/lib/propriete";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../../components/ui/dropdown-menu";
+import { getProprietes, createPropriete, deletePropriete, updatePropriete } from "@/lib/propriete";
 import type { ReactNode } from "react";
 import DashboardLayout from "../page";
 import { useRouter } from "next/navigation";
@@ -39,6 +45,9 @@ interface Propriete {
       site_web: string | null;
     };
   }>;
+  ville: string | null;
+  pays: string | null;
+  description: string | null;
 }
 
 export default function PropertiesPage() {
@@ -58,6 +67,7 @@ export default function PropertiesPage() {
     description: "",
     typePropriete: "1"
   });
+  const [editingProperty, setEditingProperty] = useState<Propriete | null>(null);
 
   // Charger les propriétés au montage du composant
   useEffect(() => {
@@ -109,8 +119,8 @@ export default function PropertiesPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Réinitialiser les erreurs
       setError(null);
+      setSuccess(null);
 
       // Validation des champs
       const errors = [];
@@ -123,6 +133,7 @@ export default function PropertiesPage() {
       // Validation des valeurs numériques
       const capacite = parseInt(formData.capacite);
       const superficie = parseInt(formData.superficie);
+      const id_type_propriete = parseInt(formData.typePropriete);
 
       if (isNaN(capacite) || capacite <= 0) {
         errors.push("La capacité doit être un nombre positif");
@@ -136,12 +147,16 @@ export default function PropertiesPage() {
         errors.push("La superficie ne peut pas dépasser 1000m²");
       }
 
+      if (!formData.typePropriete || isNaN(id_type_propriete) || id_type_propriete <= 0) {
+        errors.push("Veuillez sélectionner un type de propriété");
+      }
+
       if (errors.length > 0) {
         setError(errors.join("\n"));
         return;
       }
 
-      // Créer la propriété
+      // Préparer les données
       const propertyData = {
         nom: formData.nom.trim(),
         adresse: formData.adresse.trim(),
@@ -150,15 +165,18 @@ export default function PropertiesPage() {
         capacite,
         superficie,
         description: formData.description.trim(),
-        id_type_propriete: parseInt(formData.typePropriete)
+        id_type_propriete
       };
 
-      console.log("Données envoyées:", propertyData);
-      const result = await createPropriete(propertyData);
-      console.log("Résultat:", result);
+      let result;
+      if (editingProperty) {
+        result = await updatePropriete(editingProperty.id_propriete, propertyData);
+      } else {
+        result = await createPropriete(propertyData);
+      }
 
       if (result.success) {
-        setSuccess("Propriété créée avec succès");
+        setSuccess(editingProperty ? "Propriété modifiée avec succès" : "Propriété créée avec succès");
         setShowForm(false);
         setFormData({
           nom: "",
@@ -170,6 +188,7 @@ export default function PropertiesPage() {
           description: "",
           typePropriete: "1"
         });
+        setEditingProperty(null);
 
         // Recharger les propriétés
         const newProprietes = await getProprietes();
@@ -178,17 +197,32 @@ export default function PropertiesPage() {
         }
         setTimeout(() => setSuccess(null), 3000);
       } else {
-        let errorMessage = result.error || "Erreur lors de la création de la propriété";
+        let errorMessage = result.error || `Erreur lors de la ${editingProperty ? 'modification' : 'création'} de la propriété`;
         if (result.details) {
-          const detailsMessage = result.details.map((err: any) => err.message).join("\n");
-          errorMessage = `${errorMessage}\n${detailsMessage}`;
+          errorMessage = `${errorMessage}\n${result.details}`;
         }
         setError(errorMessage);
       }
     } catch (error) {
-      console.error("Erreur lors de la création de la propriété:", error);
-      setError("Une erreur est survenue lors de la création de la propriété. Veuillez vérifier votre connexion et réessayer.");
+      console.error(`Erreur lors de la ${editingProperty ? 'modification' : 'création'} de la propriété:`, error);
+      setError(`Une erreur est survenue lors de la ${editingProperty ? 'modification' : 'création'} de la propriété. Veuillez réessayer.`);
     }
+  };
+
+  // Fonction pour gérer la modification d'une propriété
+  const handleEdit = (propriete: Propriete) => {
+    setEditingProperty(propriete);
+    setFormData({
+      nom: propriete.nom,
+      adresse: propriete.adresse,
+      ville: propriete.ville || "",
+      pays: propriete.pays || "",
+      capacite: propriete.capacite.toString(),
+      superficie: propriete.superficie.toString(),
+      description: propriete.description || "",
+      typePropriete: propriete.typePropriete.id_type_propriete.toString()
+    });
+    setShowForm(true);
   };
 
   if (isLoading) {
@@ -230,11 +264,26 @@ export default function PropertiesPage() {
               className="bg-white p-6 rounded-xl shadow-sm"
             >
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-semibold text-gray-900">Nouvelle propriété</h3>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {editingProperty ? 'Modifier la propriété' : 'Nouvelle propriété'}
+                </h3>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setShowForm(false)}
+                  onClick={() => {
+                    setShowForm(false);
+                    setEditingProperty(null);
+                    setFormData({
+                      nom: "",
+                      adresse: "",
+                      ville: "",
+                      pays: "",
+                      capacite: "",
+                      superficie: "",
+                      description: "",
+                      typePropriete: "1"
+                    });
+                  }}
                   className="text-gray-500 hover:text-gray-900"
                 >
                   <X className="w-4 h-4" />
@@ -252,6 +301,7 @@ export default function PropertiesPage() {
                       value={formData.nom}
                       onChange={handleInputChange}
                       required
+                      className="bg-white text-gray-900"
                     />
                   </div>
                   <div>
@@ -264,6 +314,7 @@ export default function PropertiesPage() {
                       value={formData.adresse}
                       onChange={handleInputChange}
                       required
+                      className="bg-white text-gray-900"
                     />
                   </div>
                   <div>
@@ -276,6 +327,7 @@ export default function PropertiesPage() {
                       value={formData.ville}
                       onChange={handleInputChange}
                       required
+                      className="bg-white text-gray-900"
                     />
                   </div>
                   <div>
@@ -288,6 +340,7 @@ export default function PropertiesPage() {
                       value={formData.pays}
                       onChange={handleInputChange}
                       required
+                      className="bg-white text-gray-900"
                     />
                   </div>
                   <div>
@@ -301,6 +354,7 @@ export default function PropertiesPage() {
                       value={formData.capacite}
                       onChange={handleInputChange}
                       required
+                      className="bg-white text-gray-900"
                     />
                   </div>
                   <div>
@@ -314,6 +368,7 @@ export default function PropertiesPage() {
                       value={formData.superficie}
                       onChange={handleInputChange}
                       required
+                      className="bg-white text-gray-900"
                     />
                   </div>
                   <div className="md:col-span-2">
@@ -326,6 +381,7 @@ export default function PropertiesPage() {
                       value={formData.description}
                       onChange={handleInputChange}
                       required
+                      className="bg-white text-gray-900 min-h-[100px]"
                     />
                   </div>
                   <div>
@@ -337,7 +393,7 @@ export default function PropertiesPage() {
                       name="typePropriete"
                       value={formData.typePropriete}
                       onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                      className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
                       required
                     >
                       <option value="">Sélectionnez un type</option>
@@ -356,7 +412,7 @@ export default function PropertiesPage() {
                     Annuler
                   </Button>
                   <Button type="submit" className="bg-black text-white hover:bg-primary/90">
-                    Créer la propriété
+                    {editingProperty ? 'Modifier la propriété' : 'Créer la propriété'}
                   </Button>
                 </div>
               </form>
@@ -430,11 +486,26 @@ export default function PropertiesPage() {
             className="bg-white p-6 rounded-xl shadow-sm"
           >
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">Nouvelle propriété</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                {editingProperty ? 'Modifier la propriété' : 'Nouvelle propriété'}
+              </h3>
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setShowForm(false)}
+                onClick={() => {
+                  setShowForm(false);
+                  setEditingProperty(null);
+                  setFormData({
+                    nom: "",
+                    adresse: "",
+                    ville: "",
+                    pays: "",
+                    capacite: "",
+                    superficie: "",
+                    description: "",
+                    typePropriete: "1"
+                  });
+                }}
                 className="text-gray-500 hover:text-gray-900"
               >
                 <X className="w-4 h-4" />
@@ -452,6 +523,7 @@ export default function PropertiesPage() {
                     value={formData.nom}
                     onChange={handleInputChange}
                     required
+                    className="bg-white text-gray-900"
                   />
                 </div>
                 <div>
@@ -464,6 +536,7 @@ export default function PropertiesPage() {
                     value={formData.adresse}
                     onChange={handleInputChange}
                     required
+                    className="bg-white text-gray-900"
                   />
                 </div>
                 <div>
@@ -476,6 +549,7 @@ export default function PropertiesPage() {
                     value={formData.ville}
                     onChange={handleInputChange}
                     required
+                    className="bg-white text-gray-900"
                   />
                 </div>
                 <div>
@@ -488,6 +562,7 @@ export default function PropertiesPage() {
                     value={formData.pays}
                     onChange={handleInputChange}
                     required
+                    className="bg-white text-gray-900"
                   />
                 </div>
                 <div>
@@ -501,6 +576,7 @@ export default function PropertiesPage() {
                     value={formData.capacite}
                     onChange={handleInputChange}
                     required
+                    className="bg-white text-gray-900"
                   />
                 </div>
                 <div>
@@ -514,6 +590,7 @@ export default function PropertiesPage() {
                     value={formData.superficie}
                     onChange={handleInputChange}
                     required
+                    className="bg-white text-gray-900"
                   />
                 </div>
                 <div className="md:col-span-2">
@@ -526,6 +603,7 @@ export default function PropertiesPage() {
                     value={formData.description}
                     onChange={handleInputChange}
                     required
+                    className="bg-white text-gray-900 min-h-[100px]"
                   />
                 </div>
                 <div>
@@ -537,7 +615,7 @@ export default function PropertiesPage() {
                     name="typePropriete"
                     value={formData.typePropriete}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                    className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
                     required
                   >
                     <option value="">Sélectionnez un type</option>
@@ -556,7 +634,7 @@ export default function PropertiesPage() {
                   Annuler
                 </Button>
                 <Button type="submit" className="bg-black text-white hover:bg-primary/90">
-                  Créer la propriété
+                  {editingProperty ? 'Modifier la propriété' : 'Créer la propriété'}
                 </Button>
               </div>
             </form>
@@ -585,20 +663,20 @@ export default function PropertiesPage() {
                     Type
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Capacité
+                    Capacité
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Superficie
+                    Superficie
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
+                    Actions
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                  {proprietes.map((propriete: Propriete, index: number) => (
+                {proprietes.map((propriete: Propriete, index: number) => (
                   <motion.tr 
-                      key={propriete.id_propriete}
+                    key={propriete.id_propriete}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
@@ -606,30 +684,49 @@ export default function PropertiesPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <Building2 className="w-5 h-5 mr-2 text-gray-400" />
-                          <div className="text-sm font-medium text-gray-900">{propriete.nom}</div>
+                        <div className="text-sm font-medium text-gray-900">{propriete.nom}</div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{propriete.adresse}</div>
+                      <div className="text-sm text-gray-500">{propriete.adresse}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{propriete.typePropriete.libelle}</div>
+                      <div className="text-sm text-gray-900">{propriete.typePropriete.libelle}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{propriete.capacite}</div>
+                      <div className="text-sm text-gray-900">{propriete.capacite}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{propriete.superficie}m²</div>
+                      <div className="text-sm text-gray-900">{propriete.superficie}m²</div>
                     </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(propriete.id_propriete)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            className="h-8 w-8 p-0 text-gray-900"
+                          >
+                            <span className="sr-only">Ouvrir le menu</span>
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => handleEdit(propriete)}
+                            className="cursor-pointer flex items-center"
+                          >
+                            <Pencil className="mr-2 h-4 w-4" />
+                            <span>Modifier</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleDelete(propriete.id_propriete)}
+                            className="cursor-pointer flex items-center text-red-600 focus:text-red-600"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            <span>Supprimer</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </td>
                   </motion.tr>
                 ))}
