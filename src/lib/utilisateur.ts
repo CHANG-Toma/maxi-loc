@@ -37,6 +37,7 @@ export async function getAllUtilisateurs() {
   });
 }
 
+// Insertion d'un utilisateur en bdd
 export async function createUtilisateur(data: CreateUtilisateurData) {
   try {
     // Validation des données (OWASP #1)

@@ -36,6 +36,7 @@ export default function Signup() {
         telephone: formData.phone
       });
 
+      // Si l'insertion est réussi alors on renvoie ou pas le bon chemin
       if (result.success) {
         setMessage('Utilisateur créé avec succès ! 🎉');
         setFormData({

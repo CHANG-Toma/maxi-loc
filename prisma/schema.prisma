@@ -110,6 +110,18 @@ model Utilisateur {
   mot_de_passe   String?     @db.VarChar(255)
   telephone      String      @db.VarChar(15)
   proprietes     Propriete[]
+  sessions       Session[]
 
   @@map("Utilisateur")
+}
+
+model Session {
+  id          Int      @id @default(autoincrement())
+  token       String   @unique
+  utilisateur_id Int
+  expires_at  DateTime
+  created_at  DateTime @default(now())
+  utilisateur Utilisateur @relation(fields: [utilisateur_id], references: [id_utilisateur])
+
+  @@index([token])
 }
