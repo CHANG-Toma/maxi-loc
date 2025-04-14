@@ -16,17 +16,14 @@ type LoginData = z.infer<typeof loginSchema>;
 
 export async function login(data: LoginData) {
   try {
-    console.log("Tentative de connexion avec:", { email: data.email });
     
     // Validation des données
     const validatedData = loginSchema.parse(data);
-    console.log("Données validées");
 
     // Recherche de l'utilisateur
     const utilisateur = await prisma.utilisateur.findFirst({
       where: { email: validatedData.email }
     });
-    console.log("Utilisateur trouvé:", utilisateur ? "oui" : "non");
 
     if (!utilisateur) {
       return { 
@@ -48,7 +45,6 @@ export async function login(data: LoginData) {
       validatedData.mot_de_passe, 
       utilisateur.mot_de_passe
     );
-    console.log("Mot de passe vérifié:", passwordMatch ? "correct" : "incorrect");
 
     if (!passwordMatch) {
       return { 
@@ -59,7 +55,6 @@ export async function login(data: LoginData) {
 
     // Création de la session
     const session = await createSession(utilisateur.id_utilisateur);
-    console.log("Session créée");
 
     // Stockage du token dans un cookie sécurisé
     const cookieStore = await cookies();
@@ -72,7 +67,6 @@ export async function login(data: LoginData) {
       path: "/",
       maxAge: 60 * 60 * 24 * 7 // 7 jours
     });
-    console.log("Cookie de session créé");
 
     return { 
       success: true, 
