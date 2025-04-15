@@ -1,7 +1,8 @@
 "use client"
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { BarChart, LineChart, PieChart } from "lucide-react";
+import { BarChart, PieChart, Loader2 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import Dashboard from "../page";
 import {
@@ -13,65 +14,86 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  LineChart as RechartsLineChart,
-  Line,
   PieChart as RechartsPieChart,
   Pie,
   Cell
 } from "recharts";
+import { getChargesParMois, getChargesParType, getChargesParPropriete } from "@/lib/rapport";
 
 export default function ReportsPage() {
-  // Récupérer les données des rapports de la base de données ici
-  const monthlyRevenue = [
-    { name: "Jan", revenue: 4000 },
-    { name: "Fév", revenue: 3000 },
-    { name: "Mar", revenue: 5000 },
-    { name: "Avr", revenue: 2780 },
-    { name: "Mai", revenue: 1890 },
-    { name: "Juin", revenue: 2390 },
-    { name: "Juil", revenue: 3490 },
-    { name: "Août", revenue: 4000 },
-    { name: "Sep", revenue: 3200 },
-    { name: "Oct", revenue: 2800 },
-    { name: "Nov", revenue: 2600 },
-    { name: "Déc", revenue: 3800 }
-  ];
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [chargesParMois, setChargesParMois] = useState<any[]>([]);
+  const [chargesParType, setChargesParType] = useState<any[]>([]);
+  const [chargesParPropriete, setChargesParPropriete] = useState<any[]>([]);
 
-  // Récupérer les données des rapports de la base de données ici
-  const occupancyRate = [
-    { name: "Jan", rate: 65 },
-    { name: "Fév", rate: 59 },
-    { name: "Mar", rate: 80 },
-    { name: "Avr", rate: 55 },
-    { name: "Mai", rate: 40 },
-    { name: "Juin", rate: 70 },
-    { name: "Juil", rate: 95 },
-    { name: "Août", rate: 98 },
-    { name: "Sep", rate: 75 },
-    { name: "Oct", rate: 65 },
-    { name: "Nov", rate: 58 },
-    { name: "Déc", rate: 90 }
-  ];
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
 
-  // Récupérer les données des sources de réservation de la base de données ici
-  const bookingSources = [
-    { name: "Site web", value: 45 },
-    { name: "Airbnb", value: 25 },
-    { name: "Booking.com", value: 20 },
-    { name: "Autres", value: 10 }
-  ];
+        // Charger toutes les données
+        const [moisResult, typeResult, proprieteResult] = await Promise.all([
+          getChargesParMois(),
+          getChargesParType(),
+          getChargesParPropriete()
+        ]);
 
-  const COLORS = ["#007AFF", "#34C759", "#FF9500", "#FF3B30"];
+        if (moisResult.success && moisResult.data) {
+          setChargesParMois(moisResult.data);
+        }
+
+        if (typeResult.success && typeResult.data) {
+          setChargesParType(typeResult.data);
+        }
+
+        if (proprieteResult.success && proprieteResult.data) {
+          setChargesParPropriete(proprieteResult.data);
+        }
+
+        if (!moisResult.success || !typeResult.success || !proprieteResult.success) {
+          setError("Erreur lors du chargement des données");
+        }
+      } catch (error) {
+        console.error("Erreur lors du chargement des données:", error);
+        setError("Une erreur est survenue lors du chargement des données");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  const COLORS = ["#007AFF", "#34C759", "#FF9500", "#FF3B30", "#5856D6", "#FF2D55"];
+
+  if (isLoading) {
+    return (
+      <Dashboard>
+        <div className="flex items-center justify-center h-full">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </Dashboard>
+    );
+  }
 
   return (
     <Dashboard>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-900">Rapports</h2>
-          <Button className="bg-black text-white hover:bg-primary/90 cursor-pointer">
-            Exporter les données
-          </Button>
+          <h2 className="text-2xl font-bold text-gray-900">Rapports des charges</h2>
         </div>
+
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-red-50 text-red-800 p-4 rounded-lg"
+          >
+            {error}
+          </motion.div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <motion.div 
@@ -82,11 +104,11 @@ export default function ReportsPage() {
           >
             <div className="flex items-center mb-4">
               <BarChart className="w-5 h-5 mr-2 text-gray-900" />
-              <h3 className="text-lg font-semibold text-gray-900">Revenus mensuels</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Charges mensuelles</h3>
             </div>
             <ResponsiveContainer width="100%" height={300}>
               <RechartsBarChart
-                data={monthlyRevenue}
+                data={chargesParMois}
                 margin={{
                   top: 5,
                   right: 30,
@@ -97,9 +119,9 @@ export default function ReportsPage() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
-                <Tooltip formatter={(value) => [`${value}€`, "Revenu"]} />
+                <Tooltip formatter={(value) => [`${value}€`, "Montant"]} />
                 <Legend />
-                <Bar dataKey="revenue" fill="#007AFF" name="Revenu (€)" />
+                <Bar dataKey="montant" fill="#007AFF" name="Montant (€)" />
               </RechartsBarChart>
             </ResponsiveContainer>
           </motion.div>
@@ -111,49 +133,13 @@ export default function ReportsPage() {
             className="bg-white p-6 rounded-xl shadow-sm"
           >
             <div className="flex items-center mb-4">
-              <LineChart className="w-5 h-5 mr-2 text-gray-900" />
-              <h3 className="text-lg font-semibold text-gray-900">Taux d'occupation</h3>
-            </div>
-            <ResponsiveContainer width="100%" height={300}>
-              <RechartsLineChart
-                data={occupancyRate}
-                margin={{
-                  top: 5,
-                  right: 30,
-                  left: 20,
-                  bottom: 5,
-                }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip formatter={(value) => [`${value}%`, "Taux d'occupation"]} />
-                <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="rate" 
-                  stroke="#34C759" 
-                  activeDot={{ r: 8 }} 
-                  name="Taux d'occupation (%)" 
-                />
-              </RechartsLineChart>
-            </ResponsiveContainer>
-          </motion.div>
-
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-white p-6 rounded-xl shadow-sm"
-          >
-            <div className="flex items-center mb-4">
               <PieChart className="w-5 h-5 mr-2 text-gray-900" />
-              <h3 className="text-lg font-semibold text-gray-900">Sources de réservation</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Répartition par type de charge</h3>
             </div>
             <ResponsiveContainer width="100%" height={300}>
               <RechartsPieChart>
                 <Pie
-                  data={bookingSources}
+                  data={chargesParType}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
@@ -162,11 +148,11 @@ export default function ReportsPage() {
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {bookingSources.map((entry, index) => (
+                  {chargesParType.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => [`${value}%`, "Pourcentage"]} />
+                <Tooltip formatter={(value) => [`${value}€`, "Montant"]} />
                 <Legend />
               </RechartsPieChart>
             </ResponsiveContainer>
@@ -175,41 +161,30 @@ export default function ReportsPage() {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="bg-white p-6 rounded-xl shadow-sm"
+            transition={{ delay: 0.3 }}
+            className="bg-white p-6 rounded-xl shadow-sm col-span-2"
           >
             <div className="flex items-center mb-4">
               <BarChart className="w-5 h-5 mr-2 text-gray-900" />
-              <h3 className="text-lg font-semibold text-gray-900">Performances des propriétés</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Charges par propriété</h3>
             </div>
             <div className="space-y-4">
-              <div>
-                <div className="flex justify-between mb-1">
-                  <span className="text-sm font-medium text-gray-900">Villa Vue Mer</span>
-                  <span className="text-sm font-medium text-gray-900">12,500€</span>
+              {chargesParPropriete.map((item, index) => (
+                <div key={item.name}>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm font-medium text-gray-900">{item.name}</span>
+                    <span className="text-sm font-medium text-gray-900">
+                      {item.montant.toLocaleString('fr-FR')}€
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-primary h-2 rounded-full" 
+                      style={{ width: `${item.pourcentage}%` }}
+                    ></div>
+                  </div>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-primary h-2 rounded-full" style={{ width: "85%" }}></div>
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between mb-1">
-                  <span className="text-sm font-medium text-gray-900">Appartement Haussmannien</span>
-                  <span className="text-sm font-medium text-gray-900">3,200€</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-primary h-2 rounded-full" style={{ width: "45%" }}></div>
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between mb-1">
-                  <span className="text-sm font-medium text-gray-900">Chalet Montagne</span>
-                  <span className="text-sm font-medium text-gray-900">8,400€</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-primary h-2 rounded-full" style={{ width: "65%" }}></div>
-                </div>
-              </div>
+              ))}
             </div>
           </motion.div>
         </div>
