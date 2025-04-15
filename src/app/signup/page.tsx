@@ -16,7 +16,7 @@ export default function Signup() {
     password: "",
     firstName: "",
     lastName: "",
-    phone: "",
+    phone: ""
   });
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -44,7 +44,7 @@ export default function Signup() {
           password: "",
           firstName: "",
           lastName: "",
-          phone: "",
+          phone: ""
         });
         router.push("/login");
       } else {

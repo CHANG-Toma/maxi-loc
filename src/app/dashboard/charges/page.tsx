@@ -1,0 +1,616 @@
+"use client"
+
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Euro, Plus, Trash2, X, MoreVertical, Pencil, Loader2 } from "lucide-react";
+import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../../components/ui/dropdown-menu";
+import Dashboard from "../page";
+import { getCharges, createCharge, updateCharge, deleteCharge } from "@/lib/charge";
+import { getProprietes } from "@/lib/propriete";
+import { toast } from 'sonner';
+
+interface Charge {
+  id_charge: number;
+  propriete: {
+    id_propriete: number;
+    nom: string;
+  };
+  date_paiement: string;
+  montant: number;
+  type_charge: {
+    id_type_charge: number;
+    libelle: string;
+  };
+  description: string | null | undefined;
+}
+
+interface FormData {
+  id_propriete: string;
+  date_paiement: string;
+  montant: string;
+  id_type_charge: number;
+  description: string;
+}
+
+export default function ChargesPage() {
+  const [charges, setCharges] = useState<Charge[]>([]);
+  const [proprietes, setProprietes] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [editingCharge, setEditingCharge] = useState<Charge | null>(null);
+  const [formData, setFormData] = useState<FormData>({
+    id_propriete: "",
+    date_paiement: "",
+    montant: "",
+    id_type_charge: 1,
+    description: ""
+  });
+
+  useEffect(() => {
+    const loadCharges = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        const result = await getCharges();
+        
+        if (result.success && result.charges) {
+          setCharges(result.charges);
+        } else {
+          setError(result.error || "Erreur lors du chargement des charges");
+        }
+
+        const propResult = await getProprietes();
+        if (propResult.success && propResult.proprietes) {
+          setProprietes(propResult.proprietes);
+        }
+      } catch (error) {
+        console.error("Erreur lors du chargement des charges:", error);
+        setError("Une erreur est survenue lors du chargement des charges");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadCharges();
+  }, []);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setError(null);
+      setSuccess(null);
+
+      // Validation des champs
+      const errors = [];
+      if (!formData.id_propriete) errors.push("La propriété est requise");
+      if (!formData.date_paiement) errors.push("La date de paiement est requise");
+      if (!formData.montant) errors.push("Le montant est requis");
+
+      if (errors.length > 0) {
+        setError(errors.join("\n"));
+        return;
+      }
+
+      const chargeData = {
+        id_propriete: parseInt(formData.id_propriete),
+        date_paiement: formData.date_paiement,
+        montant: parseFloat(formData.montant),
+        id_type_charge: parseInt(formData.id_type_charge.toString()),
+        description: formData.description
+      };
+
+      let result;
+      if (editingCharge) {
+        result = await updateCharge(editingCharge.id_charge, chargeData);
+      } else {
+        result = await createCharge(chargeData);
+      }
+
+      if (result.success) {
+        setSuccess(editingCharge ? "Charge modifiée avec succès" : "Charge créée avec succès");
+        setShowForm(false);
+        setFormData({
+          id_propriete: "",
+          date_paiement: "",
+          montant: "",
+          id_type_charge: 1,
+          description: ""
+        });
+        setEditingCharge(null);
+
+        // Recharger les charges
+        const newResult = await getCharges();
+        if (newResult.success && newResult.charges) {
+          setCharges(newResult.charges);
+        }
+        
+        setTimeout(() => setSuccess(null), 3000);
+      } else {
+        setError(result.error || "Une erreur est survenue lors de la création de la charge");
+      }
+    } catch (error) {
+      console.error("Erreur inattendue:", error);
+      setError("Une erreur inattendue est survenue lors de la création de la charge");
+    }
+  };
+
+  const handleEdit = (charge: Charge) => {
+    setEditingCharge(charge);
+    setFormData({
+      id_propriete: charge.propriete.id_propriete.toString(),
+      date_paiement: charge.date_paiement.split('T')[0],
+      montant: charge.montant.toString(),
+      id_type_charge: charge.type_charge.id_type_charge,
+      description: charge.description || ""
+    });
+    setShowForm(true);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm("Êtes-vous sûr de vouloir supprimer cette charge ?")) return;
+    try {
+      const result = await deleteCharge(id);
+      if (result.success) {
+        setCharges(charges.filter(c => c.id_charge !== id));
+        toast.success('Charge supprimée avec succès');
+      } else {
+        throw new Error(result.error || 'Erreur lors de la suppression');
+      }
+    } catch (error) {
+      console.error('Erreur:', error);
+      toast.error('Erreur lors de la suppression de la charge');
+    }
+  };
+
+  const handleCreateClick = () => {
+    setShowForm(true);
+  };
+
+  if (isLoading) {
+    return (
+      <Dashboard>
+        <div className="flex items-center justify-center h-full">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </Dashboard>
+    );
+  }
+
+  // Si l'utilisateur n'a pas de charges
+  if (charges.length === 0) {
+    return (
+      <Dashboard>
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold text-gray-900">Charges</h2>
+            <Button 
+              className="bg-black text-white hover:bg-primary/90 cursor-pointer"
+              onClick={handleCreateClick}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Nouvelle charge
+            </Button>
+          </div>
+
+          <div className="flex flex-col items-center justify-center py-12 space-y-4">
+            <Euro className="h-12 w-12 text-gray-400" />
+            <p className="text-gray-600">Vous n'avez pas encore de charges. Ajoutez-en une !</p>
+          </div>
+
+          {showForm && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white p-6 rounded-xl shadow-sm"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {editingCharge ? 'Modifier la charge' : 'Nouvelle charge'}
+                </h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setShowForm(false);
+                    setEditingCharge(null);
+                    setFormData({
+                      id_propriete: "",
+                      date_paiement: "",
+                      montant: "",
+                      id_type_charge: 1,
+                      description: ""
+                    });
+                  }}
+                  className="text-gray-500 hover:text-gray-900"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="id_propriete" className="block text-sm font-medium text-gray-700 mb-1">
+                      Propriété
+                    </label>
+                    <select
+                      id="id_propriete"
+                      name="id_propriete"
+                      value={formData.id_propriete}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                      required
+                    >
+                      <option value="">Sélectionnez une propriété</option>
+                      {proprietes.map(prop => (
+                        <option key={prop.id_propriete} value={prop.id_propriete}>
+                          {prop.nom}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="date_paiement" className="block text-sm font-medium text-gray-700 mb-1">
+                      Date de paiement
+                    </label>
+                    <Input
+                      id="date_paiement"
+                      name="date_paiement"
+                      type="date"
+                      value={formData.date_paiement}
+                      onChange={handleInputChange}
+                      required
+                      className="bg-white text-gray-900"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="id_type_charge" className="block text-sm font-medium text-gray-700 mb-1">
+                      Type de charge
+                    </label>
+                    <select
+                      id="id_type_charge"
+                      name="id_type_charge"
+                      value={formData.id_type_charge}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                      required
+                    >
+                      <option value="1">Entretien</option>
+                      <option value="2">Fonctionnement</option>
+                      <option value="3">Financière</option>
+                      <option value="4">Fiscal</option>
+                      <option value="5">Copropriété</option>
+                      <option value="6">Travaux</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="montant" className="block text-sm font-medium text-gray-700 mb-1">
+                      Montant (€)
+                    </label>
+                    <Input
+                      id="montant"
+                      name="montant"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={formData.montant}
+                      onChange={handleInputChange}
+                      required
+                      className="bg-white text-gray-900"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                      Description
+                    </label>
+                    <Input
+                      id="description"
+                      name="description"
+                      type="text"
+                      value={formData.description}
+                      onChange={handleInputChange}
+                      className="bg-white text-gray-900"
+                      placeholder="Description optionnelle"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-4 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowForm(false)}
+                  >
+                    Annuler
+                  </Button>
+                  <Button type="submit" className="bg-black text-white hover:bg-primary/90">
+                    {editingCharge ? 'Modifier la charge' : 'Créer la charge'}
+                  </Button>
+                </div>
+              </form>
+            </motion.div>
+          )}
+        </div>
+      </Dashboard>
+    );
+  }
+
+  return (
+    <Dashboard>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-gray-900">Charges</h2>
+          <Button 
+            className="bg-black text-white hover:bg-primary/90 cursor-pointer"
+            onClick={handleCreateClick}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Nouvelle charge
+          </Button>
+        </div>
+
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-red-50 text-red-800 p-4 rounded-lg whitespace-pre-line"
+          >
+            {error}
+          </motion.div>
+        )}
+        {success && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-green-50 text-green-800 p-4 rounded-lg"
+          >
+            {success}
+          </motion.div>
+        )}
+
+        {showForm && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white p-6 rounded-xl shadow-sm"
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {editingCharge ? 'Modifier la charge' : 'Nouvelle charge'}
+              </h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setShowForm(false);
+                  setEditingCharge(null);
+                  setFormData({
+                    id_propriete: "",
+                    date_paiement: "",
+                    montant: "",
+                    id_type_charge: 1,
+                    description: ""
+                  });
+                }}
+                className="text-gray-500 hover:text-gray-900"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="id_propriete" className="block text-sm font-medium text-gray-700 mb-1">
+                    Propriété
+                  </label>
+                  <select
+                    id="id_propriete"
+                    name="id_propriete"
+                    value={formData.id_propriete}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                    required
+                  >
+                    <option value="">Sélectionnez une propriété</option>
+                    {proprietes.map(prop => (
+                      <option key={prop.id_propriete} value={prop.id_propriete}>
+                        {prop.nom}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="date_paiement" className="block text-sm font-medium text-gray-700 mb-1">
+                    Date de paiement
+                  </label>
+                  <Input
+                    id="date_paiement"
+                    name="date_paiement"
+                    type="date"
+                    value={formData.date_paiement}
+                    onChange={handleInputChange}
+                    required
+                    className="bg-white text-gray-900"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="id_type_charge" className="block text-sm font-medium text-gray-700 mb-1">
+                    Type de charge
+                  </label>
+                  <select
+                    id="id_type_charge"
+                    name="id_type_charge"
+                    value={formData.id_type_charge}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                    required
+                  >
+                    <option value="1">Entretien</option>
+                    <option value="2">Fonctionnement</option>
+                    <option value="3">Financière</option>
+                    <option value="4">Fiscal</option>
+                    <option value="5">Copropriété</option>
+                    <option value="6">Travaux</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="montant" className="block text-sm font-medium text-gray-700 mb-1">
+                    Montant (€)
+                  </label>
+                  <Input
+                    id="montant"
+                    name="montant"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.montant}
+                    onChange={handleInputChange}
+                    required
+                    className="bg-white text-gray-900"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                    Description
+                  </label>
+                  <Input
+                    id="description"
+                    name="description"
+                    type="text"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    className="bg-white text-gray-900"
+                    placeholder="Description optionnelle"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-4 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowForm(false)}
+                >
+                  Annuler
+                </Button>
+                <Button type="submit" className="bg-black text-white hover:bg-primary/90">
+                  {editingCharge ? 'Modifier la charge' : 'Créer la charge'}
+                </Button>
+              </div>
+            </form>
+          </motion.div>
+        )}
+
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Propriété
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date de paiement
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Type
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Description
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Montant
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {charges.map((charge, index) => (
+                  <motion.tr 
+                    key={charge.id_charge}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">{charge.propriete.nom}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center text-sm text-gray-900">
+                        {new Date(charge.date_paiement).toLocaleDateString()}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {charge.type_charge.libelle}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {charge.description || "-"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {charge.montant.toLocaleString('fr-FR')} €
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            className="h-8 w-8 p-0 text-gray-900"
+                          >
+                            <span className="sr-only">Ouvrir le menu</span>
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => handleEdit(charge)}
+                            className="cursor-pointer flex items-center text-gray-900 hover:text-gray-900"
+                          >
+                            <Pencil className="mr-2 h-4 w-4" />
+                            <span>Modifier</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleDelete(charge.id_charge)}
+                            className="cursor-pointer flex items-center text-red-600 focus:text-red-600"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            <span>Supprimer</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </td>
+                  </motion.tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </Dashboard>
+  );
+}

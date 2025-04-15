@@ -11,7 +11,8 @@ const proprieteSchema = z.object({
   adresse: z.string().min(1, "L'adresse est requise").max(100),
   ville: z.string().min(1, "La ville est requise").max(50),
   pays: z.string().min(1, "Le pays est requis").max(50),
-  capacite: z.number().min(1, "La capacité doit être supérieure à 0"),
+  code_postal: z.string().max(10).optional(),
+  nb_pieces: z.number().min(1, "Le nombre de pièces doit être supérieur à 0"),
   superficie: z.number().min(1, "La superficie doit être supérieure à 0"),
   description: z.string().max(255).optional(),
   id_type_propriete: z.number().min(1, "Le type de propriété est requis"),
@@ -45,6 +46,8 @@ export async function createPropriete(data: CreateProprieteData) {
       data: {
         ...validatedData,
         id_utilisateur: user.id_utilisateur,
+        code_postal: validatedData.code_postal || undefined,
+        description: validatedData.description || undefined
       },
     });
 
@@ -147,7 +150,11 @@ export async function updatePropriete(id: number, data: Partial<CreateProprieteD
       where: {
         id_propriete: id,
       },
-      data: validatedData,
+      data: {
+        ...validatedData,
+        code_postal: validatedData.code_postal || undefined,
+        description: validatedData.description || undefined
+      },
     });
 
     return { success: true, propriete: updatedPropriete };

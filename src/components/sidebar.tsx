@@ -22,14 +22,14 @@ const navigationItems = [
     path: "/dashboard/proprietes",
   },
   {
+    icon: <CreditCard className="w-5 h-5" />,
+    label: "Charges",
+    path: "/dashboard/charges",
+  },
+  {
     icon: <Calendar className="w-5 h-5" />,
     label: "Réservations",
     path: "/dashboard/reservations",
-  },
-  {
-    icon: <CreditCard className="w-5 h-5" />,
-    label: "Paiements",
-    path: "/dashboard/paiements",
   },
   {
     icon: <BarChart3 className="w-5 h-5" />,

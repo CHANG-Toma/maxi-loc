@@ -34,7 +34,7 @@ interface Propriete {
     id_type_propriete: number;
     libelle: string;
   };
-  capacite: number;
+  nb_pieces: number;
   superficie: number;
   plateformes: Array<{
     id_propriete: number;
@@ -45,8 +45,9 @@ interface Propriete {
       site_web: string | null;
     };
   }>;
-  ville: string | null;
-  pays: string | null;
+  ville: string;
+  pays: string;
+  code_postal: string | null;
   description: string | null;
 }
 
@@ -62,7 +63,8 @@ export default function PropertiesPage() {
     adresse: "",
     ville: "",
     pays: "",
-    capacite: "",
+    code_postal: "",
+    nb_pieces: "",
     superficie: "",
     description: "",
     typePropriete: "1"
@@ -118,41 +120,17 @@ export default function PropertiesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    setSuccess(null);
+
     try {
-      setError(null);
-      setSuccess(null);
-
-      // Validation des champs
-      const errors = [];
-      if (!formData.nom.trim()) errors.push("Le nom est requis");
-      if (!formData.adresse.trim()) errors.push("L'adresse est requise");
-      if (!formData.ville.trim()) errors.push("La ville est requise");
-      if (!formData.pays.trim()) errors.push("Le pays est requis");
-      if (!formData.description.trim()) errors.push("La description est requise");
-
-      // Validation des valeurs numériques
-      const capacite = parseInt(formData.capacite);
+      // Convertir les valeurs numériques
+      const nb_pieces = parseInt(formData.nb_pieces);
       const superficie = parseInt(formData.superficie);
       const id_type_propriete = parseInt(formData.typePropriete);
 
-      if (isNaN(capacite) || capacite <= 0) {
-        errors.push("La capacité doit être un nombre positif");
-      } else if (capacite > 50) {
-        errors.push("La capacité ne peut pas dépasser 50 personnes");
-      }
-
-      if (isNaN(superficie) || superficie <= 0) {
-        errors.push("La superficie doit être un nombre positif");
-      } else if (superficie > 1000) {
-        errors.push("La superficie ne peut pas dépasser 1000m²");
-      }
-
-      if (!formData.typePropriete || isNaN(id_type_propriete) || id_type_propriete <= 0) {
-        errors.push("Veuillez sélectionner un type de propriété");
-      }
-
-      if (errors.length > 0) {
-        setError(errors.join("\n"));
+      if (isNaN(nb_pieces) || isNaN(superficie) || isNaN(id_type_propriete)) {
+        setError("Veuillez entrer des valeurs numériques valides");
         return;
       }
 
@@ -162,9 +140,10 @@ export default function PropertiesPage() {
         adresse: formData.adresse.trim(),
         ville: formData.ville.trim(),
         pays: formData.pays.trim(),
-        capacite,
+        code_postal: formData.code_postal.trim() || null,
+        nb_pieces,
         superficie,
-        description: formData.description.trim(),
+        description: formData.description.trim() || null,
         id_type_propriete
       };
 
@@ -183,7 +162,8 @@ export default function PropertiesPage() {
           adresse: "",
           ville: "",
           pays: "",
-          capacite: "",
+          code_postal: "",
+          nb_pieces: "",
           superficie: "",
           description: "",
           typePropriete: "1"
@@ -215,9 +195,10 @@ export default function PropertiesPage() {
     setFormData({
       nom: propriete.nom,
       adresse: propriete.adresse,
-      ville: propriete.ville || "",
-      pays: propriete.pays || "",
-      capacite: propriete.capacite.toString(),
+      ville: propriete.ville,
+      pays: propriete.pays,
+      code_postal: propriete.code_postal || "",
+      nb_pieces: propriete.nb_pieces.toString(),
       superficie: propriete.superficie.toString(),
       description: propriete.description || "",
       typePropriete: propriete.typePropriete.id_type_propriete.toString()
@@ -278,7 +259,8 @@ export default function PropertiesPage() {
                       adresse: "",
                       ville: "",
                       pays: "",
-                      capacite: "",
+                      code_postal: "",
+                      nb_pieces: "",
                       superficie: "",
                       description: "",
                       typePropriete: "1"
@@ -344,14 +326,26 @@ export default function PropertiesPage() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="capacite" className="block text-sm font-medium text-gray-700 mb-1">
-                      Capacité
+                    <label htmlFor="code_postal" className="block text-sm font-medium text-gray-700 mb-1">
+                      Code postal
                     </label>
                     <Input
-                      id="capacite"
-                      name="capacite"
+                      id="code_postal"
+                      name="code_postal"
+                      value={formData.code_postal}
+                      onChange={handleInputChange}
+                      className="bg-white text-gray-900"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="nb_pieces" className="block text-sm font-medium text-gray-700 mb-1">
+                      Nombre de pièces
+                    </label>
+                    <Input
+                      id="nb_pieces"
+                      name="nb_pieces"
                       type="number"
-                      value={formData.capacite}
+                      value={formData.nb_pieces}
                       onChange={handleInputChange}
                       required
                       className="bg-white text-gray-900"
@@ -500,7 +494,8 @@ export default function PropertiesPage() {
                     adresse: "",
                     ville: "",
                     pays: "",
-                    capacite: "",
+                    code_postal: "",
+                    nb_pieces: "",
                     superficie: "",
                     description: "",
                     typePropriete: "1"
@@ -566,14 +561,26 @@ export default function PropertiesPage() {
                   />
                 </div>
                 <div>
-                  <label htmlFor="capacite" className="block text-sm font-medium text-gray-700 mb-1">
-                    Capacité
+                  <label htmlFor="code_postal" className="block text-sm font-medium text-gray-700 mb-1">
+                    Code postal
                   </label>
                   <Input
-                    id="capacite"
-                    name="capacite"
+                    id="code_postal"
+                    name="code_postal"
+                    value={formData.code_postal}
+                    onChange={handleInputChange}
+                    className="bg-white text-gray-900"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="nb_pieces" className="block text-sm font-medium text-gray-700 mb-1">
+                    Nombre de pièces
+                  </label>
+                  <Input
+                    id="nb_pieces"
+                    name="nb_pieces"
                     type="number"
-                    value={formData.capacite}
+                    value={formData.nb_pieces}
                     onChange={handleInputChange}
                     required
                     className="bg-white text-gray-900"
@@ -694,7 +701,7 @@ export default function PropertiesPage() {
                       <div className="text-sm text-gray-900">{propriete.typePropriete.libelle}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{propriete.capacite}</div>
+                      <div className="text-sm text-gray-900">{propriete.nb_pieces}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{propriete.superficie}m²</div>
