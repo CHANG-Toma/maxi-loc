@@ -1,5 +1,8 @@
+'use server'
+
 import { prisma } from "@/lib/prisma";
 import { validateSession } from "@/lib/session";
+import { cookies } from 'next/headers';
 
 // Fonction utilitaire pour récupérer un cookie
 function getCookie(name: string): string | undefined {
@@ -22,7 +25,7 @@ interface ReservationData {
 }
 
 export async function getReservations() {
-  const token = getCookie("session");
+  const token = cookies().get('session')?.value;
 
   if (!token) {
     return { success: false, error: "Vous devez être connecté pour voir les réservations" };
@@ -67,7 +70,7 @@ export async function getReservations() {
 }
 
 export async function createReservation(data: ReservationData) {
-  const token = getCookie("session");
+  const token = cookies().get('session')?.value;
 
   if (!token) {
     return { success: false, error: "Vous devez être connecté pour créer une réservation" };
@@ -88,7 +91,7 @@ export async function createReservation(data: ReservationData) {
       return { success: false, error: "Vous n'avez pas les droits pour cette propriété" };
     }
 
-    const reservation = await prisma.reservation.create({ 
+    const reservation = await prisma.reservation.create({
       data: {
         id_propriete: data.id_propriete,
         date_debut: new Date(data.date_debut),
@@ -110,7 +113,7 @@ export async function createReservation(data: ReservationData) {
 }
 
 export async function updateReservation(id: number, data: ReservationData) {
-  const token = getCookie("session");
+  const token = cookies().get('session')?.value;
 
   if (!token) {
     return { success: false, error: "Vous devez être connecté pour modifier une réservation" };
@@ -131,7 +134,7 @@ export async function updateReservation(id: number, data: ReservationData) {
       return { success: false, error: "Vous n'avez pas les droits pour cette propriété" };
     }
 
-    const reservation = await prisma.reservation.update({ 
+    const reservation = await prisma.reservation.update({
       where: { id_reservation: id },
       data: {
         id_propriete: data.id_propriete,
@@ -154,7 +157,7 @@ export async function updateReservation(id: number, data: ReservationData) {
 }
 
 export async function deleteReservation(id: number) {
-  const token = getCookie("session");
+  const token = cookies().get('session')?.value;
 
   if (!token) {
     return { success: false, error: "Vous devez être connecté pour supprimer une réservation" };
@@ -176,7 +179,7 @@ export async function deleteReservation(id: number) {
       return { success: false, error: "Vous n'avez pas les droits pour cette réservation" };
     }
 
-    await prisma.reservation.delete({ 
+    await prisma.reservation.delete({
       where: { id_reservation: id }
     });
 

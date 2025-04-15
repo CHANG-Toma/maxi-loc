@@ -69,15 +69,7 @@ export default function BookingsPage() {
         const result = await getReservations();
         
         if (result.success && result.reservations) {
-          const typedReservations = result.reservations.map(res => ({
-            id_reservation: res.id_reservation,
-            propriete: res.propriete,
-            date_debut: res.date_debut,
-            date_fin: res.date_fin,
-            id_statut_reservation: res.id_statut_reservation,
-            prix_total: res.prix_total
-          }));
-          setReservations(typedReservations);
+          setReservations(result.reservations);
         } else {
           setError(result.error || "Erreur lors du chargement des réservations");
         }
@@ -149,17 +141,9 @@ export default function BookingsPage() {
         setEditingReservation(null);
 
         // Recharger les réservations
-        const newReservations = await getReservations();
-        if (newReservations.success && newReservations.reservations) {
-          const typedReservations = newReservations.reservations.map(res => ({
-            id_reservation: res.id_reservation,
-            propriete: res.propriete,
-            date_debut: res.date_debut,
-            date_fin: res.date_fin,
-            id_statut_reservation: res.id_statut_reservation,
-            prix_total: res.prix_total
-          }));
-          setReservations(typedReservations);
+        const newResult = await getReservations();
+        if (newResult.success && newResult.reservations) {
+          setReservations(newResult.reservations);
         }
         
         setTimeout(() => setSuccess(null), 3000);
