@@ -18,63 +18,41 @@ import {
   ResponsiveContainer
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { OverviewService } from "@/services/overviewService";
+import { OverviewService, DashboardStats, RevenusData, ReservationRecente } from "@/services/overviewService";
 import { useEffect, useState } from "react";
 
-interface Reservation {
-  id_reservation: number;
-  propriete: {
-    id_propriete: number;
-    nom: string;
-  };
-  date_debut: string;
-  date_fin: string;
-  id_statut_reservation: number;
-  prix_total: number;
-}
-
-interface Propriete {
-  id_propriete: number;
-  nom: string;
-  ville: string;
-  pays: string;
-  typePropriete: {
-    id_type_propriete: number;
-    libelle: string;
-  };
-  nb_pieces: number;
-}
-
-interface DashboardStats {
-  proprietes: number;
-  reservations: number;
-  charges: number;
-  locataires: number;
-}
+const formatNumber = (value: number | null): string => {
+  if (value === null || value === undefined) return '0';
+  return value.toLocaleString('fr-FR');
+};
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats>({
-    proprietes: 0,
+    revenus_mensuels: 0,
+    proprietes_actives: 0,
+    taux_occupation: 0,
     reservations: 0,
-    charges: 0,
-    locataires: 0
+    variation_revenus: 0,
+    variation_proprietes: 0,
+    variation_occupation: 0,
+    variation_reservations: 0
   });
-  const [recentReservations, setRecentReservations] = useState<Reservation[]>([]);
-  const [recentProprietes, setRecentProprietes] = useState<Propriete[]>([]);
+  const [revenusData, setRevenusData] = useState<RevenusData[]>([]);
+  const [reservationsRecentes, setReservationsRecentes] = useState<ReservationRecente[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [dashboardStats, reservations, proprietes] = await Promise.all([
+        const [dashboardStats, revenus, reservations] = await Promise.all([
           OverviewService.getDashboardStats(),
-          OverviewService.getRecentReservations(),
-          OverviewService.getRecentProprietes()
+          OverviewService.getRevenusData(),
+          OverviewService.getReservationsRecentes()
         ]);
 
         setStats(dashboardStats);
-        setRecentReservations(reservations);
-        setRecentProprietes(proprietes);
+        setRevenusData(revenus);
+        setReservationsRecentes(reservations);
       } catch (error) {
         console.error("Erreur lors du chargement des données:", error);
       } finally {
@@ -84,15 +62,6 @@ export default function DashboardPage() {
 
     loadData();
   }, []);
-
-  const data = [
-    { month: "Jan", revenue: 4000 },
-    { month: "Fév", revenue: 3000 },
-    { month: "Mar", revenue: 5000 },
-    { month: "Avr", revenue: 2780 },
-    { month: "Mai", revenue: 6890 },
-    { month: "Jun", revenue: 2390 },
-  ];
 
   if (isLoading) {
     return (
@@ -109,13 +78,39 @@ export default function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-black">Propriétés</CardTitle>
+            <CardTitle className="text-sm font-medium text-black">Revenus mensuels</CardTitle>
+            <DollarSign className="h-4 w-4 text-black" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-black">{formatNumber(stats.revenus_mensuels)} €</div>
+            <p className="text-xs text-green-500">
+              +{formatNumber(stats.variation_revenus)}% vs le dernier mois
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-black">Propriétés Actives</CardTitle>
             <Building2 className="h-4 w-4 text-black" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-black">{stats.proprietes}</div>
-            <p className="text-xs text-gray-600">
-              +2 depuis le mois dernier
+            <div className="text-2xl font-bold text-black">{formatNumber(stats.proprietes_actives)}</div>
+            <p className="text-xs text-green-500">
+              +{formatNumber(stats.variation_proprietes)} vs le dernier mois
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-black">Taux d'Occupation</CardTitle>
+            <BarChart3 className="h-4 w-4 text-black" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-black">{formatNumber(stats.taux_occupation)}%</div>
+            <p className="text-xs text-green-500">
+              +{formatNumber(stats.variation_occupation)}% vs le dernier mois
             </p>
           </CardContent>
         </Card>
@@ -126,100 +121,80 @@ export default function DashboardPage() {
             <Calendar className="h-4 w-4 text-black" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-black">{stats.reservations}</div>
-            <p className="text-xs text-gray-600">
-              +5 depuis le mois dernier
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-black">Revenus</CardTitle>
-            <DollarSign className="h-4 w-4 text-black" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-black">{stats.charges.toLocaleString('fr-FR')} €</div>
-            <p className="text-xs text-gray-600">
-              +10% depuis le mois dernier
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-black">Locataires</CardTitle>
-            <Users2 className="h-4 w-4 text-black" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-black">{stats.locataires}</div>
-            <p className="text-xs text-gray-600">
-              +1 depuis le mois dernier
+            <div className="text-2xl font-bold text-black">{formatNumber(stats.reservations)}</div>
+            <p className="text-xs text-green-500">
+              +{formatNumber(stats.variation_reservations)} vs le dernier mois
             </p>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-black">Réservations récentes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentReservations.length > 0 ? (
-                recentReservations.map((reservation) => (
-                  <div key={reservation.id_reservation} className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-black">{reservation.propriete.nom}</p>
-                      <p className="text-sm text-gray-600">
-                        {new Date(reservation.date_debut).toLocaleDateString('fr-FR')} - {new Date(reservation.date_fin).toLocaleDateString('fr-FR')}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium text-black">{reservation.prix_total} €</p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-gray-600">
-                  Aucune réservation récente
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+      {/* Graphique des revenus mensuels */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-black">Revenus mensuels</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={revenusData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis 
+                  dataKey="mois" 
+                  axisLine={false}
+                  tickLine={false}
+                  fontSize={12}
+                  tickMargin={8}
+                />
+                <YAxis 
+                  axisLine={false}
+                  tickLine={false}
+                  fontSize={12}
+                  tickMargin={8}
+                  tickFormatter={(value) => formatNumber(value)}
+                />
+                <Tooltip 
+                  formatter={(value: number) => [formatNumber(value) + ' €', 'Revenus']}
+                  labelStyle={{ color: '#374151' }}
+                  contentStyle={{ 
+                    backgroundColor: 'white',
+                    border: '1px solid #E5E7EB',
+                    borderRadius: '6px',
+                    padding: '8px'
+                  }}
+                />
+                <Bar 
+                  dataKey="montant" 
+                  fill="#3B82F6"
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-black">Propriétés récentes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentProprietes.length > 0 ? (
-                recentProprietes.map((propriete) => (
-                  <div key={propriete.id_propriete} className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-black">{propriete.nom}</p>
-                      <p className="text-sm text-gray-600">
-                        {propriete.ville}, {propriete.pays}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium text-black">{propriete.typePropriete.libelle}</p>
-                      <p className="text-sm text-gray-600">{propriete.nb_pieces} pièces</p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-gray-600">
-                  Aucune propriété récente
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Activité récente */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-black">Activité récente</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {reservationsRecentes.map((reservation) => (
+              <div key={reservation.id} className="flex items-center space-x-4 border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                <div className="p-2 bg-blue-50 rounded-full">
+                  <Calendar className="w-4 h-4 text-blue-500" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-black">Nouvelle réservation</span>
+                  <span className="text-sm text-gray-500">{reservation.propriete}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 } 
