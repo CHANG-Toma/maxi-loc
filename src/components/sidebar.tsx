@@ -12,12 +12,15 @@ import {
   Settings,
   LogOut,
   User,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { NavigationService } from "@/services/navigationService";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { DashboardService } from "@/services/dashboardService";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const getIconComponent = (iconName: string) => {
   switch (iconName) {
@@ -63,52 +66,53 @@ export function Sidebar({
   return (
     <div
       className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out",
-        isOpen ? "translate-x-0" : "-translate-x-full"
+        "fixed inset-y-0 left-0 z-50 bg-white border-r border-gray-200 shadow-sm transition-all duration-300",
+        isOpen ? "w-64" : "w-16"
       )}
     >
       <div className="flex flex-col h-full">
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h1 className="text-xl font-bold text-gray-900">Maxiloc</h1>
+          {isOpen && <h1 className="text-xl font-bold text-gray-900">Maxiloc</h1>}
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="md:hidden"
+            className={cn("md:flex", isOpen ? "" : "mx-auto")}
           >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            {isOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
           </Button>
         </div>
 
         <nav className="flex-1 overflow-y-auto">
           <div className="p-4 space-y-1">
             {navigationItems.map((item) => (
-              <Button
-                key={item.path}
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start gap-2",
-                  pathname === item.path
-                    ? "bg-gray-100 text-gray-900"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                )}
-                onClick={() => router.push(item.path)}
-              >
-                {getIconComponent(item.icon)}
-                {item.label}
-              </Button>
+              <TooltipProvider key={item.path}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className={cn(
+                        "w-full gap-2",
+                        pathname === item.path
+                          ? "bg-gray-100 text-gray-900"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
+                        isOpen ? "justify-start" : "justify-center px-0"
+                      )}
+                      onClick={() => router.push(item.path)}
+                    >
+                      <div className={cn("min-w-[20px] flex justify-center")}>
+                        {getIconComponent(item.icon)}
+                      </div>
+                      {isOpen && <span>{item.label}</span>}
+                    </Button>
+                  </TooltipTrigger>
+                  {!isOpen && (
+                    <TooltipContent side="right">
+                      <p>{item.label}</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
             ))}
           </div>
         </nav>
@@ -116,21 +120,36 @@ export function Sidebar({
         <div className="p-4 border-t border-gray-200">
           <div className="space-y-1">
             {userMenuItems.map((item) => (
-              <Button
-                key={item.label}
-                variant="ghost"
-                className="w-full justify-start gap-2 text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                onClick={() => {
-                  if (item.action === "logout") {
-                    onLogout();
-                  } else if (item.path) {
-                    router.push(item.path);
-                  }
-                }}
-              >
-                {getIconComponent(item.icon)}
-                {item.label}
-              </Button>
+              <TooltipProvider key={item.label}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className={cn(
+                        "w-full gap-2 text-gray-600 hover:bg-gray-50 hover:text-gray-900",
+                        isOpen ? "justify-start" : "justify-center px-0"
+                      )}
+                      onClick={() => {
+                        if (item.action === "logout") {
+                          onLogout();
+                        } else if (item.path) {
+                          router.push(item.path);
+                        }
+                      }}
+                    >
+                      <div className={cn("min-w-[20px] flex justify-center")}>
+                        {getIconComponent(item.icon)}
+                      </div>
+                      {isOpen && <span>{item.label}</span>}
+                    </Button>
+                  </TooltipTrigger>
+                  {!isOpen && (
+                    <TooltipContent side="right">
+                      <p>{item.label}</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
             ))}
           </div>
         </div>

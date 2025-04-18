@@ -104,17 +104,17 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Tableau de bord</h1>
+      <h1 className="text-3xl font-bold text-black">Tableau de bord</h1>
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Propriétés</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-black">Propriétés</CardTitle>
+            <Building2 className="h-4 w-4 text-black" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.proprietes}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-black">{stats.proprietes}</div>
+            <p className="text-xs text-gray-600">
               +2 depuis le mois dernier
             </p>
           </CardContent>
@@ -122,12 +122,12 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Réservations</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-black">Réservations</CardTitle>
+            <Calendar className="h-4 w-4 text-black" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.reservations}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-black">{stats.reservations}</div>
+            <p className="text-xs text-gray-600">
               +5 depuis le mois dernier
             </p>
           </CardContent>
@@ -135,12 +135,12 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Revenus</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-black">Revenus</CardTitle>
+            <DollarSign className="h-4 w-4 text-black" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.charges.toLocaleString('fr-FR')} €</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-black">{stats.charges.toLocaleString('fr-FR')} €</div>
+            <p className="text-xs text-gray-600">
               +10% depuis le mois dernier
             </p>
           </CardContent>
@@ -148,12 +148,12 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Locataires</CardTitle>
-            <Users2 className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-black">Locataires</CardTitle>
+            <Users2 className="h-4 w-4 text-black" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.locataires}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-black">{stats.locataires}</div>
+            <p className="text-xs text-gray-600">
               +1 depuis le mois dernier
             </p>
           </CardContent>
@@ -163,7 +163,7 @@ export default function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Réservations récentes</CardTitle>
+            <CardTitle className="text-black">Réservations récentes</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -171,18 +171,18 @@ export default function DashboardPage() {
                 recentReservations.map((reservation) => (
                   <div key={reservation.id_reservation} className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium">{reservation.propriete.nom}</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="font-medium text-black">{reservation.propriete.nom}</p>
+                      <p className="text-sm text-gray-600">
                         {new Date(reservation.date_debut).toLocaleDateString('fr-FR')} - {new Date(reservation.date_fin).toLocaleDateString('fr-FR')}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium">{reservation.prix_total} €</p>
+                      <p className="font-medium text-black">{reservation.prix_total} €</p>
                     </div>
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-gray-600">
                   Aucune réservation récente
                 </p>
               )}
@@ -192,7 +192,7 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Propriétés récentes</CardTitle>
+            <CardTitle className="text-black">Propriétés récentes</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -200,19 +200,19 @@ export default function DashboardPage() {
                 recentProprietes.map((propriete) => (
                   <div key={propriete.id_propriete} className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium">{propriete.nom}</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="font-medium text-black">{propriete.nom}</p>
+                      <p className="text-sm text-gray-600">
                         {propriete.ville}, {propriete.pays}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium">{propriete.typePropriete.libelle}</p>
-                      <p className="text-sm text-muted-foreground">{propriete.nb_pieces} pièces</p>
+                      <p className="font-medium text-black">{propriete.typePropriete.libelle}</p>
+                      <p className="text-sm text-gray-600">{propriete.nb_pieces} pièces</p>
                     </div>
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-gray-600">
                   Aucune propriété récente
                 </p>
               )}

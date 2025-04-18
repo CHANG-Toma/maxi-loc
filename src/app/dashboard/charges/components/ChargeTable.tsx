@@ -1,4 +1,3 @@
-import { Charge } from "@/types/charge";
 import { Button } from "@/components/ui/button";
 import { MoreVertical, Pencil, Trash2 } from "lucide-react";
 import {
@@ -9,10 +8,25 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { motion } from "framer-motion";
 
+interface Charge {
+  id_charge: number;
+  propriete: {
+    id_propriete: number;
+    nom: string;
+  };
+  date_paiement: string;
+  montant: number;
+  type_charge: {
+    id_type_charge: number;
+    libelle: string;
+  };
+  description: string | null;
+}
+
 interface ChargeTableProps {
   charges: Charge[];
   onEdit: (charge: Charge) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: number) => void;
 }
 
 export function ChargeTable({ charges, onEdit, onDelete }: ChargeTableProps) {
@@ -42,26 +56,26 @@ export function ChargeTable({ charges, onEdit, onDelete }: ChargeTableProps) {
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody>
             {charges.map((charge) => (
               <motion.tr
-                key={charge.id}
+                key={charge.id_charge}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
               >
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">
-                    {charge.type}
+                    {charge.type_charge.libelle}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">
-                    {new Date(charge.date).toLocaleDateString()}
+                    {new Date(charge.date_paiement).toLocaleDateString()}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{charge.periode}</div>
+                  <div className="text-sm text-gray-900">{charge.propriete.nom}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">
@@ -93,7 +107,7 @@ export function ChargeTable({ charges, onEdit, onDelete }: ChargeTableProps) {
                         <span>Modifier</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => onDelete(charge.id)}
+                        onClick={() => onDelete(charge.id_charge)}
                         className="cursor-pointer flex items-center text-red-600 focus:text-red-600"
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
