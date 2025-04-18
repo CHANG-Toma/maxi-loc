@@ -20,6 +20,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { OverviewService } from "@/services/overviewService";
 import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface Reservation {
   id_reservation: number;
@@ -31,6 +32,8 @@ interface Reservation {
   date_fin: string;
   id_statut_reservation: number;
   prix_total: number;
+  montant_total?: number;
+  statut?: string;
 }
 
 interface Propriete {
@@ -54,13 +57,33 @@ interface DashboardStats {
 
 const Overview = () => {
   const [stats, setStats] = useState<DashboardStats>({
-    proprietes: 0,
-    reservations: 0,
-    charges: 0,
-    locataires: 0
+    proprietes: 12,
+    reservations: 45,
+    charges: 12234,
+    locataires: 8
   });
-  const [recentReservations, setRecentReservations] = useState<Reservation[]>([]);
-  const [recentProprietes, setRecentProprietes] = useState<Propriete[]>([]);
+  const [recentReservations, setRecentReservations] = useState<Reservation[]>([{
+    id_reservation: 1,
+    propriete: {
+      id_propriete: 1,
+      nom: "Villa Méditerranée"
+    },
+    date_debut: "2024-03-01",
+    date_fin: "2024-03-08",
+    id_statut_reservation: 1,
+    prix_total: 1200
+  }]);
+  const [recentProprietes, setRecentProprietes] = useState<Propriete[]>([{
+    id_propriete: 1,
+    nom: "Villa Méditerranée",
+    ville: "Nice",
+    pays: "France",
+    typePropriete: {
+      id_type_propriete: 1,
+      libelle: "Villa"
+    },
+    nb_pieces: 5
+  }]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

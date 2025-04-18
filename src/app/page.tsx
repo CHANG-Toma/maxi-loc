@@ -10,21 +10,8 @@ import {
 } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useRef, useEffect, useState } from "react";
-import {
-  ArrowDown,
-  LineChart,
-  Rocket,
-  Star,
-  Shield,
-  Globe2,
-  Laptop2,
-  CircuitBoard,
-  Atom,
-  Moon,
-  Sun,
-} from "lucide-react";
-import { Button } from "../components/ui/button";
-import Footer from "../components/footer";
+import { ArrowDown, Moon, Sun } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { HomeService } from "@/services/homeService";
 
 export default function HomePage() {
@@ -196,33 +183,38 @@ export default function HomePage() {
         </div>
 
         {/* Éléments flottants pour la présentation de la plateforme */}
-        {floatingIcons.map(({ Icon, delay, rotate }, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{
-              opacity: [0.2, 0.8, 0.2],
-              scale: [1, 1.2, 1],
-              rotate: [0, rotate, 0],
-            }}
-            transition={{
-              duration: 3,
-              delay,
-              repeat: Infinity,
-              repeatType: "reverse",
-            }}
-            className="absolute hidden md:block"
-            style={{
-              top: `${20 + index * 20}%`,
-              left: `${10 + index * 25}%`,
-              color: isDarkMode
-                ? "rgba(56, 189, 248, 0.3)"
-                : "rgba(56, 189, 248, 0.5)",
-            }}
-          >
-            <Icon className="w-12 h-12" />
-          </motion.div>
-        ))}
+        {floatingIcons.map(({ iconName, delay, rotate }, index) => {
+          const Icon = HomeService.getIconComponent(iconName);
+          if (!Icon) return null;
+          
+          return (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{
+                opacity: [0.2, 0.8, 0.2],
+                scale: [1, 1.2, 1],
+                rotate: [0, rotate, 0],
+              }}
+              transition={{
+                duration: 3,
+                delay,
+                repeat: Infinity,
+                repeatType: "reverse",
+              }}
+              className="absolute hidden md:block"
+              style={{
+                top: `${20 + index * 20}%`,
+                left: `${10 + index * 25}%`,
+                color: isDarkMode
+                  ? "rgba(56, 189, 248, 0.3)"
+                  : "rgba(56, 189, 248, 0.5)",
+              }}
+            >
+              <Icon className="w-12 h-12" />
+            </motion.div>
+          );
+        })}
 
         {/* Bouton pour scroller vers les fonctionnalités */}
         <motion.div
@@ -505,9 +497,6 @@ export default function HomePage() {
           </motion.div>
         </div>
       </div>
-
-      {/* Ajout du composant Footer */}
-      <Footer />
     </div>
   );
 }
