@@ -1,4 +1,3 @@
-
 "use client"
 
 import { motion } from "framer-motion";
@@ -18,8 +17,74 @@ import {
   Tooltip,
   ResponsiveContainer
 } from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { OverviewService } from "@/services/overviewService";
+import { useEffect, useState } from "react";
+
+interface Reservation {
+  id_reservation: number;
+  propriete: {
+    id_propriete: number;
+    nom: string;
+  };
+  date_debut: string;
+  date_fin: string;
+  id_statut_reservation: number;
+  prix_total: number;
+}
+
+interface Propriete {
+  id_propriete: number;
+  nom: string;
+  ville: string;
+  pays: string;
+  typePropriete: {
+    id_type_propriete: number;
+    libelle: string;
+  };
+  nb_pieces: number;
+}
+
+interface DashboardStats {
+  proprietes: number;
+  reservations: number;
+  charges: number;
+  locataires: number;
+}
 
 const Overview = () => {
+  const [stats, setStats] = useState<DashboardStats>({
+    proprietes: 0,
+    reservations: 0,
+    charges: 0,
+    locataires: 0
+  });
+  const [recentReservations, setRecentReservations] = useState<Reservation[]>([]);
+  const [recentProprietes, setRecentProprietes] = useState<Propriete[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [dashboardStats, reservations, proprietes] = await Promise.all([
+          OverviewService.getDashboardStats(),
+          OverviewService.getRecentReservations(),
+          OverviewService.getRecentProprietes()
+        ]);
+
+        setStats(dashboardStats);
+        setRecentReservations(reservations);
+        setRecentProprietes(proprietes);
+      } catch (error) {
+        console.error("Erreur lors du chargement des données:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
   const data = [
     { month: "Jan", revenue: 4000 },
     { month: "Fév", revenue: 3000 },
@@ -29,113 +94,133 @@ const Overview = () => {
     { month: "Jun", revenue: 2390 },
   ];
 
-  const stats = [
-    {
-      title: "Revenus Mensuels",
-      value: "12,500€",
-      change: "+12%",
-      icon: <DollarSign className="w-4 h-4 text-gray-800" />,
-      trend: "up",
-    },
-    {
-      title: "Propriétés Actives",
-      value: "25",
-      change: "+2",
-      icon: <Building2 className="w-4 h-4 text-gray-800" />,
-      trend: "up",
-    },
-    {
-      title: "Taux d'Occupation",
-      value: "89%",
-      change: "+5%",
-      icon: <Users2 className="w-4 h-4 text-gray-800" />,
-      trend: "up",
-    },
-    {
-      title: "Réservations",
-      value: "156",
-      change: "+18",
-      icon: <Calendar className="w-4 h-4 text-gray-800" />,
-      trend: "up",
-    },
-  ];
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
-    <>
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        {stats.map((stat, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm text-gray-800">{stat.title}</p>
-                <h3 className="text-2xl font-bold mt-2 text-gray-700">{stat.value}</h3>
-              </div>
-              <div className="p-2 bg-primary/10 rounded-lg text-primary">
-                {stat.icon}
-              </div>
-            </div>
-            <div className="mt-4 flex items-center">
-              <span className={`text-sm ${stat.trend === 'up' ? 'text-green-500' : 'text-red-500'}`}>
-                {stat.change}
-              </span>
-              <span className="text-sm text-gray-500 ml-2">vs mois dernier</span>
-            </div>
-          </motion.div>
-        ))}
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold">Tableau de bord</h1>
+      
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Propriétés</CardTitle>
+            <Building2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.proprietes}</div>
+            <p className="text-xs text-muted-foreground">
+              +2 depuis le mois dernier
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Réservations</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.reservations}</div>
+            <p className="text-xs text-muted-foreground">
+              +5 depuis le mois dernier
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Revenus</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.charges.toLocaleString('fr-FR')} €</div>
+            <p className="text-xs text-muted-foreground">
+              +10% depuis le mois dernier
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Locataires</CardTitle>
+            <Users2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.locataires}</div>
+            <p className="text-xs text-muted-foreground">
+              +1 depuis le mois dernier
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Chart Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white p-6 rounded-xl shadow-sm mb-6"
-      >
-        <h3 className="text-lg font-semibold mb-4 text-gray-800">Revenus Mensuels</h3>
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="revenue" fill="#007AFF" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </motion.div>
-
-      {/* Recent Activity */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-xl p-6 shadow-sm"
-      >
-        <h3 className="text-lg font-semibold mb-4 text-gray-800">Activité Récente</h3>
-        <div className="space-y-4">
-          {[1, 2, 3].map((_, index) => (
-            <div key={index} className="flex items-center justify-between py-3 border-b last:border-0">
-              <div className="flex items-center space-x-4">
-                <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                  <Calendar className="w-5 h-5 text-gray-600" />
-                </div>
-                <div>
-                  <p className="font-medium text-gray-800">Nouvelle réservation</p>
-                  <p className="text-sm text-gray-500">Appartement Paris 15</p>
-                </div>
-              </div>
-              <span className="text-sm text-gray-500">Il y a 2h</span>
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Réservations récentes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentReservations.length > 0 ? (
+                recentReservations.map((reservation) => (
+                  <div key={reservation.id_reservation} className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">{reservation.propriete.nom}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(reservation.date_debut).toLocaleDateString('fr-FR')} - {new Date(reservation.date_fin).toLocaleDateString('fr-FR')}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium">{reservation.prix_total} €</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Aucune réservation récente
+                </p>
+              )}
             </div>
-          ))}
-        </div>
-      </motion.div>
-    </>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Propriétés récentes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentProprietes.length > 0 ? (
+                recentProprietes.map((propriete) => (
+                  <div key={propriete.id_propriete} className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">{propriete.nom}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {propriete.ville}, {propriete.pays}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium">{propriete.typePropriete.libelle}</p>
+                      <p className="text-sm text-muted-foreground">{propriete.nb_pieces} pièces</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Aucune propriété récente
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
 

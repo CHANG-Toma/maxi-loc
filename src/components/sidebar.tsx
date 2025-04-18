@@ -1,84 +1,141 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Home,
   Building2,
   Calendar,
-  Users2,
-  CreditCard,
+  DollarSign,
   BarChart3,
   Settings,
+  LogOut,
+  User,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { NavigationService } from "@/services/navigationService";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { DashboardService } from "@/services/dashboardService";
 
-const navigationItems = [
-  { icon: <Home className="w-5 h-5" />, label: "Accueil", path: "/dashboard" },
-  {
-    icon: <Building2 className="w-5 h-5" />,
-    label: "Propriétés",
-    path: "/dashboard/proprietes",
-  },
-  {
-    icon: <CreditCard className="w-5 h-5" />,
-    label: "Charges",
-    path: "/dashboard/charges",
-  },
-  {
-    icon: <Calendar className="w-5 h-5" />,
-    label: "Réservations",
-    path: "/dashboard/reservations",
-  },
-  {
-    icon: <BarChart3 className="w-5 h-5" />,
-    label: "Rapports",
-    path: "/dashboard/rapports",
-  },
-  {
-    icon: <Settings className="w-5 h-5" />,
-    label: "Paramètres",
-    path: "/dashboard/parametres",
-  },
-];
+const getIconComponent = (iconName: string) => {
+  switch (iconName) {
+    case 'Home':
+      return <Home className="w-5 h-5" />;
+    case 'Building2':
+      return <Building2 className="w-5 h-5" />;
+    case 'Calendar':
+      return <Calendar className="w-5 h-5" />;
+    case 'DollarSign':
+      return <DollarSign className="w-5 h-5" />;
+    case 'BarChart3':
+      return <BarChart3 className="w-5 h-5" />;
+    case 'Settings':
+      return <Settings className="w-5 h-5" />;
+    case 'User':
+      return <User className="w-5 h-5" />;
+    case 'LogOut':
+      return <LogOut className="w-5 h-5" />;
+    default:
+      return null;
+  }
+};
 
-export function Sidebar({ 
-  isSidebarOpen, 
-  setIsSidebarOpen 
-}: { 
-  isSidebarOpen: boolean, 
-  setIsSidebarOpen?: (open: boolean) => void 
-}) {
+interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+  navigationItems: ReturnType<typeof DashboardService.getNavigationItems>;
+  userMenuItems: ReturnType<typeof DashboardService.getUserMenuItems>;
+  onLogout: () => void;
+}
+
+export function Sidebar({
+  isOpen,
+  onClose,
+  navigationItems,
+  userMenuItems,
+  onLogout,
+}: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
 
   return (
-    <motion.div
-      initial={{ width: "64px" }}
-      animate={{ 
-        width: isSidebarOpen ? "16rem" : "64px" 
-      }}
-      className="bg-white border-r border-gray-200 fixed h-full z-30 overflow-hidden transition-all duration-300"
+    <div
+      className={cn(
+        "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out",
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      )}
     >
-      <div className="p-4">
-        <h2 className={`text-xl font-bold text-gray-800 mb-6 ${isSidebarOpen ? 'block' : 'hidden'}`}>MaxiLoc</h2>
-        <nav className="space-y-2">
-          {navigationItems.map((item, index) => (
-            <Link
-              key={index}
-              href={item.path}
-              className={`flex items-center ${isSidebarOpen ? 'space-x-3' : 'justify-center'} text-gray-600 hover:text-gray-700 hover:bg-gray-50 w-full p-2 rounded-lg transition-colors ${
-                pathname === item.path ? "bg-gray-100 text-gray-900" : ""
-              }`}
-              title={isSidebarOpen ? "" : item.label}
+      <div className="flex flex-col h-full">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <h1 className="text-xl font-bold text-gray-900">Maxiloc</h1>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="md:hidden"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
             >
-              {item.icon}
-              <span className={isSidebarOpen ? "block" : "hidden"}>{item.label}</span>
-            </Link>
-          ))}
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </Button>
+        </div>
+
+        <nav className="flex-1 overflow-y-auto">
+          <div className="p-4 space-y-1">
+            {navigationItems.map((item) => (
+              <Button
+                key={item.path}
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start gap-2",
+                  pathname === item.path
+                    ? "bg-gray-100 text-gray-900"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                )}
+                onClick={() => router.push(item.path)}
+              >
+                {getIconComponent(item.icon)}
+                {item.label}
+              </Button>
+            ))}
+          </div>
         </nav>
+
+        <div className="p-4 border-t border-gray-200">
+          <div className="space-y-1">
+            {userMenuItems.map((item) => (
+              <Button
+                key={item.label}
+                variant="ghost"
+                className="w-full justify-start gap-2 text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                onClick={() => {
+                  if (item.action === "logout") {
+                    onLogout();
+                  } else if (item.path) {
+                    router.push(item.path);
+                  }
+                }}
+              >
+                {getIconComponent(item.icon)}
+                {item.label}
+              </Button>
+            ))}
+          </div>
+        </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 

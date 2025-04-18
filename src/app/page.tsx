@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import Footer from "../components/footer";
+import { HomeService } from "@/services/homeService";
 
 export default function HomePage() {
   const router = useRouter();
@@ -75,39 +76,10 @@ export default function HomePage() {
     transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
   };
 
-  const features = [
-    {
-      icon: <Rocket className="w-8 h-8" />,
-      title: "Innovation Constante",
-      description: "Technologies de pointe pour une gestion optimale",
-      color: "from-cyan-500 to-blue-600",
-    },
-    {
-      icon: <Atom className="w-8 h-8" />,
-      title: "IA Intelligente",
-      description: "Prédictions et analyses automatisées",
-      color: "from-fuchsia-500 to-violet-600",
-    },
-    {
-      icon: <CircuitBoard className="w-8 h-8" />,
-      title: "Automatisation",
-      description: "Processus automatisés pour plus d'efficacité",
-      color: "from-teal-400 to-emerald-600",
-    },
-    {
-      icon: <Star className="w-8 h-8" />,
-      title: "Performance",
-      description: "Maximisez vos revenus locatifs",
-      color: "from-indigo-400 to-blue-600",
-    },
-  ];
-
-  const floatingIcons = [
-    { Icon: Globe2, delay: 0, rotate: 20 },
-    { Icon: Laptop2, delay: 0.2, rotate: -15 },
-    { Icon: LineChart, delay: 0.4, rotate: 10 },
-    { Icon: Shield, delay: 0.6, rotate: -20 },
-  ];
+  const features = HomeService.getFeatures();
+  const floatingIcons = HomeService.getFloatingIcons();
+  const backgroundStyles = HomeService.getBackgroundStyles(isDarkMode);
+  const buttonStyles = HomeService.getButtonStyles(isDarkMode);
 
   return (
     <div
@@ -137,34 +109,14 @@ export default function HomePage() {
 
       {/* Background with Interactive Grid */}
       <div className="fixed inset-0">
+        <div className={`absolute inset-0 ${backgroundStyles.gradient1}`} />
+        <div className={`absolute inset-0 ${backgroundStyles.gradient2}`} />
         <div
-          className={`absolute inset-0 ${
-            isDarkMode
-              ? "bg-[radial-gradient(circle_at_center,rgba(56,189,248,0.1)_0%,transparent_100%)]"
-              : "bg-[radial-gradient(circle_at_center,rgba(56,189,248,0.3)_0%,transparent_100%)]"
-          }`}
-        />
-        <div
-          className={`absolute inset-0 ${
-            isDarkMode
-              ? "bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.05)_0%,transparent_100%)]"
-              : "bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.15)_0%,transparent_100%)]"
-          }`}
-        />
-        <div
-          className={`absolute inset-0 ${
-            isDarkMode
-              ? "bg-[linear-gradient(to_right,#4f4f4f1a_1px,transparent_1px)]"
-              : "bg-[linear-gradient(to_right,#4f4f4f33_1px,transparent_1px)]"
-          } bg-[size:30px] bg-[position:center]`}
+          className={`absolute inset-0 ${backgroundStyles.grid1} bg-[size:30px] bg-[position:center]`}
           style={transformStyle}
         />
         <div
-          className={`absolute inset-0 ${
-            isDarkMode
-              ? "bg-[linear-gradient(to_bottom,#4f4f4f1a_1px,transparent_1px)]"
-              : "bg-[linear-gradient(to_bottom,#4f4f4f33_1px,transparent_1px)]"
-          } bg-[size:30px] bg-[position:center]`}
+          className={`absolute inset-0 ${backgroundStyles.grid2} bg-[size:30px] bg-[position:center]`}
           style={transformStyle}
         />
       </div>
@@ -221,11 +173,7 @@ export default function HomePage() {
               variant="outline"
               size="lg"
               onClick={() => router.push("/signup")}
-              className={`${
-                isDarkMode
-                  ? "border-white bg-white text-black hover:bg-white/10"
-                  : "border-black bg-black text-white hover:bg-black/80"
-              } backdrop-blur-sm transition-all duration-300 cursor-pointer relative group overflow-hidden`}
+              className={`${buttonStyles.primary} backdrop-blur-sm transition-all duration-300 cursor-pointer relative group overflow-hidden`}
             >
               <motion.span
                 className="absolute inset-0 bg-gradient-to-r from-primary to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
@@ -240,11 +188,7 @@ export default function HomePage() {
               variant="outline"
               size="lg"
               onClick={() => router.push("/login")}
-              className={`${
-                isDarkMode
-                  ? "border-gray-500 text-white"
-                  : "border-gray-700 text-gray-900 bg-white"
-              } hover:bg-white/10 backdrop-blur-sm transition-all duration-300 cursor-pointer`}
+              className={`${buttonStyles.secondary} hover:bg-white/10 backdrop-blur-sm transition-all duration-300 cursor-pointer`}
             >
               Se Connecter
             </Button>
@@ -305,53 +249,38 @@ export default function HomePage() {
         </motion.div>
       </div>
 
-      {/* Fonctionnalités principales et objectifs de la plateforme */}
-      <div
-        id="features"
-        className={`relative py-24 ${
-          isDarkMode ? "bg-black/50" : "bg-white/70"
-        } backdrop-blur-xl`}
-      >
-        <div className="container px-4 mx-auto">
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {features.map((feature, index) => (
-              <motion.div
-                key={feature.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ margin: "-100px" }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                whileHover={{ scale: 1.05, rotateY: 5 }}
-                className="relative p-6 rounded-2xl overflow-hidden group backdrop-blur-xl"
-              >
-                <div
-                  className={`absolute inset-0 bg-gradient-to-br ${
-                    feature.color
-                  } ${
-                    isDarkMode
-                      ? "opacity-10 group-hover:opacity-20"
-                      : "opacity-15 group-hover:opacity-25"
-                  } transition-opacity duration-300`}
-                />
-                <div className={isDarkMode ? "" : "text-gray-900"}>
-                  {feature.icon}
-                </div>
-                <h3
-                  className={`relative z-10 text-xl font-semibold mb-2 ${
-                    isDarkMode ? "text-white" : "text-gray-900"
+      {/* Section Features */}
+      <div className="relative py-20">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {features.map((feature, index) => {
+              const Icon = HomeService.getIconComponent(feature.iconName);
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className={`p-6 rounded-lg backdrop-blur-sm bg-opacity-10 ${
+                    isDarkMode ? "bg-white/5" : "bg-black/5"
                   }`}
                 >
-                  {feature.title}
-                </h3>
-                <p
-                  className={`relative z-10 ${
+                  <div className={`text-4xl mb-4 bg-gradient-to-r ${feature.color} text-transparent bg-clip-text`}>
+                    {Icon && <Icon className="w-8 h-8" />}
+                  </div>
+                  <h3 className={`text-xl font-semibold mb-2 ${
+                    isDarkMode ? "text-white" : "text-gray-900"
+                  }`}>
+                    {feature.title}
+                  </h3>
+                  <p className={`text-sm ${
                     isDarkMode ? "text-gray-400" : "text-gray-600"
-                  } text-sm`}
-                >
-                  {feature.description}
-                </p>
-              </motion.div>
-            ))}
+                  }`}>
+                    {feature.description}
+                  </p>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </div>

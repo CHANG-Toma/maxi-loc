@@ -1,35 +1,25 @@
 "use client"
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Euro, Plus, Trash2, X, MoreVertical, Pencil, Loader2 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
+import { Textarea } from "../../../components/ui/textarea";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu";
-import Dashboard from "../page";
+import DashboardLayout from "../layout";
 import { getCharges, createCharge, updateCharge, deleteCharge } from "@/lib/charge";
 import { getProprietes } from "@/lib/propriete";
 import { toast } from 'sonner';
-
-interface Charge {
-  id_charge: number;
-  propriete: {
-    id_propriete: number;
-    nom: string;
-  };
-  date_paiement: string;
-  montant: number;
-  type_charge: {
-    id_type_charge: number;
-    libelle: string;
-  };
-  description: string | null | undefined;
-}
+import { Charge } from "@/types/charge";
+import { ChargeService } from "@/services/chargeService";
+import { ChargeTable } from "./components/ChargeTable";
+import { ChargeForm } from "./components/ChargeForm";
 
 interface FormData {
   id_propriete: string;
@@ -54,6 +44,8 @@ export default function ChargesPage() {
     id_type_charge: 1,
     description: ""
   });
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedCharge, setSelectedCharge] = useState<Charge | null>(null);
 
   useEffect(() => {
     const loadCharges = async () => {
@@ -181,26 +173,47 @@ export default function ChargesPage() {
     setShowForm(true);
   };
 
+  const handleCreateCharge = async (charge: Omit<Charge, "id">) => {
+    await ChargeService.createCharge(charge);
+    await loadCharges();
+    setIsFormOpen(false);
+  };
+
+  const handleUpdateCharge = async (id: string, charge: Partial<Charge>) => {
+    await ChargeService.updateCharge(id, charge);
+    await loadCharges();
+    setIsFormOpen(false);
+    setSelectedCharge(null);
+  };
+
+  const handleDeleteCharge = async (id: string) => {
+    await ChargeService.deleteCharge(id);
+    await loadCharges();
+  };
+
   if (isLoading) {
     return (
-      <Dashboard>
+      <DashboardLayout>
         <div className="flex items-center justify-center h-full">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </Dashboard>
+      </DashboardLayout>
     );
   }
 
   // Si l'utilisateur n'a pas de charges
   if (charges.length === 0) {
     return (
-      <Dashboard>
+      <DashboardLayout>
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-gray-900">Charges</h2>
             <Button 
               className="bg-black text-white hover:bg-primary/90 cursor-pointer"
-              onClick={handleCreateClick}
+              onClick={() => {
+                setIsFormOpen(true);
+                setSelectedCharge(null);
+              }}
             >
               <Plus className="w-4 h-4 mr-2" />
               Nouvelle charge
@@ -350,18 +363,21 @@ export default function ChargesPage() {
             </motion.div>
           )}
         </div>
-      </Dashboard>
+      </DashboardLayout>
     );
   }
 
   return (
-    <Dashboard>
+    <DashboardLayout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-gray-900">Charges</h2>
           <Button 
             className="bg-black text-white hover:bg-primary/90 cursor-pointer"
-            onClick={handleCreateClick}
+            onClick={() => {
+              setIsFormOpen(true);
+              setSelectedCharge(null);
+            }}
           >
             <Plus className="w-4 h-4 mr-2" />
             Nouvelle charge
@@ -387,230 +403,26 @@ export default function ChargesPage() {
           </motion.div>
         )}
 
-        {showForm && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white p-6 rounded-xl shadow-sm"
-          >
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {editingCharge ? 'Modifier la charge' : 'Nouvelle charge'}
-              </h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setShowForm(false);
-                  setEditingCharge(null);
-                  setFormData({
-                    id_propriete: "",
-                    date_paiement: "",
-                    montant: "",
-                    id_type_charge: 1,
-                    description: ""
-                  });
-                }}
-                className="text-gray-500 hover:text-gray-900"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
+        <ChargeTable
+          charges={charges}
+          onEdit={(charge) => {
+            setSelectedCharge(charge);
+            setIsFormOpen(true);
+          }}
+          onDelete={handleDeleteCharge}
+        />
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="id_propriete" className="block text-sm font-medium text-gray-700 mb-1">
-                    Propriété
-                  </label>
-                  <select
-                    id="id_propriete"
-                    name="id_propriete"
-                    value={formData.id_propriete}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                    required
-                  >
-                    <option value="">Sélectionnez une propriété</option>
-                    {proprietes.map(prop => (
-                      <option key={prop.id_propriete} value={prop.id_propriete}>
-                        {prop.nom}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label htmlFor="date_paiement" className="block text-sm font-medium text-gray-700 mb-1">
-                    Date de paiement
-                  </label>
-                  <Input
-                    id="date_paiement"
-                    name="date_paiement"
-                    type="date"
-                    value={formData.date_paiement}
-                    onChange={handleInputChange}
-                    required
-                    className="bg-white text-gray-900"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="id_type_charge" className="block text-sm font-medium text-gray-700 mb-1">
-                    Type de charge
-                  </label>
-                  <select
-                    id="id_type_charge"
-                    name="id_type_charge"
-                    value={formData.id_type_charge}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                    required
-                  >
-                    <option value="1">Entretien</option>
-                    <option value="2">Fonctionnement</option>
-                    <option value="3">Financière</option>
-                    <option value="4">Fiscal</option>
-                    <option value="5">Copropriété</option>
-                    <option value="6">Travaux</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label htmlFor="montant" className="block text-sm font-medium text-gray-700 mb-1">
-                    Montant (€)
-                  </label>
-                  <Input
-                    id="montant"
-                    name="montant"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={formData.montant}
-                    onChange={handleInputChange}
-                    required
-                    className="bg-white text-gray-900"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                    Description
-                  </label>
-                  <Input
-                    id="description"
-                    name="description"
-                    type="text"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    className="bg-white text-gray-900"
-                    placeholder="Description optionnelle"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end space-x-4 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setShowForm(false)}
-                >
-                  Annuler
-                </Button>
-                <Button type="submit" className="bg-black text-white hover:bg-primary/90">
-                  {editingCharge ? 'Modifier la charge' : 'Créer la charge'}
-                </Button>
-              </div>
-            </form>
-          </motion.div>
+        {isFormOpen && (
+          <ChargeForm
+            charge={selectedCharge}
+            onClose={() => {
+              setIsFormOpen(false);
+              setSelectedCharge(null);
+            }}
+            onSubmit={selectedCharge ? handleUpdateCharge : handleCreateCharge}
+          />
         )}
-
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Propriété
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date de paiement
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Type
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Description
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Montant
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {charges.map((charge, index) => (
-                  <motion.tr 
-                    key={charge.id_charge}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{charge.propriete.nom}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center text-sm text-gray-900">
-                        {new Date(charge.date_paiement).toLocaleDateString()}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {charge.type_charge.libelle}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {charge.description || "-"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {charge.montant.toLocaleString('fr-FR')} €
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            className="h-8 w-8 p-0 text-gray-900"
-                          >
-                            <span className="sr-only">Ouvrir le menu</span>
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => handleEdit(charge)}
-                            className="cursor-pointer flex items-center text-gray-900 hover:text-gray-900"
-                          >
-                            <Pencil className="mr-2 h-4 w-4" />
-                            <span>Modifier</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleDelete(charge.id_charge)}
-                            className="cursor-pointer flex items-center text-red-600 focus:text-red-600"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            <span>Supprimer</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </td>
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
       </div>
-    </Dashboard>
+    </DashboardLayout>
   );
 }

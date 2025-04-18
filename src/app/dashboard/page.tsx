@@ -5,95 +5,221 @@ import {
   BarChart3, 
   Building2, 
   Calendar, 
-  ChevronDown, 
-  CreditCard, 
   DollarSign, 
-  Home, 
-  LogOut,
-  Menu, 
-  Settings, 
-  User,
   Users2 
 } from "lucide-react";
-import { Button } from "../../components/ui/button";
-import { useState } from "react";
-import { usePathname, useRouter } from 'next/navigation';
-import Overview from "./components/Overview";
-import { Sidebar } from "../../components/sidebar";
-import { 
-  Menubar, 
-  MenubarContent, 
-  MenubarItem, 
-  MenubarMenu,
-  MenubarTrigger 
-} from "@/components/ui/menubar";
-import { ReactNode } from "react";
-import { logout } from "@/lib/auth";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
+} from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { OverviewService } from "@/services/overviewService";
+import { useEffect, useState } from "react";
 
-export default function Dashboard({ children }: { children?: ReactNode }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const pathname = usePathname();
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    const result = await logout();
-    if (result.success) {
-      router.push("/login");
-    }
+interface Reservation {
+  id_reservation: number;
+  propriete: {
+    id_propriete: number;
+    nom: string;
   };
+  date_debut: string;
+  date_fin: string;
+  id_statut_reservation: number;
+  prix_total: number;
+}
+
+interface Propriete {
+  id_propriete: number;
+  nom: string;
+  ville: string;
+  pays: string;
+  typePropriete: {
+    id_type_propriete: number;
+    libelle: string;
+  };
+  nb_pieces: number;
+}
+
+interface DashboardStats {
+  proprietes: number;
+  reservations: number;
+  charges: number;
+  locataires: number;
+}
+
+export default function DashboardPage() {
+  const [stats, setStats] = useState<DashboardStats>({
+    proprietes: 0,
+    reservations: 0,
+    charges: 0,
+    locataires: 0
+  });
+  const [recentReservations, setRecentReservations] = useState<Reservation[]>([]);
+  const [recentProprietes, setRecentProprietes] = useState<Propriete[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [dashboardStats, reservations, proprietes] = await Promise.all([
+          OverviewService.getDashboardStats(),
+          OverviewService.getRecentReservations(),
+          OverviewService.getRecentProprietes()
+        ]);
+
+        setStats(dashboardStats);
+        setRecentReservations(reservations);
+        setRecentProprietes(proprietes);
+      } catch (error) {
+        console.error("Erreur lors du chargement des données:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  const data = [
+    { month: "Jan", revenue: 4000 },
+    { month: "Fév", revenue: 3000 },
+    { month: "Mar", revenue: 5000 },
+    { month: "Avr", revenue: 2780 },
+    { month: "Mai", revenue: 6890 },
+    { month: "Jun", revenue: 2390 },
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <Sidebar 
-        isSidebarOpen={isSidebarOpen} 
-        setIsSidebarOpen={setIsSidebarOpen} 
-      />
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold">Tableau de bord</h1>
+      
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Propriétés</CardTitle>
+            <Building2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.proprietes}</div>
+            <p className="text-xs text-muted-foreground">
+              +2 depuis le mois dernier
+            </p>
+          </CardContent>
+        </Card>
 
-      {/* Main Content */}
-      <div className={`flex-1 ${isSidebarOpen ? 'ml-64' : 'ml-16'} transition-all duration-300`}>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Réservations</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.reservations}</div>
+            <p className="text-xs text-muted-foreground">
+              +5 depuis le mois dernier
+            </p>
+          </CardContent>
+        </Card>
 
-        {/* Top Bar */}
-        <header className="bg-white border-b border-gray-200 p-4 flex justify-between items-center">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="text-gray-900 cursor-pointer"
-          >
-            <Menu className="w-5 h-5" />
-          </Button>
-          <div className="flex items-center space-x-4">
-            {/* User Avatar + dropdown menu */}
-            <Menubar className="border-0 bg-white p-0 h-auto">
-              <MenubarMenu>
-                <MenubarTrigger className="p-0 focus:bg-transparent data-[state=open]:bg-transparent cursor-pointer">
-                  <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
-                    <User className="w-5 h-5" />
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Revenus</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.charges.toLocaleString('fr-FR')} €</div>
+            <p className="text-xs text-muted-foreground">
+              +10% depuis le mois dernier
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Locataires</CardTitle>
+            <Users2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.locataires}</div>
+            <p className="text-xs text-muted-foreground">
+              +1 depuis le mois dernier
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Réservations récentes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentReservations.length > 0 ? (
+                recentReservations.map((reservation) => (
+                  <div key={reservation.id_reservation} className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">{reservation.propriete.nom}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(reservation.date_debut).toLocaleDateString('fr-FR')} - {new Date(reservation.date_fin).toLocaleDateString('fr-FR')}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium">{reservation.prix_total} €</p>
+                    </div>
                   </div>
-                </MenubarTrigger>
-                <MenubarContent className="bg-white">
-                  <MenubarItem className="flex gap-2 text-gray-900 cursor-pointer hover:bg-gray-100">
-                    <User className="w-4 h-4" />
-                    <a href="/dashboard/parametres">Mon profil</a>
-                  </MenubarItem>
-                  <MenubarItem 
-                    className="flex gap-2 text-gray-900 cursor-pointer hover:bg-gray-100"
-                    onClick={handleLogout}
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span>Déconnexion</span>
-                  </MenubarItem>
-                </MenubarContent>
-              </MenubarMenu>
-            </Menubar>
-          </div>
-        </header>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Aucune réservation récente
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Dashboard Content */}
-        <main className="p-6">
-          {children || <Overview />}  
-        </main>
+        <Card>
+          <CardHeader>
+            <CardTitle>Propriétés récentes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentProprietes.length > 0 ? (
+                recentProprietes.map((propriete) => (
+                  <div key={propriete.id_propriete} className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">{propriete.nom}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {propriete.ville}, {propriete.pays}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium">{propriete.typePropriete.libelle}</p>
+                      <p className="text-sm text-muted-foreground">{propriete.nb_pieces} pièces</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Aucune propriété récente
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
-}
+} 

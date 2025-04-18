@@ -7,7 +7,7 @@ import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Switch } from "../../../components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs";
-import Dashboard from "../page";
+import DashboardLayout from "../layout";
 import { updateProfile, updatePassword } from "@/lib/utilisateur";
 import { validateSession } from "@/lib/session";
 
@@ -238,16 +238,16 @@ export default function SettingsPage() {
 
   if (isLoading) {
     return (
-      <Dashboard>
+      <DashboardLayout>
         <div className="flex items-center justify-center h-full">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
-      </Dashboard>
+      </DashboardLayout>
     );
   }
 
   return (
-    <Dashboard>
+    <DashboardLayout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-gray-900">Paramètres</h2>
@@ -626,6 +626,6 @@ export default function SettingsPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </Dashboard>
+    </DashboardLayout>
   );
 }

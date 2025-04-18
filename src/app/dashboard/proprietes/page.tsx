@@ -14,7 +14,7 @@ import {
 } from "../../../components/ui/dropdown-menu";
 import { getProprietes, createPropriete, deletePropriete, updatePropriete } from "@/lib/propriete";
 import type { ReactNode } from "react";
-import DashboardLayout from "../page";
+import DashboardLayout from "../layout";
 import { useRouter } from "next/navigation";
 
 // Fonction utilitaire pour récupérer un cookie
