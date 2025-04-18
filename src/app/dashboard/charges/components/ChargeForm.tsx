@@ -61,14 +61,14 @@ export function ChargeForm({ charge, onClose, onSubmit }: ChargeFormProps) {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="type">Type de charge</Label>
+            <Label htmlFor="type" className="text-gray-900">Type de charge</Label>
             <Select name="type" defaultValue={charge?.type}>
-              <SelectTrigger>
+              <SelectTrigger className="bg-white text-gray-900 border-gray-200">
                 <SelectValue placeholder="Sélectionnez un type" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white text-gray-900 border-gray-200">
                 {ChargeService.getChargeTypes().map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
+                  <SelectItem key={type.value} value={type.value} className="hover:bg-gray-100">
                     {type.label}
                   </SelectItem>
                 ))}
@@ -77,14 +77,14 @@ export function ChargeForm({ charge, onClose, onSubmit }: ChargeFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="periode">Période</Label>
+            <Label htmlFor="periode" className="text-gray-900">Période</Label>
             <Select name="periode" defaultValue={charge?.periode}>
-              <SelectTrigger>
+              <SelectTrigger className="bg-white text-gray-900 border-gray-200">
                 <SelectValue placeholder="Sélectionnez une période" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white text-gray-900 border-gray-200">
                 {ChargeService.getChargePeriods().map((periode) => (
-                  <SelectItem key={periode.value} value={periode.value}>
+                  <SelectItem key={periode.value} value={periode.value} className="hover:bg-gray-100">
                     {periode.label}
                   </SelectItem>
                 ))}
@@ -93,18 +93,19 @@ export function ChargeForm({ charge, onClose, onSubmit }: ChargeFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="date">Date</Label>
+            <Label htmlFor="date" className="text-gray-900">Date</Label>
             <Input
               id="date"
               name="date"
               type="date"
               defaultValue={charge?.date ? new Date(charge.date).toISOString().split("T")[0] : ""}
               required
+              className="bg-white text-gray-900 border-gray-200"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="montant">Montant (€)</Label>
+            <Label htmlFor="montant" className="text-gray-900">Montant (€)</Label>
             <Input
               id="montant"
               name="montant"
@@ -113,17 +114,19 @@ export function ChargeForm({ charge, onClose, onSubmit }: ChargeFormProps) {
               min="0"
               defaultValue={charge?.montant}
               required
+              className="bg-white text-gray-900 border-gray-200"
             />
           </div>
 
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description" className="text-gray-900">Description</Label>
             <Input
               id="description"
               name="description"
               type="text"
               defaultValue={charge?.description}
               placeholder="Description optionnelle"
+              className="bg-white text-gray-900 border-gray-200 placeholder-gray-400"
             />
           </div>
         </div>
@@ -133,10 +136,11 @@ export function ChargeForm({ charge, onClose, onSubmit }: ChargeFormProps) {
             type="button"
             variant="outline"
             onClick={onClose}
+            className="bg-black text-white hover:bg-gray-900 border-transparent"
           >
             Annuler
           </Button>
-          <Button type="submit" className="bg-black text-white hover:bg-primary/90">
+          <Button type="submit" className="bg-black text-white hover:bg-gray-900">
             {charge ? "Modifier" : "Créer"}
           </Button>
         </div>
