@@ -1,11 +1,14 @@
 export interface Charge {
-  id: string;
-  type: string;
+  id_charge: number;
+  propriete: {
+    id_propriete: number;
+    nom: string;
+  };
+  date_paiement: string;
   montant: number;
-  periode: string;
-  date: Date;
-  description?: string;
-  proprieteId: string;
-  createdAt: Date;
-  updatedAt: Date;
+  type_charge: {
+    id_type_charge: number;
+    libelle: string;
+  };
+  description: string | null;
 } 

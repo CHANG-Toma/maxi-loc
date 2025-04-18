@@ -11,28 +11,74 @@ import {
 } from "@/components/ui/select";
 import { X } from "lucide-react";
 import { motion } from "framer-motion";
-import { ChargeService } from "@/services/chargeService";
+import { useEffect, useState } from "react";
+import { getTypeCharges } from "@/lib/charge";
+import { getProprietes } from "@/lib/propriete";
+
+interface TypeCharge {
+  id_type_charge: number;
+  libelle: string;
+}
+
+interface Propriete {
+  id_propriete: number;
+  nom: string;
+}
 
 interface ChargeFormProps {
   charge?: Charge | null;
   onClose: () => void;
-  onSubmit: (charge: Omit<Charge, "id">) => Promise<void>;
+  onSubmit: (charge: Omit<Charge, "id_charge">) => Promise<void>;
 }
 
 export function ChargeForm({ charge, onClose, onSubmit }: ChargeFormProps) {
+  const [typeCharges, setTypeCharges] = useState<TypeCharge[]>([]);
+  const [proprietes, setProprietes] = useState<Propriete[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [typeChargesResult, proprietesResult] = await Promise.all([
+          getTypeCharges(),
+          getProprietes()
+        ]);
+
+        if (typeChargesResult.success && typeChargesResult.typeCharges) {
+          setTypeCharges(typeChargesResult.typeCharges);
+        } else {
+          setError(typeChargesResult.error || "Erreur lors du chargement des types de charges");
+        }
+
+        if (proprietesResult.success && proprietesResult.proprietes) {
+          setProprietes(proprietesResult.proprietes);
+        } else {
+          setError(proprietesResult.error || "Erreur lors du chargement des propriétés");
+        }
+      } catch (error) {
+        setError("Une erreur est survenue lors du chargement des données");
+      }
+    };
+
+    loadData();
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
-    const chargeData: Omit<Charge, "id"> = {
-      type: formData.get("type") as string,
+    const chargeData: Omit<Charge, "id_charge"> = {
+      propriete: {
+        id_propriete: Number(formData.get("id_propriete")),
+        nom: proprietes.find(p => p.id_propriete === Number(formData.get("id_propriete")))?.nom || ""
+      },
+      date_paiement: formData.get("date_paiement") as string,
       montant: Number(formData.get("montant")),
-      periode: formData.get("periode") as string,
-      date: new Date(formData.get("date") as string),
-      description: formData.get("description") as string,
-      proprieteId: formData.get("proprieteId") as string,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      type_charge: {
+        id_type_charge: Number(formData.get("id_type_charge")),
+        libelle: typeCharges.find(tc => tc.id_type_charge === Number(formData.get("id_type_charge")))?.libelle || ""
+      },
+      description: formData.get("description") as string || null
     };
 
     await onSubmit(chargeData);
@@ -58,18 +104,28 @@ export function ChargeForm({ charge, onClose, onSubmit }: ChargeFormProps) {
         </Button>
       </div>
 
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 text-red-800 rounded-lg">
+          {error}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="type" className="text-gray-900">Type de charge</Label>
-            <Select name="type" defaultValue={charge?.type}>
+            <Label htmlFor="id_propriete" className="text-gray-900">Propriété</Label>
+            <Select name="id_propriete" defaultValue={charge?.propriete.id_propriete.toString()}>
               <SelectTrigger className="bg-white text-gray-900 border-gray-200">
-                <SelectValue placeholder="Sélectionnez un type" />
+                <SelectValue placeholder="Sélectionnez une propriété" />
               </SelectTrigger>
               <SelectContent className="bg-white text-gray-900 border-gray-200">
-                {ChargeService.getChargeTypes().map((type) => (
-                  <SelectItem key={type.value} value={type.value} className="hover:bg-gray-100">
-                    {type.label}
+                {proprietes.map((propriete) => (
+                  <SelectItem 
+                    key={propriete.id_propriete} 
+                    value={propriete.id_propriete.toString()}
+                    className="hover:bg-gray-100"
+                  >
+                    {propriete.nom}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -77,70 +133,67 @@ export function ChargeForm({ charge, onClose, onSubmit }: ChargeFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="periode" className="text-gray-900">Période</Label>
-            <Select name="periode" defaultValue={charge?.periode}>
-              <SelectTrigger className="bg-white text-gray-900 border-gray-200">
-                <SelectValue placeholder="Sélectionnez une période" />
-              </SelectTrigger>
-              <SelectContent className="bg-white text-gray-900 border-gray-200">
-                {ChargeService.getChargePeriods().map((periode) => (
-                  <SelectItem key={periode.value} value={periode.value} className="hover:bg-gray-100">
-                    {periode.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="date" className="text-gray-900">Date</Label>
+            <Label htmlFor="date_paiement" className="text-gray-900">Date de paiement</Label>
             <Input
-              id="date"
-              name="date"
+              id="date_paiement"
+              name="date_paiement"
               type="date"
-              defaultValue={charge?.date ? new Date(charge.date).toISOString().split("T")[0] : ""}
+              defaultValue={charge?.date_paiement.split('T')[0]}
+              className="bg-white text-gray-900"
               required
-              className="bg-white text-gray-900 border-gray-200"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="montant" className="text-gray-900">Montant (€)</Label>
+            <Label htmlFor="montant" className="text-gray-900">Montant</Label>
             <Input
               id="montant"
               name="montant"
               type="number"
               step="0.01"
-              min="0"
               defaultValue={charge?.montant}
+              className="bg-white text-gray-900"
               required
-              className="bg-white text-gray-900 border-gray-200"
             />
           </div>
 
-          <div className="space-y-2 md:col-span-2">
+          <div className="space-y-2">
+            <Label htmlFor="id_type_charge" className="text-gray-900">Type de charge</Label>
+            <Select name="id_type_charge" defaultValue={charge?.type_charge.id_type_charge.toString()}>
+              <SelectTrigger className="bg-white text-gray-900 border-gray-200">
+                <SelectValue placeholder="Sélectionnez un type" />
+              </SelectTrigger>
+              <SelectContent className="bg-white text-gray-900 border-gray-200">
+                {typeCharges.map((type) => (
+                  <SelectItem 
+                    key={type.id_type_charge} 
+                    value={type.id_type_charge.toString()}
+                    className="hover:bg-gray-100"
+                  >
+                    {type.libelle}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="description" className="text-gray-900">Description</Label>
             <Input
               id="description"
               name="description"
               type="text"
-              defaultValue={charge?.description}
-              placeholder="Description optionnelle"
-              className="bg-white text-gray-900 border-gray-200 placeholder-gray-400"
+              defaultValue={charge?.description || ""}
+              className="bg-white text-gray-900"
             />
           </div>
         </div>
 
-        <div className="flex justify-end space-x-4 pt-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onClose}
-            className="bg-black text-white hover:bg-gray-900 border-transparent"
-          >
+        <div className="flex justify-end space-x-4">
+          <Button type="button" variant="outline" onClick={onClose}>
             Annuler
           </Button>
-          <Button type="submit" className="bg-black text-white hover:bg-gray-900">
+          <Button type="submit" className="bg-black text-white hover:bg-primary/90">
             {charge ? "Modifier" : "Créer"}
           </Button>
         </div>

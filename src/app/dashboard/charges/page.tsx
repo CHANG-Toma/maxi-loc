@@ -47,32 +47,32 @@ export default function ChargesPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedCharge, setSelectedCharge] = useState<Charge | null>(null);
 
-  useEffect(() => {
-    const loadCharges = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        const result = await getCharges();
-        
-        if (result.success && result.charges) {
-          setCharges(result.charges);
-        } else {
-          setError(result.error || "Erreur lors du chargement des charges");
-        }
-
-        const propResult = await getProprietes();
-        if (propResult.success && propResult.proprietes) {
-          setProprietes(propResult.proprietes);
-        }
-      } catch (error) {
-        console.error("Erreur lors du chargement des charges:", error);
-        setError("Une erreur est survenue lors du chargement des charges");
-      } finally {
-        setIsLoading(false);
+  const loadCharges = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const result = await getCharges();
+      
+      if (result.success && result.charges) {
+        setCharges(result.charges);
+      } else {
+        setError(result.error || "Erreur lors du chargement des charges");
       }
-    };
 
+      const propResult = await getProprietes();
+      if (propResult.success && propResult.proprietes) {
+        setProprietes(propResult.proprietes);
+      }
+    } catch (error) {
+      console.error("Erreur lors du chargement des charges:", error);
+      setError("Une erreur est survenue lors du chargement des charges");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadCharges();
   }, []);
 
@@ -92,6 +92,7 @@ export default function ChargesPage() {
       if (!formData.id_propriete) errors.push("La propriété est requise");
       if (!formData.date_paiement) errors.push("La date de paiement est requise");
       if (!formData.montant) errors.push("Le montant est requis");
+      if (!formData.id_type_charge) errors.push("Le type de charge est requis");
 
       if (errors.length > 0) {
         setError(errors.join("\n"));
@@ -102,7 +103,7 @@ export default function ChargesPage() {
         id_propriete: parseInt(formData.id_propriete),
         date_paiement: formData.date_paiement,
         montant: parseFloat(formData.montant),
-        id_type_charge: parseInt(formData.id_type_charge.toString()),
+        id_type_charge: formData.id_type_charge,
         description: formData.description
       };
 
@@ -124,13 +125,7 @@ export default function ChargesPage() {
           description: ""
         });
         setEditingCharge(null);
-
-        // Recharger les charges
-        const newResult = await getCharges();
-        if (newResult.success && newResult.charges) {
-          setCharges(newResult.charges);
-        }
-        
+        await loadCharges();
         setTimeout(() => setSuccess(null), 3000);
       } else {
         setError(result.error || "Une erreur est survenue lors de la création de la charge");
@@ -173,22 +168,48 @@ export default function ChargesPage() {
     setShowForm(true);
   };
 
-  const handleCreateCharge = async (charge: Omit<Charge, "id">) => {
-    await ChargeService.createCharge(charge);
-    await loadCharges();
-    setIsFormOpen(false);
+  const handleCreateCharge = async (charge: Omit<Charge, "id_charge">) => {
+    const result = await createCharge({
+      id_propriete: parseInt(charge.propriete.id_propriete.toString()),
+      date_paiement: charge.date_paiement,
+      montant: charge.montant,
+      id_type_charge: charge.type_charge.id_type_charge,
+      description: charge.description || undefined
+    });
+    
+    if (result.success) {
+      await loadCharges();
+      setIsFormOpen(false);
+    } else {
+      setError(result.error || "Erreur lors de la création de la charge");
+    }
   };
 
-  const handleUpdateCharge = async (id: string, charge: Partial<Charge>) => {
-    await ChargeService.updateCharge(id, charge);
-    await loadCharges();
-    setIsFormOpen(false);
-    setSelectedCharge(null);
+  const handleUpdateCharge = async (id: number, charge: Partial<Charge>) => {
+    const result = await updateCharge(id, {
+      id_propriete: parseInt(charge.propriete?.id_propriete.toString() || "0"),
+      date_paiement: charge.date_paiement || "",
+      montant: charge.montant || 0,
+      id_type_charge: charge.type_charge?.id_type_charge || 0,
+      description: charge.description || undefined
+    });
+
+    if (result.success) {
+      await loadCharges();
+      setIsFormOpen(false);
+      setSelectedCharge(null);
+    } else {
+      setError(result.error || "Erreur lors de la mise à jour de la charge");
+    }
   };
 
-  const handleDeleteCharge = async (id: string) => {
-    await ChargeService.deleteCharge(id);
-    await loadCharges();
+  const handleDeleteCharge = async (id: number) => {
+    const result = await deleteCharge(id);
+    if (result.success) {
+      await loadCharges();
+    } else {
+      setError(result.error || "Erreur lors de la suppression de la charge");
+    }
   };
 
   if (isLoading) {
@@ -258,12 +279,12 @@ export default function ChargesPage() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="id_propriete" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="proprieteId" className="block text-sm font-medium text-gray-700 mb-1">
                       Propriété
                     </label>
                     <select
-                      id="id_propriete"
-                      name="id_propriete"
+                      id="proprieteId"
+                      name="proprieteId"
                       value={formData.id_propriete}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
@@ -279,11 +300,11 @@ export default function ChargesPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="date_paiement" className="block text-sm font-medium text-gray-700 mb-1">
-                      Date de paiement
+                    <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
+                      Date
                     </label>
                     <Input
-                      id="date_paiement"
+                      id="date"
                       name="date_paiement"
                       type="date"
                       value={formData.date_paiement}
@@ -294,23 +315,24 @@ export default function ChargesPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="id_type_charge" className="block text-sm font-medium text-gray-700 mb-1">
-                      Type de charge
+                    <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
+                      Type
                     </label>
                     <select
-                      id="id_type_charge"
+                      id="type"
                       name="id_type_charge"
                       value={formData.id_type_charge}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
                       required
                     >
-                      <option value="1">Entretien</option>
-                      <option value="2">Fonctionnement</option>
-                      <option value="3">Financière</option>
-                      <option value="4">Fiscal</option>
-                      <option value="5">Copropriété</option>
-                      <option value="6">Travaux</option>
+                      <option value="">Sélectionnez un type</option>
+                      <option value="Entretien">Entretien</option>
+                      <option value="Fonctionnement">Fonctionnement</option>
+                      <option value="Financière">Financière</option>
+                      <option value="Fiscal">Fiscal</option>
+                      <option value="Copropriété">Copropriété</option>
+                      <option value="Travaux">Travaux</option>
                     </select>
                   </div>
 
@@ -419,7 +441,10 @@ export default function ChargesPage() {
               setIsFormOpen(false);
               setSelectedCharge(null);
             }}
-            onSubmit={selectedCharge ? handleUpdateCharge : handleCreateCharge}
+            onSubmit={selectedCharge ? 
+              (charge) => handleUpdateCharge(selectedCharge.id_charge, charge) : 
+              handleCreateCharge
+            }
           />
         )}
       </div>
