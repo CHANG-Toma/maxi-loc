@@ -76,7 +76,7 @@ export function Footer({ isDarkMode }: FooterProps) {
             </div>
             <div className="flex justify-center md:justify-end">
               <Link href="/legal/accessibilite" className={`text-sm ${isDarkMode ? "text-gray-400 hover:text-white" : "text-gray-600 hover:text-gray-900"} transition-colors`}>
-                Accessibilité : non conforme
+                Accessibilité : conforme
               </Link>
             </div>
           </div>
