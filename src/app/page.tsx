@@ -13,6 +13,8 @@ import { useRef, useEffect, useState } from "react";
 import { ArrowDown, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HomeService } from "@/services/homeService";
+import { Footer } from "@/components/footer";
+import { CookieConsent } from "@/components/CookieConsent";
 
 export default function HomePage() {
   const router = useRouter();
@@ -497,6 +499,12 @@ export default function HomePage() {
           </motion.div>
         </div>
       </div>
+
+      {/* Footer */}
+      <Footer isDarkMode={isDarkMode} />
+      
+      {/* Cookie Consent */}
+      <CookieConsent isDarkMode={isDarkMode} />
     </div>
   );
 }

@@ -1,127 +1,90 @@
-"use client"
-
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Facebook, Twitter, Instagram, Mail, ExternalLink } from "lucide-react";
-import { Button } from "./ui/button";
-import { useEffect } from "react";
-import { NavigationService } from "@/services/navigationService";
 
-const Footer = () => {
-  const currentYear = NavigationService.getCurrentYear();
-  const footerLinks = NavigationService.getFooterLinks();
-  const socialLinks = NavigationService.getSocialLinks();
+interface FooterProps {
+  isDarkMode: boolean;
+}
 
-  // Définition des styles pour l'animation
-  const styles = `
-    .highlight-section {
-      animation: pulse-highlight 1.5s ease-out;
-    }
-
-    @keyframes pulse-highlight {
-      0% {
-        box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4);
-      }
-      50% {
-        box-shadow: 0 0 0 20px rgba(56, 189, 248, 0);
-      }
-      100% {
-        box-shadow: 0 0 0 0 rgba(56, 189, 248, 0);
-      }
-    }
-  `;
-
-  useEffect(() => {
-    // Injecter les styles dans le document
-    const styleElement = document.createElement('style');
-    styleElement.innerHTML = styles;
-    document.head.appendChild(styleElement);
-    
-    return () => {
-      // Nettoyer les styles à la destruction du composant
-      if (document.head.contains(styleElement)) {
-        document.head.removeChild(styleElement);
-      }
-    };
-  }, []);
-
+export function Footer({ isDarkMode }: FooterProps) {
   return (
-    <footer className="relative mt-20 border-primary/10 bg-black/90 backdrop-blur-xl">
-      {/* Effet de grille futuriste */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f0a_1px,transparent_1px)] bg-[size:30px] bg-[position:center] opacity-20" />
-      
-      <div className="container mx-auto px-4 py-12">
-        {/* Section principale */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+    <footer className={`relative py-12 ${isDarkMode ? "bg-black/50" : "bg-white/70"} backdrop-blur-xl`}>
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo et description */}
-          <div className="space-y-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-              className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-600 text-transparent bg-clip-text"
-            >
-              Logo ici
-            </motion.div>
-            <p className="text-gray-400 text-sm">
-              Propulsez votre gestion locative vers le futur avec notre plateforme innovante.
+          <div className="col-span-1 md:col-span-2">
+            <h3 className={`text-2xl font-bold mb-4 ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+              Maxiloc
+            </h3>
+            <p className={`${isDarkMode ? "text-gray-400" : "text-gray-600"} mb-4`}>
+              Votre partenaire de confiance pour la gestion locative intelligente.
             </p>
           </div>
 
-          {/* Liens */}
-          {footerLinks.map((group) => (
-            <div key={group.title} className="space-y-4">
-              <h3 className="text-white font-semibold">{group.title}</h3>
-              <ul className="space-y-2">
-                {group.links.map((link) => (
-                  <li key={link.name} className="relative w-full z-10">
-                    <a 
-                      href={link.href} 
-                      className="text-gray-400 hover:text-white transition-colors duration-200 text-sm flex items-center gap-1 group"
-                      onClick={(e) => NavigationService.handleInternalLink(e, link.href)}
-                    >
-                      {link.name}
-                      <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          {/* Liens rapides */}
+          <div>
+            <h4 className={`text-lg font-semibold mb-4 ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+              Liens Rapides
+            </h4>
+            <ul className="space-y-2">
+              <li>
+                <Link href="/features" className={`${isDarkMode ? "text-gray-400 hover:text-white" : "text-gray-600 hover:text-gray-900"} transition-colors`}>
+                  Fonctionnalités
+                </Link>
+              </li>
+              <li>
+                <Link href="/pricing" className={`${isDarkMode ? "text-gray-400 hover:text-white" : "text-gray-600 hover:text-gray-900"} transition-colors`}>
+                  Tarifs
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className={`${isDarkMode ? "text-gray-400 hover:text-white" : "text-gray-600 hover:text-gray-900"} transition-colors`}>
+                  Contact
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h4 className={`text-lg font-semibold mb-4 ${isDarkMode ? "text-white" : "text-gray-900"}`}>
+              Contact
+            </h4>
+            <ul className="space-y-2">
+              <li className={`${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                Email: contact@maxiloc.com
+              </li>
+              <li className={`${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                Tél: +33 1 23 45 67 89
+              </li>
+            </ul>
+          </div>
         </div>
 
-        {/* Barre sociale */}
-        <div className="mt-12 pt-8 border-t border-primary/10">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex space-x-4">
-              {socialLinks.map(({ icon, href, label }) => {
-                const Icon = icon === 'Facebook' ? Facebook :
-                           icon === 'Twitter' ? Twitter :
-                           icon === 'Instagram' ? Instagram :
-                           Mail;
-                return (
-                  <a
-                    key={label}
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-white transition-colors duration-200 flex items-center gap-1 group p-2 hover:scale-110"
-                    onClick={(e) => NavigationService.handleInternalLink(e, href)}
-                  >
-                    <Icon className="w-5 h-5" />
-                    <span className="sr-only">{label}</span>
-                  </a>
-                );
-              })}
+        {/* Mentions légales et accessibilité */}
+        <div className={`mt-12 pt-8 border-t ${isDarkMode ? "border-gray-800" : "border-gray-200"}`}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+              <Link href="/legal/mentions-legales" className={`text-sm ${isDarkMode ? "text-gray-400 hover:text-white" : "text-gray-600 hover:text-gray-900"} transition-colors`}>
+                Mentions légales
+              </Link>
+              <Link href="/legal/politique-confidentialite" className={`text-sm ${isDarkMode ? "text-gray-400 hover:text-white" : "text-gray-600 hover:text-gray-900"} transition-colors`}>
+                Politique de confidentialité
+              </Link>
+              <Link href="/legal/cgu" className={`text-sm ${isDarkMode ? "text-gray-400 hover:text-white" : "text-gray-600 hover:text-gray-900"} transition-colors`}>
+                CGU
+              </Link>
             </div>
-            <p className="text-gray-400 text-sm">
-              © {currentYear} MaxiLoc. Tous droits réservés.
-            </p>
+            <div className="flex justify-center md:justify-end">
+              <Link href="/legal/accessibilite" className={`text-sm ${isDarkMode ? "text-gray-400 hover:text-white" : "text-gray-600 hover:text-gray-900"} transition-colors`}>
+                Accessibilité : non conforme
+              </Link>
+            </div>
           </div>
+          <p className={`text-center mt-4 ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+            © {new Date().getFullYear()} Maxiloc. Tous droits réservés.
+          </p>
         </div>
       </div>
     </footer>
   );
-};
-
-export default Footer;
+} 
