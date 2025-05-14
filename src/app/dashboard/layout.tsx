@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Sidebar } from "@/components/Sidebar";
+import { Sidebar } from "@/components/sidebar";
 import { DashboardService } from "@/services/dashboardService";
 import { Button } from "@/components/ui/button";
 import { Menu, User, LogOut } from "lucide-react";

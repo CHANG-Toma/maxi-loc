@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "../../components/ui/button";
@@ -8,9 +8,11 @@ import { Input } from "../../components/ui/input";
 import { motion } from "framer-motion";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { login } from "../../lib/auth";
+import ReCAPTCHA from "react-google-recaptcha";
 
 export default function Login() {
   const router = useRouter();
+  const recaptchaRef = useRef<ReCAPTCHA>(null); // Référence pour le reCAPTCHA
   const [formData, setFormData] = useState({
     email: "",
     mot_de_passe: "",
@@ -31,6 +33,7 @@ export default function Login() {
   const [isBlocked, setIsBlocked] = useState(false);
   // État pour le temps de blocage
   const [blockTimeRemaining, setBlockTimeRemaining] = useState(0);
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
 
   const MAX_ATTEMPTS = 5;
   const BLOCK_DURATION = 15 * 60; // 15 minutes en secondes
@@ -95,10 +98,18 @@ export default function Login() {
       return;
     }
 
+    if (!recaptchaToken) {
+      setMessage("Veuillez valider le reCAPTCHA avant de continuer.");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const result = await login(formData);
+      const result = await login({
+        ...formData,
+        recaptchaToken
+      });
 
       if (result.success) {
         // Réinitialiser les tentatives en cas de succès
@@ -140,6 +151,9 @@ export default function Login() {
       setMessage("Une erreur est survenue lors de la connexion.");
     } finally {
       setIsLoading(false);
+      // Réinitialiser le reCAPTCHA après chaque tentative
+      recaptchaRef.current?.reset();
+      setRecaptchaToken(null);
     }
   };
 
@@ -154,6 +168,11 @@ export default function Login() {
         return newErrors;
       });
     }
+  };
+
+  // Gestion du changement du reCAPTCHA pour pouvoir valider la connexion
+  const handleRecaptchaChange = (token: string | null) => {
+    setRecaptchaToken(token);
   };
 
   return (
@@ -266,12 +285,20 @@ export default function Login() {
               </div>
             </div>
 
+            <div className="flex justify-center">
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''}
+                onChange={handleRecaptchaChange}
+              />
+            </div>
+
             <div>
               <Button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || !recaptchaToken}
                 className={`w-full bg-secondary text-gray-900 hover:bg-secondary/90 border border-gray-300 ${
-                  isLoading ? "opacity-50 cursor-not-allowed" : ""
+                  (isLoading || !recaptchaToken) ? "opacity-50 cursor-not-allowed" : ""
                 }`}
               >
                 {isLoading ? "Connexion en cours..." : "Se connecter"}

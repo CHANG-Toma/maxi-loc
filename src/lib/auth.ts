@@ -42,8 +42,26 @@ export async function logout() {
   }
 }
 
-export async function login(credentials: { email: string; mot_de_passe: string }) {
+export async function login(credentials: { email: string; mot_de_passe: string; recaptchaToken: string }) {
   try {
+    // Vérifier le reCAPTCHA
+    const recaptchaResponse = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${credentials.recaptchaToken}`,
+    });
+
+    const recaptchaData = await recaptchaResponse.json();
+
+    if (!recaptchaData.success) {
+      return {
+        success: false,
+        error: "Vérification reCAPTCHA échouée. Veuillez réessayer."
+      };
+    }
+
     // Chercher l'utilisateur avec l'email fourni
     const user = await prisma.utilisateur.findFirst({
       where: { email: credentials.email }
