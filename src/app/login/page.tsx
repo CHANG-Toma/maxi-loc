@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "../../components/ui/button";
@@ -15,15 +15,85 @@ export default function Login() {
     email: "",
     mot_de_passe: "",
   });
+  // État pour la visibilité du mot de passe
   const [showPassword, setShowPassword] = useState(false);
+  // État pour le message d'erreur
   const [message, setMessage] = useState("");
+  // État pour les erreurs de validation
   const [errors, setErrors] = useState<Record<string, string>>({});
+  // État pour le chargement
   const [isLoading, setIsLoading] = useState(false);
+  // État pour l'acceptation des CGU
   const [cguAccepted, setCguAccepted] = useState(false);
+  // État pour le nombre de tentatives
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  // État pour le blocage du compte
+  const [isBlocked, setIsBlocked] = useState(false);
+  // État pour le temps de blocage
+  const [blockTimeRemaining, setBlockTimeRemaining] = useState(0);
+
+  const MAX_ATTEMPTS = 5;
+  const BLOCK_DURATION = 15 * 60; // 15 minutes en secondes
+
+  useEffect(() => {
+    // Récupérer les tentatives stockées
+    const storedAttempts = localStorage.getItem('loginAttempts');
+    const lastAttemptTime = localStorage.getItem('lastAttemptTime');
+    
+    if (storedAttempts) {
+      // Récupérer les tentatives stockées
+      setLoginAttempts(parseInt(storedAttempts));
+    }
+    
+    // Si le temps de blocage est écoulé
+    if (lastAttemptTime) {
+      const timeSinceLastAttempt = Math.floor((Date.now() - parseInt(lastAttemptTime)) / 1000);
+      if (timeSinceLastAttempt < BLOCK_DURATION) {
+        setIsBlocked(true);
+        setBlockTimeRemaining(BLOCK_DURATION - timeSinceLastAttempt);
+      } else {
+        // Réinitialiser si le temps de blocage est écoulé
+        localStorage.removeItem('loginAttempts');
+        localStorage.removeItem('lastAttemptTime');
+        setLoginAttempts(0);
+        setIsBlocked(false);
+      }
+    }
+  }, []);
+
+  // Gestion du blocage du compte si trop de tentatives
+  // Max 5 tentatives si non c'est bloqué pour 15 minutes :)
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isBlocked && blockTimeRemaining > 0) {
+      timer = setInterval(() => {
+        // Décrémenter le temps de blocage
+        setBlockTimeRemaining(prev => {
+          // Si le temps de blocage est écoulé
+          if (prev <= 1) {
+            setIsBlocked(false);
+            localStorage.removeItem('loginAttempts');
+            localStorage.removeItem('lastAttemptTime');
+            setLoginAttempts(0);
+            return 0;
+          }
+          // Décrémenter le temps de blocage
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [isBlocked, blockTimeRemaining]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
+
+    if (isBlocked) {
+      // Afficher le message d'erreur si le compte est bloqué
+      setMessage(`Compte temporairement bloqué. Veuillez réessayer dans ${Math.ceil(blockTimeRemaining / 60)} minutes.`);
+      return;
+    }
 
     setIsLoading(true);
 
@@ -31,19 +101,39 @@ export default function Login() {
       const result = await login(formData);
 
       if (result.success) {
+        // Réinitialiser les tentatives en cas de succès
+        localStorage.removeItem('loginAttempts');
+        localStorage.removeItem('lastAttemptTime');
+        setLoginAttempts(0);
         setMessage("Connexion réussie !");
         router.push("/dashboard");
       } else {
-        if (result.details) {
-          // Gestion des erreurs de validation
-          const validationErrors: Record<string, string> = {};
-          result.details.forEach((error: any) => {
-            const field = error.path[0];
-            validationErrors[field] = error.message;
-          });
-          setErrors(validationErrors);
+        // Incrémenter le nombre de tentatives
+        const newAttempts = loginAttempts + 1;
+        setLoginAttempts(newAttempts);
+        localStorage.setItem('loginAttempts', newAttempts.toString());
+        localStorage.setItem('lastAttemptTime', Date.now().toString());
+
+        // Gestion des erreurs de validation
+        if (newAttempts >= MAX_ATTEMPTS) {
+          setIsBlocked(true);
+          setBlockTimeRemaining(BLOCK_DURATION);
+          setMessage(`Trop de tentatives échouées. Compte bloqué pour ${BLOCK_DURATION / 60} minutes.`);
         } else {
-          setMessage(result.error || "Erreur lors de la connexion.");
+          // Si il y a des erreurs de validation
+          if (result.details) {
+            const validationErrors: Record<string, string> = {};
+
+            // Ajouter les erreurs de validation dans le tableau d'erreurs pour pouvoir les afficher
+            result.details.forEach((error: any) => {
+              const field = error.path[0];
+              validationErrors[field] = error.message;
+            });
+            setErrors(validationErrors);
+          } else {
+            // Si il n'y a pas d'erreurs de validation et que le compte n'est pas bloqué alors on affiche le message d'erreur
+            setMessage(result.error || `Erreur lors de la connexion. Il vous reste ${MAX_ATTEMPTS - newAttempts} tentative(s).`);
+          }
         }
       }
     } catch (error) {
