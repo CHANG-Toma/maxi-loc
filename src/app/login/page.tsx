@@ -33,8 +33,11 @@ export default function Login() {
   const [isBlocked, setIsBlocked] = useState(false);
   // État pour le temps de blocage
   const [blockTimeRemaining, setBlockTimeRemaining] = useState(0);
+
+  // État pour le reCAPTCHA token
   const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
 
+  // Max 5 tentatives si non c'est bloqué pour 15 minutes :)
   const MAX_ATTEMPTS = 5;
   const BLOCK_DURATION = 15 * 60; // 15 minutes en secondes
 
@@ -98,6 +101,7 @@ export default function Login() {
       return;
     }
 
+    // Si le reCAPTCHA n'est pas validé alors on affiche le message d'erreur
     if (!recaptchaToken) {
       setMessage("Veuillez valider le reCAPTCHA avant de continuer.");
       return;
@@ -105,10 +109,11 @@ export default function Login() {
 
     setIsLoading(true);
 
+    // On tente de se connecter avec les informations de l'utilisateur
     try {
       const result = await login({
         ...formData,
-        recaptchaToken
+        recaptchaToken // On envoie le token du reCAPTCHA
       });
 
       if (result.success) {
@@ -285,6 +290,7 @@ export default function Login() {
               </div>
             </div>
 
+            {/* On affiche le reCAPTCHA pour pouvoir valider la connexion */}
             <div className="flex justify-center">
               <ReCAPTCHA
                 ref={recaptchaRef}

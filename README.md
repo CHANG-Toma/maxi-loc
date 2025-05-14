@@ -24,8 +24,9 @@ Notre solution offre une vision claire de la rentabilité de chaque bien, avec d
 - Déploiement: Vercel
 
 ## Logique utilisées
-- lib : Logique métier (getUser, newUser, ...)
-- api : traitement des données récupérées depuis lib (login, register, ...)
+- services : Logique métier (getUser, newUser, ...)
+- app : agit comme la view (MVC)
+- lib : agit comme un controleur (MVC)
 
 ## Auteurs et contributeurs
 
@@ -38,5 +39,24 @@ Ce projet est sous licence [MIT](LICENSE) - voir le fichier LICENSE pour plus de
 
 ## LOGIQUE UTILISÉE
 
+# Sécurisation du formulaire de connexion avec Google reCAPTCHA
 
+Pour protéger l’application contre les attaques automatisées (brute force, bots, DDoS), le formulaire de connexion utilise Google reCAPTCHA v2.
 
+Logique d’intégration :
+
+Affichage du reCAPTCHA :
+- Le composant reCAPTCHA s’affiche sur le formulaire de connexion. L’utilisateur doit le valider pour activer le bouton de connexion.
+
+- Récupération du token :
+Après validation, un token reCAPTCHA est généré côté client.
+
+Vérification côté serveur :
+- Lors de la soumission du formulaire, le token est envoyé au backend, qui le vérifie auprès de l’API Google reCAPTCHA grâce à la clé secrète.
+
+Connexion autorisée ou refusée :
+- Si le token est valide, la connexion se poursuit. Sinon, elle est refusée.
+
+Variables d’environnement nécessaires :
+- NEXT_PUBLIC_RECAPTCHA_SITE_KEY (clé publique, frontend)
+- RECAPTCHA_SECRET_KEY (clé secrète, backend)
