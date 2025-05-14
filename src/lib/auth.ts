@@ -34,4 +34,37 @@ export async function logout() {
     console.error("Erreur lors de la déconnexion:", error);
     return { success: false, error: "Erreur lors de la déconnexion" };
   }
+}
+
+export async function login(credentials: { email: string; mot_de_passe: string }) {
+  try {
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(credentials),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: data.error || 'Erreur lors de la connexion',
+        details: data.details
+      };
+    }
+
+    return {
+      success: true,
+      user: data.user
+    };
+  } catch (error) {
+    console.error("Erreur lors de la connexion:", error);
+    return {
+      success: false,
+      error: "Une erreur est survenue lors de la connexion"
+    };
+  }
 } 

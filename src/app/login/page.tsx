@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from 'next/link';
+import Link from "next/link";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { motion } from "framer-motion";
@@ -13,23 +13,25 @@ export default function Login() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     email: "",
-    mot_de_passe: ""
+    mot_de_passe: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [cguAccepted, setCguAccepted] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
+
     setIsLoading(true);
 
     try {
       const result = await login(formData);
 
       if (result.success) {
-        setMessage('Connexion réussie !');
+        setMessage("Connexion réussie !");
         router.push("/dashboard");
       } else {
         if (result.details) {
@@ -41,11 +43,11 @@ export default function Login() {
           });
           setErrors(validationErrors);
         } else {
-          setMessage(result.error || 'Erreur lors de la connexion.');
+          setMessage(result.error || "Erreur lors de la connexion.");
         }
       }
     } catch (error) {
-      setMessage('Une erreur est survenue lors de la connexion.');
+      setMessage("Une erreur est survenue lors de la connexion.");
     } finally {
       setIsLoading(false);
     }
@@ -53,10 +55,10 @@ export default function Login() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
     // Effacer l'erreur du champ quand l'utilisateur modifie sa valeur
     if (errors[name]) {
-      setErrors(prev => {
+      setErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors[name];
         return newErrors;
@@ -95,13 +97,22 @@ export default function Login() {
         <div className="bg-white py-8 px-4 shadow-sm rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {message && (
-              <div className={`p-3 rounded-md ${message.includes('réussie') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+              <div
+                className={`p-3 rounded-md ${
+                  message.includes("réussie")
+                    ? "bg-green-100 text-green-700"
+                    : "bg-red-100 text-red-700"
+                }`}
+              >
                 {message}
               </div>
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Email
               </label>
               <div className="mt-1">
@@ -112,7 +123,7 @@ export default function Login() {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className={`bg-white ${errors.email ? 'border-red-500' : ''}`}
+                  className={`bg-white ${errors.email ? "border-red-500" : ""}`}
                 />
                 {errors.email && (
                   <p className="mt-1 text-sm text-red-600">{errors.email}</p>
@@ -121,7 +132,10 @@ export default function Login() {
             </div>
 
             <div>
-              <label htmlFor="mot_de_passe" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="mot_de_passe"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Mot de passe
               </label>
               <div className="mt-1 relative">
@@ -132,9 +146,11 @@ export default function Login() {
                   required
                   value={formData.mot_de_passe}
                   onChange={handleChange}
-                  className={`bg-white ${errors.mot_de_passe ? 'border-red-500' : ''}`}
+                  className={`bg-white ${
+                    errors.mot_de_passe ? "border-red-500" : ""
+                  }`}
                 />
-                <div 
+                <div
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-600 cursor-pointer"
                 >
@@ -145,18 +161,22 @@ export default function Login() {
                   )}
                 </div>
                 {errors.mot_de_passe && (
-                  <p className="mt-1 text-sm text-red-600">{errors.mot_de_passe}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.mot_de_passe}
+                  </p>
                 )}
               </div>
             </div>
 
             <div>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={isLoading}
-                className={`w-full bg-secondary text-gray-900 hover:bg-secondary/90 border border-gray-300 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`w-full bg-secondary text-gray-900 hover:bg-secondary/90 border border-gray-300 ${
+                  isLoading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               >
-                {isLoading ? 'Connexion en cours...' : 'Se connecter'}
+                {isLoading ? "Connexion en cours..." : "Se connecter"}
               </Button>
             </div>
           </form>
