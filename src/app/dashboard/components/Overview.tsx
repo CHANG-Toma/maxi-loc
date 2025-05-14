@@ -1,4 +1,3 @@
-
 "use client"
 
 import { motion } from "framer-motion";
@@ -18,124 +17,200 @@ import {
   Tooltip,
   ResponsiveContainer
 } from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { OverviewService, DashboardStats, RevenusData, ReservationRecente } from "@/services/overviewService";
+import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
+
+interface Reservation {
+  id_reservation: number;
+  propriete: {
+    id_propriete: number;
+    nom: string;
+  };
+  date_debut: string;
+  date_fin: string;
+  id_statut_reservation: number;
+  prix_total: number;
+  montant_total?: number;
+  statut?: string;
+}
+
+interface Propriete {
+  id_propriete: number;
+  nom: string;
+  ville: string;
+  pays: string;
+  typePropriete: {
+    id_type_propriete: number;
+    libelle: string;
+  };
+  nb_pieces: number;
+}
+
+const formatNumber = (value: number | null): string => {
+  if (value === null || value === undefined) return '0';
+  return value.toLocaleString('fr-FR');
+};
 
 const Overview = () => {
-  const data = [
-    { month: "Jan", revenue: 4000 },
-    { month: "Fév", revenue: 3000 },
-    { month: "Mar", revenue: 5000 },
-    { month: "Avr", revenue: 2780 },
-    { month: "Mai", revenue: 6890 },
-    { month: "Jun", revenue: 2390 },
-  ];
+  const [stats, setStats] = useState<DashboardStats>({
+    revenus_mensuels: 0,
+    proprietes_actives: 0,
+    taux_occupation: 0,
+    reservations: 0,
+    variation_revenus: 0,
+    variation_proprietes: 0,
+    variation_occupation: 0,
+    variation_reservations: 0
+  });
+  const [revenusData, setRevenusData] = useState<RevenusData[]>([]);
+  const [reservationsRecentes, setReservationsRecentes] = useState<ReservationRecente[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const stats = [
-    {
-      title: "Revenus Mensuels",
-      value: "12,500€",
-      change: "+12%",
-      icon: <DollarSign className="w-4 h-4 text-gray-800" />,
-      trend: "up",
-    },
-    {
-      title: "Propriétés Actives",
-      value: "25",
-      change: "+2",
-      icon: <Building2 className="w-4 h-4 text-gray-800" />,
-      trend: "up",
-    },
-    {
-      title: "Taux d'Occupation",
-      value: "89%",
-      change: "+5%",
-      icon: <Users2 className="w-4 h-4 text-gray-800" />,
-      trend: "up",
-    },
-    {
-      title: "Réservations",
-      value: "156",
-      change: "+18",
-      icon: <Calendar className="w-4 h-4 text-gray-800" />,
-      trend: "up",
-    },
-  ];
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [dashboardStats, revenus, reservations] = await Promise.all([
+          OverviewService.getDashboardStats(),
+          OverviewService.getRevenusData(),
+          OverviewService.getReservationsRecentes()
+        ]);
+
+        setStats(dashboardStats);
+        setRevenusData(revenus);
+        setReservationsRecentes(reservations);
+      } catch (error) {
+        console.error("Erreur lors du chargement des données:", error);
+        // En cas d'erreur, on garde les valeurs par défaut
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
-    <>
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        {stats.map((stat, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm text-gray-800">{stat.title}</p>
-                <h3 className="text-2xl font-bold mt-2 text-gray-700">{stat.value}</h3>
-              </div>
-              <div className="p-2 bg-primary/10 rounded-lg text-primary">
-                {stat.icon}
-              </div>
+    <div className="space-y-8">
+      {/* Cartes statistiques */}
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <Card className="bg-white">
+          <CardContent className="p-6">
+            <div className="flex flex-col space-y-1">
+              <span className="text-sm text-gray-500">Revenus mensuels</span>
+              <span className="text-2xl font-bold">{formatNumber(stats.revenus_mensuels)} €</span>
+              <span className="text-xs text-green-500">+{formatNumber(stats.variation_revenus)}% vs le dernier mois</span>
             </div>
-            <div className="mt-4 flex items-center">
-              <span className={`text-sm ${stat.trend === 'up' ? 'text-green-500' : 'text-red-500'}`}>
-                {stat.change}
-              </span>
-              <span className="text-sm text-gray-500 ml-2">vs mois dernier</span>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white">
+          <CardContent className="p-6">
+            <div className="flex flex-col space-y-1">
+              <span className="text-sm text-gray-500">Propriétés Actives</span>
+              <span className="text-2xl font-bold">{formatNumber(stats.proprietes_actives)}</span>
+              <span className="text-xs text-green-500">+{formatNumber(stats.variation_proprietes)} vs le dernier mois</span>
             </div>
-          </motion.div>
-        ))}
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white">
+          <CardContent className="p-6">
+            <div className="flex flex-col space-y-1">
+              <span className="text-sm text-gray-500">Taux d'Occupation</span>
+              <span className="text-2xl font-bold">{formatNumber(stats.taux_occupation)}%</span>
+              <span className="text-xs text-green-500">+{formatNumber(stats.variation_occupation)}% vs le dernier mois</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white">
+          <CardContent className="p-6">
+            <div className="flex flex-col space-y-1">
+              <span className="text-sm text-gray-500">Réservations</span>
+              <span className="text-2xl font-bold">{formatNumber(stats.reservations)}</span>
+              <span className="text-xs text-green-500">+{formatNumber(stats.variation_reservations)} vs le dernier mois</span>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Chart Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white p-6 rounded-xl shadow-sm mb-6"
-      >
-        <h3 className="text-lg font-semibold mb-4 text-gray-800">Revenus Mensuels</h3>
-        <div className="h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="revenue" fill="#007AFF" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </motion.div>
-
-      {/* Recent Activity */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-xl p-6 shadow-sm"
-      >
-        <h3 className="text-lg font-semibold mb-4 text-gray-800">Activité Récente</h3>
-        <div className="space-y-4">
-          {[1, 2, 3].map((_, index) => (
-            <div key={index} className="flex items-center justify-between py-3 border-b last:border-0">
-              <div className="flex items-center space-x-4">
-                <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                  <Calendar className="w-5 h-5 text-gray-600" />
-                </div>
-                <div>
-                  <p className="font-medium text-gray-800">Nouvelle réservation</p>
-                  <p className="text-sm text-gray-500">Appartement Paris 15</p>
-                </div>
-              </div>
-              <span className="text-sm text-gray-500">Il y a 2h</span>
+      {/* Graphique des revenus mensuels */}
+      <Card className="bg-white">
+        <CardContent className="p-6">
+          <div className="flex flex-col space-y-4">
+            <h3 className="text-lg font-medium">Revenus mensuels</h3>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={revenusData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis 
+                    dataKey="mois" 
+                    axisLine={false}
+                    tickLine={false}
+                    fontSize={12}
+                    tickMargin={8}
+                  />
+                  <YAxis 
+                    axisLine={false}
+                    tickLine={false}
+                    fontSize={12}
+                    tickMargin={8}
+                    tickFormatter={(value) => formatNumber(value)}
+                  />
+                  <Tooltip 
+                    formatter={(value: number) => [formatNumber(value) + ' €', 'Revenus']}
+                    labelStyle={{ color: '#374151' }}
+                    contentStyle={{ 
+                      backgroundColor: 'white',
+                      border: '1px solid #E5E7EB',
+                      borderRadius: '6px',
+                      padding: '8px'
+                    }}
+                  />
+                  <Bar 
+                    dataKey="montant" 
+                    fill="#3B82F6"
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
-          ))}
-        </div>
-      </motion.div>
-    </>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Activité récente */}
+      <Card className="bg-white">
+        <CardContent className="p-6">
+          <div className="flex flex-col space-y-4">
+            <h3 className="text-lg font-medium">Activité récente</h3>
+            <div className="space-y-4">
+              {reservationsRecentes.map((reservation) => (
+                <div key={reservation.id} className="flex items-center space-x-4 border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                  <div className="p-2 bg-blue-50 rounded-full">
+                    <Calendar className="w-4 h-4 text-blue-500" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">Nouvelle réservation</span>
+                    <span className="text-sm text-gray-500">{reservation.propriete}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

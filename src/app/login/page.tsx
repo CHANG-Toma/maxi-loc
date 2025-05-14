@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from 'next/link';
+import Link from "next/link";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { motion } from "framer-motion";
@@ -13,39 +13,131 @@ export default function Login() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     email: "",
-    mot_de_passe: ""
+    mot_de_passe: "",
   });
+  // État pour la visibilité du mot de passe
   const [showPassword, setShowPassword] = useState(false);
+  // État pour le message d'erreur
   const [message, setMessage] = useState("");
+  // État pour les erreurs de validation
   const [errors, setErrors] = useState<Record<string, string>>({});
+  // État pour le chargement
   const [isLoading, setIsLoading] = useState(false);
+  // État pour l'acceptation des CGU
+  const [cguAccepted, setCguAccepted] = useState(false);
+  // État pour le nombre de tentatives
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  // État pour le blocage du compte
+  const [isBlocked, setIsBlocked] = useState(false);
+  // État pour le temps de blocage
+  const [blockTimeRemaining, setBlockTimeRemaining] = useState(0);
+
+  const MAX_ATTEMPTS = 5;
+  const BLOCK_DURATION = 15 * 60; // 15 minutes en secondes
+
+  useEffect(() => {
+    // Récupérer les tentatives stockées
+    const storedAttempts = localStorage.getItem('loginAttempts');
+    const lastAttemptTime = localStorage.getItem('lastAttemptTime');
+    
+    if (storedAttempts) {
+      // Récupérer les tentatives stockées
+      setLoginAttempts(parseInt(storedAttempts));
+    }
+    
+    // Si le temps de blocage est écoulé
+    if (lastAttemptTime) {
+      const timeSinceLastAttempt = Math.floor((Date.now() - parseInt(lastAttemptTime)) / 1000);
+      if (timeSinceLastAttempt < BLOCK_DURATION) {
+        setIsBlocked(true);
+        setBlockTimeRemaining(BLOCK_DURATION - timeSinceLastAttempt);
+      } else {
+        // Réinitialiser si le temps de blocage est écoulé
+        localStorage.removeItem('loginAttempts');
+        localStorage.removeItem('lastAttemptTime');
+        setLoginAttempts(0);
+        setIsBlocked(false);
+      }
+    }
+  }, []);
+
+  // Gestion du blocage du compte si trop de tentatives
+  // Max 5 tentatives si non c'est bloqué pour 15 minutes :)
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isBlocked && blockTimeRemaining > 0) {
+      timer = setInterval(() => {
+        // Décrémenter le temps de blocage
+        setBlockTimeRemaining(prev => {
+          // Si le temps de blocage est écoulé
+          if (prev <= 1) {
+            setIsBlocked(false);
+            localStorage.removeItem('loginAttempts');
+            localStorage.removeItem('lastAttemptTime');
+            setLoginAttempts(0);
+            return 0;
+          }
+          // Décrémenter le temps de blocage
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [isBlocked, blockTimeRemaining]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
+
+    if (isBlocked) {
+      // Afficher le message d'erreur si le compte est bloqué
+      setMessage(`Compte temporairement bloqué. Veuillez réessayer dans ${Math.ceil(blockTimeRemaining / 60)} minutes.`);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const result = await login(formData);
 
       if (result.success) {
-        setMessage('Connexion réussie !');
+        // Réinitialiser les tentatives en cas de succès
+        localStorage.removeItem('loginAttempts');
+        localStorage.removeItem('lastAttemptTime');
+        setLoginAttempts(0);
+        setMessage("Connexion réussie !");
         router.push("/dashboard");
       } else {
-        if (result.details) {
-          // Gestion des erreurs de validation
-          const validationErrors: Record<string, string> = {};
-          result.details.forEach((error: any) => {
-            const field = error.path[0];
-            validationErrors[field] = error.message;
-          });
-          setErrors(validationErrors);
+        // Incrémenter le nombre de tentatives
+        const newAttempts = loginAttempts + 1;
+        setLoginAttempts(newAttempts);
+        localStorage.setItem('loginAttempts', newAttempts.toString());
+        localStorage.setItem('lastAttemptTime', Date.now().toString());
+
+        // Gestion des erreurs de validation
+        if (newAttempts >= MAX_ATTEMPTS) {
+          setIsBlocked(true);
+          setBlockTimeRemaining(BLOCK_DURATION);
+          setMessage(`Trop de tentatives échouées. Compte bloqué pour ${BLOCK_DURATION / 60} minutes.`);
         } else {
-          setMessage(result.error || 'Erreur lors de la connexion.');
+          // Si il y a des erreurs de validation
+          if (result.details) {
+            const validationErrors: Record<string, string> = {};
+
+            // Ajouter les erreurs de validation dans le tableau d'erreurs pour pouvoir les afficher
+            result.details.forEach((error: any) => {
+              const field = error.path[0];
+              validationErrors[field] = error.message;
+            });
+            setErrors(validationErrors);
+          } else {
+            // Si il n'y a pas d'erreurs de validation et que le compte n'est pas bloqué alors on affiche le message d'erreur
+            setMessage(result.error || `Erreur lors de la connexion. Il vous reste ${MAX_ATTEMPTS - newAttempts} tentative(s).`);
+          }
         }
       }
     } catch (error) {
-      setMessage('Une erreur est survenue lors de la connexion.');
+      setMessage("Une erreur est survenue lors de la connexion.");
     } finally {
       setIsLoading(false);
     }
@@ -53,10 +145,10 @@ export default function Login() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
     // Effacer l'erreur du champ quand l'utilisateur modifie sa valeur
     if (errors[name]) {
-      setErrors(prev => {
+      setErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors[name];
         return newErrors;
@@ -95,13 +187,22 @@ export default function Login() {
         <div className="bg-white py-8 px-4 shadow-sm rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {message && (
-              <div className={`p-3 rounded-md ${message.includes('réussie') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+              <div
+                className={`p-3 rounded-md ${
+                  message.includes("réussie")
+                    ? "bg-green-100 text-green-700"
+                    : "bg-red-100 text-red-700"
+                }`}
+              >
                 {message}
               </div>
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Email
               </label>
               <div className="mt-1">
@@ -112,7 +213,7 @@ export default function Login() {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className={`bg-white ${errors.email ? 'border-red-500' : ''}`}
+                  className={`bg-white ${errors.email ? "border-red-500" : ""}`}
                 />
                 {errors.email && (
                   <p className="mt-1 text-sm text-red-600">{errors.email}</p>
@@ -121,7 +222,10 @@ export default function Login() {
             </div>
 
             <div>
-              <label htmlFor="mot_de_passe" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="mot_de_passe"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Mot de passe
               </label>
               <div className="mt-1 relative">
@@ -132,9 +236,11 @@ export default function Login() {
                   required
                   value={formData.mot_de_passe}
                   onChange={handleChange}
-                  className={`bg-white ${errors.mot_de_passe ? 'border-red-500' : ''}`}
+                  className={`bg-white ${
+                    errors.mot_de_passe ? "border-red-500" : ""
+                  }`}
                 />
-                <div 
+                <div
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-600 cursor-pointer"
                 >
@@ -145,18 +251,30 @@ export default function Login() {
                   )}
                 </div>
                 {errors.mot_de_passe && (
-                  <p className="mt-1 text-sm text-red-600">{errors.mot_de_passe}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.mot_de_passe}
+                  </p>
                 )}
+              </div>
+              <div className="flex justify-end mt-2">
+                <Link
+                  href="/forgotpassword"
+                  className="text-sm text-gray-600 hover:text-gray-900"
+                >
+                  Mot de passe oublié ?
+                </Link>
               </div>
             </div>
 
             <div>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={isLoading}
-                className={`w-full bg-secondary text-gray-900 hover:bg-secondary/90 border border-gray-300 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`w-full bg-secondary text-gray-900 hover:bg-secondary/90 border border-gray-300 ${
+                  isLoading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
               >
-                {isLoading ? 'Connexion en cours...' : 'Se connecter'}
+                {isLoading ? "Connexion en cours..." : "Se connecter"}
               </Button>
             </div>
           </form>

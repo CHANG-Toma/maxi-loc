@@ -8,6 +8,7 @@ import { Input } from "../../components/ui/input";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { createUtilisateur } from "../../lib/utilisateur";
+import { Checkbox } from "../../components/ui/checkbox";
 
 export default function Signup() {
   const router = useRouter();
@@ -21,10 +22,17 @@ export default function Signup() {
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [cguAccepted, setCguAccepted] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
+    
+    if (!cguAccepted) {
+      setMessage("Vous devez accepter les CGU pour continuer");
+      return;
+    }
+    
     setIsLoading(true);
 
     try {
@@ -233,6 +241,21 @@ export default function Signup() {
               </div>
             </div>
 
+            <div className="flex items-center space-x-2 mt-4">
+              <Checkbox
+                id="cgu"
+                checked={cguAccepted}
+                onCheckedChange={(checked) => setCguAccepted(checked as boolean)}
+                className="border-gray-400 data-[state=checked]:bg-gray-900 data-[state=checked]:border-gray-900 hover:border-gray-900"
+              />
+              <label
+                htmlFor="cgu"
+                className="text-sm text-gray-900"
+              >
+                En cochant cette case vous acceptez nos CGU
+              </label>
+            </div>
+
             <div>
               <Button
                 type="submit"
@@ -242,6 +265,7 @@ export default function Signup() {
                 {isLoading ? 'Création en cours...' : "S'inscrire"}
               </Button>
             </div>
+
           </form>
 
           <div className="mt-6">

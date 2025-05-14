@@ -32,9 +32,22 @@ export async function getCharges() {
         }
       },
       include: {
-        propriete: true,
-        typeCharge: true,
+        propriete: {
+          select: {
+            id_propriete: true,
+            nom: true
+          }
+        },
+        typeCharge: {
+          select: {
+            id_type_charge: true,
+            libelle: true
+          }
+        }
       },
+      orderBy: {
+        date_paiement: 'desc'
+      }
     });
 
     const formattedCharges = charges.map(charge => ({
@@ -177,5 +190,24 @@ export async function deleteCharge(id: number) {
   } catch (error) {
     console.error("Erreur lors de la suppression de la charge:", error);
     return { success: false, error: "Une erreur est survenue lors de la suppression de la charge" };
+  }
+}
+
+export async function getTypeCharges() {
+  try {
+    const typeCharges = await prisma.typeCharge.findMany({
+      select: {
+        id_type_charge: true,
+        libelle: true
+      },
+      orderBy: {
+        id_type_charge: 'asc'
+      }
+    });
+
+    return { success: true, typeCharges };
+  } catch (error) {
+    console.error("Erreur lors de la récupération des types de charges:", error);
+    return { success: false, error: "Une erreur est survenue lors de la récupération des types de charges" };
   }
 }

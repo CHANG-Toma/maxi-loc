@@ -1,84 +1,121 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Home,
   Building2,
   Calendar,
-  Users2,
-  CreditCard,
+  DollarSign,
   BarChart3,
   Settings,
+  LogOut,
+  User,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { DashboardService } from "@/services/dashboardService";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-const navigationItems = [
-  { icon: <Home className="w-5 h-5" />, label: "Accueil", path: "/dashboard" },
-  {
-    icon: <Building2 className="w-5 h-5" />,
-    label: "Propriétés",
-    path: "/dashboard/proprietes",
-  },
-  {
-    icon: <CreditCard className="w-5 h-5" />,
-    label: "Charges",
-    path: "/dashboard/charges",
-  },
-  {
-    icon: <Calendar className="w-5 h-5" />,
-    label: "Réservations",
-    path: "/dashboard/reservations",
-  },
-  {
-    icon: <BarChart3 className="w-5 h-5" />,
-    label: "Rapports",
-    path: "/dashboard/rapports",
-  },
-  {
-    icon: <Settings className="w-5 h-5" />,
-    label: "Paramètres",
-    path: "/dashboard/parametres",
-  },
-];
+const getIconComponent = (iconName: string) => {
+  switch (iconName) {
+    case 'Home':
+      return <Home className="w-5 h-5" />;
+    case 'Building2':
+      return <Building2 className="w-5 h-5" />;
+    case 'Calendar':
+      return <Calendar className="w-5 h-5" />;
+    case 'DollarSign':
+      return <DollarSign className="w-5 h-5" />;
+    case 'BarChart3':
+      return <BarChart3 className="w-5 h-5" />;
+    case 'Settings':
+      return <Settings className="w-5 h-5" />;
+    default:
+      return null;
+  }
+};
 
-export function Sidebar({ 
-  isSidebarOpen, 
-  setIsSidebarOpen 
-}: { 
-  isSidebarOpen: boolean, 
-  setIsSidebarOpen?: (open: boolean) => void 
-}) {
+interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+  navigationItems: ReturnType<typeof DashboardService.getNavigationItems>;
+  userMenuItems: ReturnType<typeof DashboardService.getUserMenuItems>;
+  onLogout: () => void;
+}
+
+export function Sidebar({
+  isOpen,
+  onClose,
+  navigationItems,
+  userMenuItems,
+  onLogout,
+}: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
 
   return (
-    <motion.div
-      initial={{ width: "64px" }}
-      animate={{ 
-        width: isSidebarOpen ? "16rem" : "64px" 
-      }}
-      className="bg-white border-r border-gray-200 fixed h-full z-30 overflow-hidden transition-all duration-300"
+    <div
+      className={cn(
+        "fixed inset-y-0 left-0 z-50 bg-white border-r border-gray-200 transition-all duration-300",
+        isOpen ? "w-64" : "w-16"
+      )}
     >
-      <div className="p-4">
-        <h2 className={`text-xl font-bold text-gray-800 mb-6 ${isSidebarOpen ? 'block' : 'hidden'}`}>MaxiLoc</h2>
-        <nav className="space-y-2">
-          {navigationItems.map((item, index) => (
-            <Link
-              key={index}
-              href={item.path}
-              className={`flex items-center ${isSidebarOpen ? 'space-x-3' : 'justify-center'} text-gray-600 hover:text-gray-700 hover:bg-gray-50 w-full p-2 rounded-lg transition-colors ${
-                pathname === item.path ? "bg-gray-100 text-gray-900" : ""
-              }`}
-              title={isSidebarOpen ? "" : item.label}
-            >
-              {item.icon}
-              <span className={isSidebarOpen ? "block" : "hidden"}>{item.label}</span>
-            </Link>
+      <div className="flex flex-col h-full">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <h1 className={cn(
+            "font-semibold text-gray-900 transition-all duration-300",
+            isOpen ? "text-xl opacity-100" : "text-sm opacity-0"
+          )}>
+            Maxiloc
+          </h1>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="flex items-center justify-center hover:bg-gray-100"
+          >
+            {isOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+          </Button>
+        </div>
+
+        <nav className="flex-1 overflow-y-auto p-2">
+          {navigationItems.map((item) => (
+            <TooltipProvider key={item.path}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className={cn(
+                      "w-full gap-3 mb-1 h-12 text-gray-900",
+                      pathname === item.path
+                        ? "bg-black text-white hover:bg-black/90"
+                        : "hover:bg-gray-100",
+                      isOpen ? "justify-start px-4" : "justify-center px-0"
+                    )}
+                    onClick={() => router.push(item.path)}
+                  >
+                    <div className={cn("min-w-[20px] flex justify-center")}>
+                      {getIconComponent(item.icon)}
+                    </div>
+                    {isOpen && <span className="font-medium">{item.label}</span>}
+                  </Button>
+                </TooltipTrigger>
+                {!isOpen && (
+                  <TooltipContent side="right">
+                    <p>{item.label}</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
           ))}
         </nav>
       </div>
-    </motion.div>
+    </div>
   );
 }
 

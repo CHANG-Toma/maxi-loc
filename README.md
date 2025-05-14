@@ -35,3 +35,8 @@ Notre solution offre une vision claire de la rentabilité de chaque bien, avec d
 
 Ce projet est sous licence [MIT](LICENSE) - voir le fichier LICENSE pour plus de détails.
 
+
+## LOGIQUE UTILISÉE
+
+
+

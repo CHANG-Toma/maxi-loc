@@ -5,38 +5,12 @@ import Link from "next/link";
 import { Facebook, Twitter, Instagram, Mail, ExternalLink } from "lucide-react";
 import { Button } from "./ui/button";
 import { useEffect } from "react";
+import { NavigationService } from "@/services/navigationService";
 
 const Footer = () => {
-  const currentYear = new Date().getFullYear();
-
-  const footerLinks = [
-    {
-      title: "Légal",
-      links: [
-        { name: "Mentions Légales", href: "/legal/mentions-legales" },
-        { name: "Politique de Confidentialité", href: "/legal/privacy" },
-        { name: "Politique des Cookies", href: "/legal/cookies" },
-        { name: "Conformité RGPD", href: "/legal/rgpd" },
-        { name: "Déclaration CNIL", href: "/legal/cnil" },
-      ],
-    },
-    {
-      title: "Entreprise",
-      links: [
-        { name: "Accueil", href: "#hero" },
-        { name: "Fonctionnalités", href: "#features" },
-        { name: "Services", href: "#dashboard" },
-        { name: "Contact", href: "#contact" },
-      ],
-    },
-  ];
-
-  const socialLinks = [
-    { Icon: Facebook, href: "https://www.facebook.com", label: "Facebook" },
-    { Icon: Twitter, href: "https://www.twitter.com", label: "Twitter" },
-    { Icon: Instagram, href: "https://www.instagram.com", label: "Instagram" },
-    { Icon: Mail, href: "mailto:toma11chang@gmail.com", label: "Email" },
-  ];
+  const currentYear = NavigationService.getCurrentYear();
+  const footerLinks = NavigationService.getFooterLinks();
+  const socialLinks = NavigationService.getSocialLinks();
 
   // Définition des styles pour l'animation
   const styles = `
@@ -104,28 +78,7 @@ const Footer = () => {
                     <a 
                       href={link.href} 
                       className="text-gray-400 hover:text-white transition-colors duration-200 text-sm flex items-center gap-1 group"
-                      onClick={(e) => {
-                        // Vérifier si le lien commence par un # (lien interne)
-                        if (link.href.startsWith('#')) {
-                          e.preventDefault();
-                          const targetId = link.href.substring(1);
-                          const targetElement = document.getElementById(targetId);
-                          
-                          if (targetElement) {
-                            // Animation de scroll douce
-                            window.scrollTo({
-                              top: targetElement.offsetTop,
-                              behavior: 'smooth'
-                            });
-                            
-                            // Animation visuelle supplémentaire
-                            targetElement.classList.add('highlight-section');
-                            setTimeout(() => {
-                              targetElement.classList.remove('highlight-section');
-                            }, 1500);
-                          }
-                        }
-                      }}
+                      onClick={(e) => NavigationService.handleInternalLink(e, link.href)}
                     >
                       {link.name}
                       <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -141,40 +94,25 @@ const Footer = () => {
         <div className="mt-12 pt-8 border-t border-primary/10">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex space-x-4">
-              {socialLinks.map(({ Icon, href, label }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-white transition-colors duration-200 flex items-center gap-1 group p-2 hover:scale-110"
-                  onClick={(e) => {
-                    // Vérifier si le lien commence par un # (lien interne)
-                    if (href.startsWith('#')) {
-                      e.preventDefault();
-                      const targetId = href.substring(1);
-                      const targetElement = document.getElementById(targetId);
-                      
-                      if (targetElement) {
-                        // Animation de scroll douce
-                        window.scrollTo({
-                          top: targetElement.offsetTop,
-                          behavior: 'smooth'
-                        });
-                        
-                        // Animation visuelle supplémentaire
-                        targetElement.classList.add('highlight-section');
-                        setTimeout(() => {
-                          targetElement.classList.remove('highlight-section');
-                        }, 1500);
-                      }
-                    }
-                  }}
-                >
-                  <Icon className="w-5 h-5" />
-                  <span className="sr-only">{label}</span>
-                </a>
-              ))}
+              {socialLinks.map(({ icon, href, label }) => {
+                const Icon = icon === 'Facebook' ? Facebook :
+                           icon === 'Twitter' ? Twitter :
+                           icon === 'Instagram' ? Instagram :
+                           Mail;
+                return (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-400 hover:text-white transition-colors duration-200 flex items-center gap-1 group p-2 hover:scale-110"
+                    onClick={(e) => NavigationService.handleInternalLink(e, href)}
+                  >
+                    <Icon className="w-5 h-5" />
+                    <span className="sr-only">{label}</span>
+                  </a>
+                );
+              })}
             </div>
             <p className="text-gray-400 text-sm">
               © {currentYear} MaxiLoc. Tous droits réservés.
