@@ -1,5 +1,7 @@
 "use server"
 
+// Backend pour la gestion des utilisateurs et des sessions
+
 import { prisma } from "@/lib/prisma";
 import { Utilisateur } from "@prisma/client";
 import bcrypt from "bcryptjs";
@@ -14,8 +16,6 @@ const commonPasswords = new Set([
   'qwerty',
   'admin',
   'welcome',
-  'letmein',
-  // ... ajouter d'autres mots de passe courants
 ]);
 
 // Fonction pour vérifier la force du mot de passe
@@ -28,28 +28,29 @@ function validatePasswordStrength(password: string): { valid: boolean; message: 
   const hasNoSpaces = !/\s/.test(password);
   const hasNoSequentialChars = !/(.)\1{2,}/.test(password);
 
-  if (password.length < minLength) {
+  if (password.length < minLength) { // Vérifie si le mot de passe est assez long
     return { valid: false, message: `Le mot de passe doit contenir au moins ${minLength} caractères` };
   }
-  if (!hasUpperCase) {
+  if (!hasUpperCase) { // Vérifie si le mot de passe contient une majuscule
     return { valid: false, message: "Le mot de passe doit contenir au moins une majuscule" };
   }
-  if (!hasLowerCase) {
+  if (!hasLowerCase) { // Vérifie si le mot de passe contient une minuscule
     return { valid: false, message: "Le mot de passe doit contenir au moins une minuscule" };
   }
-  if (!hasNumbers) {
+  if (!hasNumbers) { // Vérifie si le mot de passe contient un chiffre
     return { valid: false, message: "Le mot de passe doit contenir au moins un chiffre" };
   }
-  if (!hasSpecialChar) {
+  if (!hasSpecialChar) { // Vérifie si le mot de passe contient un caractère spécial
     return { valid: false, message: "Le mot de passe doit contenir au moins un caractère spécial" };
   }
-  if (!hasNoSpaces) {
+  if (!hasNoSpaces) { // Vérifie si le mot de passe ne contient pas d'espaces
     return { valid: false, message: "Le mot de passe ne doit pas contenir d'espaces" };
   }
-  if (!hasNoSequentialChars) {
+  if (!hasNoSequentialChars) { // Vérifie si le mot de passe ne contient pas de caractères répétés
     return { valid: false, message: "Le mot de passe ne doit pas contenir de caractères répétés" };
   }
 
+  // Si toutes les conditions sont remplies, le mot de passe est valide
   return { valid: true, message: "Mot de passe valide" };
 }
 
@@ -148,18 +149,22 @@ export async function createUtilisateur(data: CreateUtilisateurData) {
   }
 }
 
+// Mise à jour du profil de l'utilisateur
 export async function updateProfile(id: string, utilisateur: Partial<CreateUtilisateurData>) {
   try {
     let userId: number;
 
+    // Récupérer l'ID de l'utilisateur connecté
     if (id === "current") {
       const cookieStore = await cookies();
       const sessionToken = cookieStore.get("session")?.value;
       
+      // Vérifier si la session est valide
       if (!sessionToken) {
         return { success: false, error: "Vous devez être connecté pour modifier votre profil" };
       }
 
+      // Valider la session
       const user = await validateSession(sessionToken);
       if (!user) {
         return { success: false, error: "Votre session a expiré, veuillez vous reconnecter" };
@@ -175,6 +180,7 @@ export async function updateProfile(id: string, utilisateur: Partial<CreateUtili
 
     const validatedData = utilisateurSchema.partial().parse(utilisateur);
 
+    // Mettre à jour les données de l'utilisateur en appelant la fonction update de prisma
     const updatedUser = await prisma.utilisateur.update({
       where: { id_utilisateur: userId },
       data: validatedData,
@@ -187,6 +193,7 @@ export async function updateProfile(id: string, utilisateur: Partial<CreateUtili
       }
     });
 
+    // Retourner les données mises à jour
     return { 
       success: true, 
       message: "Votre profil a été mis à jour avec succès",
@@ -201,6 +208,7 @@ export async function updateProfile(id: string, utilisateur: Partial<CreateUtili
         details: error.errors.map(err => err.message).join(", ")
       };
     }
+    // Gestion des erreurs
     return { 
       success: false, 
       error: "Une erreur est survenue lors de la mise à jour de votre profil. Veuillez réessayer plus tard." 
@@ -208,6 +216,7 @@ export async function updateProfile(id: string, utilisateur: Partial<CreateUtili
   }
 }
 
+// Mise à jour du mot de passe de l'utilisateur
 export async function updatePassword(
   currentPassword: string,
   newPassword: string,

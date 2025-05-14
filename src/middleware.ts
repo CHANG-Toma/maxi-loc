@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 // Routes qui nécessitent une redirection si l'utilisateur est déjà connecté
-const authRoutes = ["/login", "/signup"];
+const authRoutes = ["/login", "/signup", "/forgotpassword", "/reset-password"];
 
 // Permet de vérifier la session de l'utilisateur
 export function middleware(request: NextRequest) {
