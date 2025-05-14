@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Save,
@@ -29,29 +29,25 @@ import {
   PasswordData,
   Feedback,
 } from "@/services/parametreService";
-
-// Fonction utilitaire pour récupérer un cookie
-function getCookie(name: string): string | undefined {
-  if (typeof document === "undefined") return undefined;
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(";").shift();
-  return undefined;
-}
+import { useSession } from "@/components/providers/SessionProvider";
 
 export default function SettingsPage() {
-  // État pour les données du profil
+  // useSession pour charger les données de l'utilisateur
+  const { user, loading } = useSession();
+
+  if (loading) return <div>Chargement...</div>;
+  if (!user) return <div>Session invalide, veuillez vous reconnecter</div>;
+
+  // État pour les données du profil, initialisé avec les infos du user
   const [profile, setProfile] = useState<ProfileData>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
+    firstName: user.prenom || "",
+    lastName: user.nom || "",
+    email: user.email || "",
+    phone: user.telephone || "",
   });
 
   // État pour suivre les modifications
-  const [modifiedFields, setModifiedFields] = useState<Record<string, string>>(
-    {}
-  );
+  const [modifiedFields, setModifiedFields] = useState<Record<string, string>>({});
 
   // État pour les messages de feedback
   const [feedback, setFeedback] = useState<Feedback>({
@@ -72,49 +68,12 @@ export default function SettingsPage() {
     message: "",
   });
 
-  // État pour suivre si l'utilisateur est connecté
-  const [isLoading, setIsLoading] = useState(true);
-
   // État pour la visibilité des mots de passe
   const [passwordVisibility, setPasswordVisibility] = useState({
     currentPassword: false,
     newPassword: false,
     confirmPassword: false,
   });
-
-  // Charger les données de l'utilisateur au montage du composant
-  useEffect(() => {
-    const loadUserData = async () => {
-      try {
-        setIsLoading(true);
-        const sessionToken = getCookie("session");
-        const result = await ParametreService.loadUserData(sessionToken);
-
-        if (result.success && result.profile) {
-          setProfile(result.profile);
-        } else {
-          setFeedback({
-            type: "error",
-            message: result.error || "Erreur lors du chargement des données",
-          });
-        }
-      } catch (error) {
-        console.error(
-          "Erreur lors du chargement des données utilisateur:",
-          error
-        );
-        setFeedback({
-          type: "error",
-          message:
-            "Erreur lors du chargement de vos données. Veuillez rafraîchir la page.",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadUserData();
-  }, []);
 
   // Fonction pour mettre à jour un champ
   const handleFieldChange = (field: string, value: string) => {
@@ -126,24 +85,23 @@ export default function SettingsPage() {
   const handleSave = async () => {
     try {
       const result = await ParametreService.updateProfile(modifiedFields);
-
       if (result.success) {
         setProfile((prev) => ({ ...prev, ...modifiedFields }));
         setModifiedFields({});
         setFeedback({
           type: "success",
-          message:
-            result.message || "Votre profil a été mis à jour avec succès",
+          message: result.message || "Votre profil a été mis à jour avec succès",
         });
       } else {
+        // Afficher le message d'erreur
         setFeedback({
           type: "error",
-          message:
-            result.error || "Une erreur est survenue lors de la sauvegarde",
+          message: result.error || "Une erreur est survenue lors de la sauvegarde",
         });
       }
-    } catch (error) {
-      console.error("Erreur lors de la sauvegarde:", error);
+    } 
+    // Afficher le message d'erreur
+    catch (error) {
       setFeedback({
         type: "error",
         message: "Une erreur inattendue est survenue. Veuillez réessayer.",
@@ -245,19 +203,6 @@ export default function SettingsPage() {
       },
     },
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[600px]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
-          <p className="text-gray-500 animate-pulse">
-            Chargement de vos paramètres...
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <motion.div

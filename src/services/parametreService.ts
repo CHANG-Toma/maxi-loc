@@ -1,5 +1,6 @@
 import { updateProfile, updatePassword } from "@/lib/utilisateur";
 import { validateSession } from "@/lib/session";
+import { getCookie } from "@/lib/cookie";
 
 export interface ProfileData {
   firstName: string;
@@ -14,12 +15,16 @@ export interface PasswordData {
   confirmPassword: string;
 }
 
+// Interface pour les messages de feedback
 export interface Feedback {
   type: "success" | "error" | null;
   message: string;
 }
 
+// Service pour la gestion des paramètres de l'utilisateur
 export class ParametreService {
+
+  // Fonction pour charger les données de l'utilisateur
   static async loadUserData(sessionToken: string | undefined): Promise<{
     success: boolean;
     profile?: ProfileData;
@@ -27,10 +32,10 @@ export class ParametreService {
     message?: string;
   }> {
     try {
-      if (!sessionToken) {
+      if (sessionToken === undefined) {
         return {
           success: false,
-          error: "Session invalide"
+          error: "Session invalide, veuillez vous reconnecter"
         };
       }
 
@@ -38,7 +43,7 @@ export class ParametreService {
       if (!user) {
         return {
           success: false,
-          error: "Session expirée"
+          error: "Session invalide"
         };
       }
 

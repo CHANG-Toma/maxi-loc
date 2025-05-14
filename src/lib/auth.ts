@@ -6,15 +6,17 @@ import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
 import bcrypt from "bcryptjs";
 
+// Fonction pour récupérer l'utilisateur connecté
 export async function getCurrentUser() {
   try {
-    const cookieStore = cookies();
-    const sessionToken = cookieStore.get("session")?.value;
+    const cookieStore = await cookies(); // Récupérer le cookie de session
+    const sessionToken = cookieStore.get("session")?.value; // Récupérer le token de session
     
     if (!sessionToken) {
       return null;
     }
 
+    // Valider la session et retourner l'utilisateur
     return await validateSession(sessionToken);
   } catch (error) {
     console.error("Erreur lors de la récupération de l'utilisateur:", error);
@@ -22,16 +24,17 @@ export async function getCurrentUser() {
   }
 }
 
+// Fonction de déconnexion
 export async function logout() {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const sessionToken = cookieStore.get("session")?.value;
     
-    if (sessionToken) {
+    if (sessionToken) { // Vérifier si le token de session existe
       await deleteSession(sessionToken);
     }
     
-    cookieStore.delete("session");
+    await cookieStore.delete("session"); // Supprimer le cookie de session
     return { success: true };
   } catch (error) {
     console.error("Erreur lors de la déconnexion:", error);
@@ -41,10 +44,12 @@ export async function logout() {
 
 export async function login(credentials: { email: string; mot_de_passe: string }) {
   try {
+    // Chercher l'utilisateur avec l'email fourni
     const user = await prisma.utilisateur.findFirst({
       where: { email: credentials.email }
-    });
+    }); 
 
+    // Vérifier si l'utilisateur existe et si le mot de passe est correct
     if (!user || !user.mot_de_passe) {
       return {
         success: false,
@@ -52,6 +57,7 @@ export async function login(credentials: { email: string; mot_de_passe: string }
       };
     }
 
+    // Vérifier si le mot de passe est correct
     const isValid = await bcrypt.compare(credentials.mot_de_passe, user.mot_de_passe);
 
     if (!isValid) {
@@ -61,10 +67,11 @@ export async function login(credentials: { email: string; mot_de_passe: string }
       };
     }
 
-    // Créer une session
-    const sessionToken = crypto.randomUUID();
+    // Créer une session avec un cookie pour 7 jours
+    const sessionToken = crypto.randomUUID(); // Générer un token de session
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 jours
 
+    // Créer une session dans la base de données
     await prisma.session.create({
       data: {
         token: sessionToken,
@@ -74,8 +81,8 @@ export async function login(credentials: { email: string; mot_de_passe: string }
     });
 
     // Définir le cookie de session
-    const cookieStore = cookies();
-    cookieStore.set("session", sessionToken, {
+    const cookieStore = await cookies();
+    await cookieStore.set("session", sessionToken, {
       expires: expiresAt,
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -101,6 +108,7 @@ export async function login(credentials: { email: string; mot_de_passe: string }
   }
 }
 
+// Fonction en cas d'oublie du mot de passe
 export async function forgotPassword(email: string) {
   try {
     // Vérifier si l'utilisateur existe

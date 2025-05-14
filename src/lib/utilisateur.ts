@@ -1,4 +1,4 @@
-"use server"
+"use server";
 
 // Backend pour la gestion des utilisateurs et des sessions
 
@@ -11,15 +11,18 @@ import { validateSession } from "@/lib/session";
 
 // Liste de mots de passe courants
 const commonPasswords = new Set([
-  'password',
-  '123456',
-  'qwerty',
-  'admin',
-  'welcome',
+  "password",
+  "123456",
+  "qwerty",
+  "admin",
+  "welcome",
 ]);
 
 // Fonction pour vérifier la force du mot de passe
-function validatePasswordStrength(password: string): { valid: boolean; message: string } {
+function validatePasswordStrength(password: string): {
+  valid: boolean;
+  message: string;
+} {
   const minLength = 12;
   const hasUpperCase = /[A-Z]/.test(password);
   const hasLowerCase = /[a-z]/.test(password);
@@ -28,26 +31,54 @@ function validatePasswordStrength(password: string): { valid: boolean; message: 
   const hasNoSpaces = !/\s/.test(password);
   const hasNoSequentialChars = !/(.)\1{2,}/.test(password);
 
-  if (password.length < minLength) { // Vérifie si le mot de passe est assez long
-    return { valid: false, message: `Le mot de passe doit contenir au moins ${minLength} caractères` };
+  if (password.length < minLength) {
+    // Vérifie si le mot de passe est assez long
+    return {
+      valid: false,
+      message: `Le mot de passe doit contenir au moins ${minLength} caractères`,
+    };
   }
-  if (!hasUpperCase) { // Vérifie si le mot de passe contient une majuscule
-    return { valid: false, message: "Le mot de passe doit contenir au moins une majuscule" };
+  if (!hasUpperCase) {
+    // Vérifie si le mot de passe contient une majuscule
+    return {
+      valid: false,
+      message: "Le mot de passe doit contenir au moins une majuscule",
+    };
   }
-  if (!hasLowerCase) { // Vérifie si le mot de passe contient une minuscule
-    return { valid: false, message: "Le mot de passe doit contenir au moins une minuscule" };
+  if (!hasLowerCase) {
+    // Vérifie si le mot de passe contient une minuscule
+    return {
+      valid: false,
+      message: "Le mot de passe doit contenir au moins une minuscule",
+    };
   }
-  if (!hasNumbers) { // Vérifie si le mot de passe contient un chiffre
-    return { valid: false, message: "Le mot de passe doit contenir au moins un chiffre" };
+  if (!hasNumbers) {
+    // Vérifie si le mot de passe contient un chiffre
+    return {
+      valid: false,
+      message: "Le mot de passe doit contenir au moins un chiffre",
+    };
   }
-  if (!hasSpecialChar) { // Vérifie si le mot de passe contient un caractère spécial
-    return { valid: false, message: "Le mot de passe doit contenir au moins un caractère spécial" };
+  if (!hasSpecialChar) {
+    // Vérifie si le mot de passe contient un caractère spécial
+    return {
+      valid: false,
+      message: "Le mot de passe doit contenir au moins un caractère spécial",
+    };
   }
-  if (!hasNoSpaces) { // Vérifie si le mot de passe ne contient pas d'espaces
-    return { valid: false, message: "Le mot de passe ne doit pas contenir d'espaces" };
+  if (!hasNoSpaces) {
+    // Vérifie si le mot de passe ne contient pas d'espaces
+    return {
+      valid: false,
+      message: "Le mot de passe ne doit pas contenir d'espaces",
+    };
   }
-  if (!hasNoSequentialChars) { // Vérifie si le mot de passe ne contient pas de caractères répétés
-    return { valid: false, message: "Le mot de passe ne doit pas contenir de caractères répétés" };
+  if (!hasNoSequentialChars) {
+    // Vérifie si le mot de passe ne contient pas de caractères répétés
+    return {
+      valid: false,
+      message: "Le mot de passe ne doit pas contenir de caractères répétés",
+    };
   }
 
   // Si toutes les conditions sont remplies, le mot de passe est valide
@@ -63,15 +94,21 @@ function isCommonPassword(password: string): boolean {
 // Protection contre les attaques par injection (OWASP #1)
 const utilisateurSchema = z.object({
   email: z.string().email("Email invalide"),
-  mot_de_passe: z.string()
+  mot_de_passe: z
+    .string()
     .min(8, "Le mot de passe doit contenir au moins 8 caractères")
     .regex(/[A-Z]/, "Le mot de passe doit contenir au moins une majuscule")
     .regex(/[a-z]/, "Le mot de passe doit contenir au moins une minuscule")
     .regex(/[0-9]/, "Le mot de passe doit contenir au moins un chiffre")
-    .regex(/[^A-Za-z0-9]/, "Le mot de passe doit contenir au moins un caractère spécial"),
+    .regex(
+      /[^A-Za-z0-9]/,
+      "Le mot de passe doit contenir au moins un caractère spécial"
+    ),
   nom: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
   prenom: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
-  telephone: z.string().regex(/^[0-9]{10}$/, "Le numéro de téléphone doit contenir 10 chiffres")
+  telephone: z
+    .string()
+    .regex(/^[0-9]{10}$/, "Le numéro de téléphone doit contenir 10 chiffres"),
 });
 
 // Type pour les données de création d'utilisateur
@@ -86,8 +123,8 @@ export async function getAllUtilisateurs() {
       email: true,
       nom: true,
       prenom: true,
-      telephone: true
-    }
+      telephone: true,
+    },
   });
 }
 
@@ -99,13 +136,13 @@ export async function createUtilisateur(data: CreateUtilisateurData) {
 
     // Vérification si l'email existe déjà (OWASP #2)
     const existingUser = await prisma.utilisateur.findFirst({
-      where: { email: validatedData.email }
+      where: { email: validatedData.email },
     });
 
     if (existingUser) {
-      return { 
-        success: false, 
-        error: "Un utilisateur avec cet email existe déjà" 
+      return {
+        success: false,
+        error: "Un utilisateur avec cet email existe déjà",
       };
     }
 
@@ -119,7 +156,7 @@ export async function createUtilisateur(data: CreateUtilisateurData) {
         mot_de_passe: hashedPassword,
         nom: validatedData.nom,
         prenom: validatedData.prenom,
-        telephone: validatedData.telephone
+        telephone: validatedData.telephone,
       },
       // Ne retourne pas le mot de passe (OWASP #3)
       select: {
@@ -127,30 +164,33 @@ export async function createUtilisateur(data: CreateUtilisateurData) {
         email: true,
         nom: true,
         prenom: true,
-        telephone: true
-      }
+        telephone: true,
+      },
     });
 
     return { success: true, utilisateur };
   } catch (error) {
     // Gestion sécurisée des erreurs (OWASP #7)
     if (error instanceof z.ZodError) {
-      return { 
-        success: false, 
-        error: "Données invalides", 
-        details: error.errors 
+      return {
+        success: false,
+        error: "Données invalides",
+        details: error.errors,
       };
     }
     console.error("Erreur lors de la création de l'utilisateur:", error);
-    return { 
-      success: false, 
-      error: "Une erreur est survenue lors de la création du compte" 
+    return {
+      success: false,
+      error: "Une erreur est survenue lors de la création du compte",
     };
   }
 }
 
 // Mise à jour du profil de l'utilisateur
-export async function updateProfile(id: string, utilisateur: Partial<CreateUtilisateurData>) {
+export async function updateProfile(
+  id: string,
+  utilisateur: Partial<CreateUtilisateurData>
+) {
   try {
     let userId: number;
 
@@ -158,23 +198,29 @@ export async function updateProfile(id: string, utilisateur: Partial<CreateUtili
     if (id === "current") {
       const cookieStore = await cookies();
       const sessionToken = cookieStore.get("session")?.value;
-      
+
       // Vérifier si la session est valide
       if (!sessionToken) {
-        return { success: false, error: "Vous devez être connecté pour modifier votre profil" };
+        return {
+          success: false,
+          error: "Vous devez être connecté pour modifier votre profil",
+        };
       }
 
       // Valider la session
       const user = await validateSession(sessionToken);
       if (!user) {
-        return { success: false, error: "Votre session a expiré, veuillez vous reconnecter" };
+        return { success: false, error: "Session invalide" };
       }
 
       userId = user.id_utilisateur;
     } else {
       userId = parseInt(id);
       if (isNaN(userId)) {
-        return { success: false, error: "L'identifiant de l'utilisateur est invalide" };
+        return {
+          success: false,
+          error: "L'identifiant de l'utilisateur est invalide",
+        };
       }
     }
 
@@ -189,29 +235,30 @@ export async function updateProfile(id: string, utilisateur: Partial<CreateUtili
         email: true,
         nom: true,
         prenom: true,
-        telephone: true
-      }
+        telephone: true,
+      },
     });
 
     // Retourner les données mises à jour
-    return { 
-      success: true, 
+    return {
+      success: true,
       message: "Votre profil a été mis à jour avec succès",
-      utilisateur: updatedUser 
+      utilisateur: updatedUser,
     };
   } catch (error) {
     console.error("Erreur lors de la mise à jour de l'utilisateur:", error);
     if (error instanceof z.ZodError) {
-      return { 
-        success: false, 
+      return {
+        success: false,
         error: "Les données saisies sont invalides",
-        details: error.errors.map(err => err.message).join(", ")
+        details: error.errors.map((err) => err.message).join(", "),
       };
     }
     // Gestion des erreurs
-    return { 
-      success: false, 
-      error: "Une erreur est survenue lors de la mise à jour de votre profil. Veuillez réessayer plus tard." 
+    return {
+      success: false,
+      error:
+        "Une erreur est survenue lors de la mise à jour de votre profil. Veuillez réessayer plus tard.",
     };
   }
 }
@@ -227,7 +274,10 @@ export async function updatePassword(
     const cookieStore = await cookies();
     const sessionToken = cookieStore.get("session")?.value;
     if (!sessionToken) {
-      return { success: false, error: "Vous devez être connecté pour modifier votre mot de passe" };
+      return {
+        success: false,
+        error: "Vous devez être connecté pour modifier votre mot de passe",
+      };
     }
 
     // Valider la session
@@ -238,12 +288,18 @@ export async function updatePassword(
 
     // Vérifier que les mots de passe correspondent
     if (newPassword !== confirmPassword) {
-      return { success: false, error: "Les mots de passe ne correspondent pas" };
+      return {
+        success: false,
+        error: "Les mots de passe ne correspondent pas",
+      };
     }
 
     // Vérifier que le nouveau mot de passe est différent de l'ancien
     if (newPassword === currentPassword) {
-      return { success: false, error: "Le nouveau mot de passe doit être différent de l'ancien" };
+      return {
+        success: false,
+        error: "Le nouveau mot de passe doit être différent de l'ancien",
+      };
     }
 
     // Vérifier la force du mot de passe
@@ -254,21 +310,31 @@ export async function updatePassword(
 
     // Vérifier si le mot de passe est courant
     if (isCommonPassword(newPassword)) {
-      return { success: false, error: "Ce mot de passe est trop courant. Veuillez en choisir un autre." };
+      return {
+        success: false,
+        error:
+          "Ce mot de passe est trop courant. Veuillez en choisir un autre.",
+      };
     }
 
     // Récupérer l'utilisateur avec son mot de passe
     const currentUser = await prisma.utilisateur.findUnique({
       where: { id_utilisateur: user.id_utilisateur },
-      select: { mot_de_passe: true }
+      select: { mot_de_passe: true },
     });
 
     if (!currentUser || !currentUser.mot_de_passe) {
-      return { success: false, error: "Utilisateur non trouvé ou mot de passe non défini" };
+      return {
+        success: false,
+        error: "Utilisateur non trouvé ou mot de passe non défini",
+      };
     }
 
     // Vérifier que l'ancien mot de passe est correct
-    const isPasswordValid = await bcrypt.compare(currentPassword, currentUser.mot_de_passe);
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      currentUser.mot_de_passe
+    );
     if (!isPasswordValid) {
       return { success: false, error: "Mot de passe actuel incorrect" };
     }
@@ -282,15 +348,15 @@ export async function updatePassword(
       data: { mot_de_passe: hashedPassword },
     });
 
-    return { 
-      success: true, 
-      message: "Votre mot de passe a été mis à jour avec succès" 
+    return {
+      success: true,
+      message: "Votre mot de passe a été mis à jour avec succès",
     };
   } catch (error) {
     console.error("Erreur lors de la mise à jour du mot de passe:", error);
-    return { 
-      success: false, 
-      error: "Une erreur est survenue lors de la mise à jour du mot de passe" 
+    return {
+      success: false,
+      error: "Une erreur est survenue lors de la mise à jour du mot de passe",
     };
   }
 }
