@@ -20,32 +20,8 @@ export function Footer({ isDarkMode }: FooterProps) {
             </p>
           </div>
 
-          {/* Liens rapides */}
-          <div>
-            <h4 className={`text-lg font-semibold mb-4 ${isDarkMode ? "text-white" : "text-gray-900"}`}>
-              Liens Rapides
-            </h4>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/features" className={`${isDarkMode ? "text-gray-400 hover:text-white" : "text-gray-600 hover:text-gray-900"} transition-colors`}>
-                  Fonctionnalités
-                </Link>
-              </li>
-              <li>
-                <Link href="/pricing" className={`${isDarkMode ? "text-gray-400 hover:text-white" : "text-gray-600 hover:text-gray-900"} transition-colors`}>
-                  Tarifs
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className={`${isDarkMode ? "text-gray-400 hover:text-white" : "text-gray-600 hover:text-gray-900"} transition-colors`}>
-                  Contact
-                </Link>
-              </li>
-            </ul>
-          </div>
-
           {/* Contact */}
-          <div>
+          <div className="">
             <h4 className={`text-lg font-semibold mb-4 ${isDarkMode ? "text-white" : "text-gray-900"}`}>
               Contact
             </h4>
