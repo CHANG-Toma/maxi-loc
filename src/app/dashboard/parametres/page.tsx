@@ -31,6 +31,15 @@ import {
 } from "@/services/parametreService";
 import { useSession } from "@/components/providers/SessionProvider";
 
+// Fonctionnalités de la page de paramètres :
+// - Afficher les informations du profil de l'utilisateur
+// - Modifier les informations du profil de l'utilisateur
+// - Changer le mot de passe de l'utilisateur
+// - Gérer les notifications de l'utilisateur
+// - Gérer les préférences de l'utilisateur
+// - Gérer la facturation de l'utilisateur
+
+
 export default function SettingsPage() {
   // useSession pour charger les données de l'utilisateur
   const { user, loading } = useSession();

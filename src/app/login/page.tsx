@@ -27,16 +27,15 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   // État pour l'acceptation des CGU
   const [cguAccepted, setCguAccepted] = useState(false);
+
   // État pour le nombre de tentatives
   const [loginAttempts, setLoginAttempts] = useState(0);
   // État pour le blocage du compte
   const [isBlocked, setIsBlocked] = useState(false);
   // État pour le temps de blocage
   const [blockTimeRemaining, setBlockTimeRemaining] = useState(0);
-
   // État pour le reCAPTCHA token
   const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
-
   // Max 5 tentatives si non c'est bloqué pour 15 minutes :)
   const MAX_ATTEMPTS = 5;
   const BLOCK_DURATION = 15 * 60; // 15 minutes en secondes
@@ -68,7 +67,6 @@ export default function Login() {
   }, []);
 
   // Gestion du blocage du compte si trop de tentatives
-  // Max 5 tentatives si non c'est bloqué pour 15 minutes :)
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (isBlocked && blockTimeRemaining > 0) {

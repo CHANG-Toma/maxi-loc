@@ -103,17 +103,19 @@ export default function ChargesPage() {
 
       // Validation des champs
       const errors = [];
-      if (!formData.id_propriete) errors.push("La propriété est requise");
+      if (!formData.id_propriete) errors.push("La propriété est requise"); // Si la propriété n'est pas sélectionnée, on affiche une erreur
       if (!formData.date_paiement)
-        errors.push("La date de paiement est requise");
-      if (!formData.montant) errors.push("Le montant est requis");
-      if (!formData.id_type_charge) errors.push("Le type de charge est requis");
+        errors.push("La date de paiement est requise"); // Si la date de paiement n'est pas sélectionnée, on affiche une erreur
+      if (!formData.montant) errors.push("Le montant est requis"); // Si le montant n'est pas sélectionné, on affiche une erreur
+      if (!formData.id_type_charge)
+        errors.push("Le type de charge est requis"); // Si le type de charge n'est pas sélectionné, on affiche une erreur
 
       if (errors.length > 0) {
-        setError(errors.join("\n"));
+        setError(errors.join("\n")); // Si les erreurs sont présentes, on affiche une erreur
         return;
       }
 
+      // On crée les données de la charge
       const chargeData = {
         id_propriete: parseInt(formData.id_propriete),
         date_paiement: formData.date_paiement,
@@ -123,12 +125,15 @@ export default function ChargesPage() {
       };
 
       let result;
+      // Si la charge est en cours de modification, on met à jour la charge
       if (editingCharge) {
         result = await updateCharge(editingCharge.id_charge, chargeData);
       } else {
+        // Sinon, on crée la charge
         result = await createCharge(chargeData);
       }
 
+      // Si la charge est créée ou modifiée avec succès, on affiche un message de succès
       if (result.success) {
         setSuccess(
           editingCharge
@@ -143,7 +148,7 @@ export default function ChargesPage() {
           id_type_charge: 1,
           description: "",
         });
-        setEditingCharge(null);
+        setEditingCharge(null); // On réinitialise la charge en cours de modification
         await loadCharges();
         setTimeout(() => setSuccess(null), 3000);
       } else {
@@ -160,6 +165,7 @@ export default function ChargesPage() {
     }
   };
 
+  // Gérer l'édition de la charge
   const handleEdit = (charge: Charge) => {
     setEditingCharge(charge);
     setFormData({
@@ -172,6 +178,7 @@ export default function ChargesPage() {
     setShowForm(true);
   };
 
+  // Gérer la suppression de la charge
   const handleDelete = async (id: number) => {
     if (!confirm("Êtes-vous sûr de vouloir supprimer cette charge ?")) return;
     try {
@@ -192,8 +199,10 @@ export default function ChargesPage() {
     setShowForm(true);
   };
 
+  // Gérer la création de la charge
   const handleCreateCharge = async (charge: Omit<Charge, "id_charge">) => {
     const result = await createCharge({
+      // On crée les données de la charge
       id_propriete: parseInt(charge.propriete.id_propriete.toString()),
       date_paiement: charge.date_paiement,
       montant: charge.montant,
@@ -202,13 +211,14 @@ export default function ChargesPage() {
     });
 
     if (result.success) {
-      await loadCharges();
+      await loadCharges(); // On recharge les charges pour actualiser la liste
       setIsFormOpen(false);
     } else {
       setError(result.error || "Erreur lors de la création de la charge");
     }
   };
 
+  // Gérer la mise à jour de la charge
   const handleUpdateCharge = async (id: number, charge: Partial<Charge>) => {
     const result = await updateCharge(id, {
       id_propriete: parseInt(charge.propriete?.id_propriete.toString() || "0"),
@@ -227,6 +237,7 @@ export default function ChargesPage() {
     }
   };
 
+  // Gérer la suppression de la charge
   const handleDeleteCharge = async (id: number) => {
     const result = await deleteCharge(id);
     if (result.success) {
@@ -246,7 +257,7 @@ export default function ChargesPage() {
 
   // Si l'utilisateur n'a pas de charges
   if (charges.length === 0) {
-    return (
+    return (  
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-gray-900">Charges</h2>

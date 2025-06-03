@@ -55,6 +55,7 @@ export async function login(credentials: { email: string; mot_de_passe: string; 
 
     const recaptchaData = await recaptchaResponse.json();
 
+    // Vérifier si la vérification reCAPTCHA a échoué
     if (!recaptchaData.success) {
       return {
         success: false,
@@ -78,6 +79,7 @@ export async function login(credentials: { email: string; mot_de_passe: string; 
     // Vérifier si le mot de passe est correct
     const isValid = await bcrypt.compare(credentials.mot_de_passe, user.mot_de_passe);
 
+    // Si le mot de passe est incorrect, on renvoie une erreur
     if (!isValid) {
       return {
         success: false,
@@ -101,11 +103,11 @@ export async function login(credentials: { email: string; mot_de_passe: string; 
     // Définir le cookie de session
     const cookieStore = await cookies();
     await cookieStore.set("session", sessionToken, {
-      expires: expiresAt,
-      httpOnly: true,
+      expires: expiresAt, // définit la date d'expiration du cookie
+      httpOnly: true, // empêche le JavaScript de lire le cookie
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/"
+      sameSite: "lax", // permet de sécuriser les cookies
+      path: "/" 
     });
 
     return {
@@ -129,7 +131,7 @@ export async function login(credentials: { email: string; mot_de_passe: string; 
 // Fonction en cas d'oublie du mot de passe
 export async function forgotPassword(email: string) {
   try {
-    // Vérifier si l'utilisateur existe
+    // Vérifier si l'utilisateur existe #OWASP A3
     const user = await prisma.utilisateur.findFirst({
       where: { email }
     });
@@ -158,6 +160,7 @@ export async function forgotPassword(email: string) {
     // Envoyer l'email de réinitialisation
     const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
     
+    // Envoyer l'email de réinitialisation
     await sendEmail({
       to: email,
       subject: "Réinitialisation de votre mot de passe",

@@ -103,6 +103,7 @@ export default function BookingsPage() {
     }
   };
 
+  // Gérer la soumission du formulaire pour ajouter ou modifier une réservation
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);

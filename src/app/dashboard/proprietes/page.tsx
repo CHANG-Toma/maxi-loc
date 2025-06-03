@@ -67,9 +67,11 @@ export default function PropertiesPage() {
         setError(null);
         const result = await ProprieteService.loadProprietes();
 
+        // Si les propriétés sont chargées avec succès, on les affiche
         if (result.success && result.proprietes) {
           setProprietes(result.proprietes);
         } else {
+          // Si non, on affiche une erreur
           setError(result.error || "Erreur lors du chargement des propriétés");
         }
       } catch (error) {
@@ -80,6 +82,7 @@ export default function PropertiesPage() {
       }
     };
 
+    // On charge les propriétés si il y en a
     loadProprietes();
   }, []);
 
@@ -87,11 +90,13 @@ export default function PropertiesPage() {
   const handleDelete = async (id: number) => {
     try {
       const result = await ProprieteService.handleDelete(id);
+      // Si la suppression est réussie, on affiche un message de succès
       if (result.success) {
         setProprietes(proprietes.filter((p) => p.id_propriete !== id));
         setSuccess(result.message || "Propriété supprimée avec succès");
         setTimeout(() => setSuccess(null), 3000);
       } else {
+        // Si non, on affiche une erreur
         setError(result.error || "Erreur lors de la suppression");
       }
     } catch (error) {
@@ -100,6 +105,7 @@ export default function PropertiesPage() {
     }
   };
 
+  // Gérer le changement des données du formulaire
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -109,17 +115,20 @@ export default function PropertiesPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Gérer la soumission du formulaire
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
 
+    // On tente de soumettre le formulaire
     try {
       const result = await ProprieteService.handleSubmit(
         formData,
         editingProperty
       );
 
+      // Si la soumission est réussie, on affiche un message de succès
       if (result.success) {
         setSuccess(result.message || "Opération réussie");
         setShowForm(false);
@@ -136,7 +145,7 @@ export default function PropertiesPage() {
         });
         setEditingProperty(null);
 
-        // Recharger les propriétés
+        // Recharger les propriétés pour actualiser la liste de manière dynamique
         const newProprietes = await ProprieteService.loadProprietes();
         if (newProprietes.success && newProprietes.proprietes) {
           setProprietes(newProprietes.proprietes);

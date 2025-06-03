@@ -93,12 +93,14 @@ export class ReservationService {
     }
   }
 
+  // Gérer la soumission du formulaire pour ajouter ou modifier une réservation
   static async handleSubmit(formData: ReservationFormData, editingReservation: Reservation | null) {
     try {
       // Convertir les valeurs numériques
       const id_propriete = parseInt(formData.id_propriete);
       const prix_total = parseFloat(formData.prix_total);
 
+      // Vérifier que les valeurs numériques sont valides
       if (isNaN(id_propriete) || isNaN(prix_total)) {
         return { success: false, error: "Veuillez entrer des valeurs numériques valides" };
       }
@@ -112,19 +114,22 @@ export class ReservationService {
         prix_total
       };
 
+      // Si la réservation est en cours de modification, on met à jour la réservation
       let result;
       if (editingReservation) {
-        result = await updateReservation(editingReservation.id_reservation, reservationData);
+        result = await updateReservation(editingReservation.id_reservation, reservationData); // On met à jour la réservation
       } else {
-        result = await createReservation(reservationData);
+        result = await createReservation(reservationData); // On crée la réservation
       }
 
+      // Si la réservation est créée ou modifiée avec succès, on affiche un message de succès
       if (result.success) {
         return { 
           success: true, 
           message: editingReservation ? "Réservation modifiée avec succès" : "Réservation créée avec succès" 
         };
       } else {
+        // si non on affiche un message d'erreur
         let errorMessage = result.error || `Erreur lors de la ${editingReservation ? 'modification' : 'création'} de la réservation`;
         if (result.details) {
           errorMessage = `${errorMessage}\n${result.details}`;

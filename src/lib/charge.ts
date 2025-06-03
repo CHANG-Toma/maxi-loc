@@ -72,14 +72,17 @@ export async function getCharges() {
   }
 }
 
+// Créer une charge
 export async function createCharge(data: ChargeData) {
-  const token = (await cookies()).get('session')?.value;
+  const token = (await cookies()).get('session')?.value; 
 
+  // Vérifier que le token est présent
   if (!token) {
     return { success: false, error: "Vous devez être connecté pour créer une charge" };
   }
 
   try {
+    // Vérifier que la session est valide
     const user = await validateSession(token);
     if (!user) {
       return { success: false, error: "Session invalide" };
@@ -90,10 +93,12 @@ export async function createCharge(data: ChargeData) {
       where: { id_propriete: data.id_propriete }
     });
 
+    // Vérifier que la propriété appartient à l'utilisateur
     if (!propriete || propriete.id_utilisateur !== user.id_utilisateur) {
       return { success: false, error: "Vous n'avez pas les droits pour cette propriété" };
     }
 
+    // Créer la charge dans la base de données via prisma
     const charge = await prisma.charge.create({
       data: {
         id_propriete: data.id_propriete,

@@ -265,7 +265,6 @@ export default function Signup() {
                 {isLoading ? 'Création en cours...' : "S'inscrire"}
               </Button>
             </div>
-
           </form>
 
           <div className="mt-6">
