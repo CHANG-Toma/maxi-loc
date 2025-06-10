@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
-import { getToken } from 'next-auth/jwt';
 import type { NextRequest } from 'next/server';
+import { validateSession } from '@/lib/session';
 
 // Routes qui ne nécessitent pas d'authentification
 const publicRoutes = [
   "/",
   "/login",
   "/signup",
+  "/forgotpassword",
   "/legal/mentions-legales",
   "/legal/politique-confidentialite",
   "/legal/cgu",
@@ -15,7 +16,17 @@ const publicRoutes = [
 
 // Permet de vérifier la session de l'utilisateur
 export async function middleware(request: NextRequest) {
-  const session = await getToken({ req: request });
+  const sessionToken = request.cookies.get("session")?.value;
+  let isAuthenticated = false;
+
+  if (sessionToken) {
+    try {
+      const user = await validateSession(sessionToken);
+      isAuthenticated = !!user;
+    } catch (error) {
+      console.error("Erreur lors de la validation de la session:", error);
+    }
+  }
 
   // Vérifier si la route actuelle est une route publique
   const isPublicRoute = publicRoutes.some(route => 
@@ -24,7 +35,7 @@ export async function middleware(request: NextRequest) {
   );
 
   // Si l'utilisateur n'est pas connecté et essaie d'accéder à une route protégée
-  if (!session && !isPublicRoute) {
+  if (!isAuthenticated && !isPublicRoute) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 

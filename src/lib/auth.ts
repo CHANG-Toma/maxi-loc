@@ -42,6 +42,7 @@ export async function logout() {
   }
 }
 
+// Fonction de connexion avec NextAuth (utilisé pour la connexion avec Google)
 export async function login(credentials: { email: string; mot_de_passe: string; recaptchaToken: string }) {
   try {
     // Vérifier le reCAPTCHA
@@ -54,7 +55,7 @@ export async function login(credentials: { email: string; mot_de_passe: string; 
     });
 
     const recaptchaData = await recaptchaResponse.json();
-
+    
     // Vérifier si la vérification reCAPTCHA a échoué
     if (!recaptchaData.success) {
       return {
