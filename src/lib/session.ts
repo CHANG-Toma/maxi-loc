@@ -1,26 +1,6 @@
 "use server"
 
 import { prisma } from "@/lib/prisma";
-import crypto from "crypto";
-
-// Durée de validité d'une session (7 jours)
-const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000;
-
-export async function createSession(userId: number) {
-  // Génération d'un token sécurisé
-  const token = crypto.randomBytes(32).toString("hex");
-  
-  // Création de la session dans la base de données
-  const session = await prisma.session.create({
-    data: {
-      token,
-      utilisateur_id: userId,
-      expires_at: new Date(Date.now() + SESSION_DURATION)
-    }
-  });
-
-  return session;
-}
 
 // Fonction pour valider une session existante
 export async function validateSession(token: string) {
@@ -56,7 +36,6 @@ export async function validateSession(token: string) {
     // Retourner les données de l'utilisateur
     return session.utilisateur;
   } catch (error) {
-    console.error("Erreur lors de la validation de la session:", error);
     return null;
   }
 }

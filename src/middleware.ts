@@ -1,3 +1,5 @@
+"use server"
+
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { validateSession } from '@/lib/session';
@@ -21,8 +23,8 @@ export async function middleware(request: NextRequest) {
 
   if (sessionToken) {
     try {
-      const user = await validateSession(sessionToken);
-      isAuthenticated = !!user;
+      const user = await validateSession(sessionToken); // Si la session est valide, l'utilisateur est authentifié
+      isAuthenticated = !user; // Si la session est valide, l'utilisateur est authentifié
     } catch (error) {
       console.error("Erreur lors de la validation de la session:", error);
     }

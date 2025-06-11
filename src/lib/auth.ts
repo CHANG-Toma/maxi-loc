@@ -4,7 +4,7 @@ import { deleteSession, validateSession } from "@/lib/session";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcryptjs"; // Importation de bcrypt pour le hachage des mots de passe
 
 // Fonction pour récupérer l'utilisateur connecté
 export async function getCurrentUser() {
@@ -12,6 +12,7 @@ export async function getCurrentUser() {
     const cookieStore = await cookies(); // Récupérer le cookie de session
     const sessionToken = cookieStore.get("session")?.value; // Récupérer le token de session
     
+    // Si le token de session n'existe pas, on renvoie null
     if (!sessionToken) {
       return null;
     }
@@ -30,7 +31,7 @@ export async function logout() {
     const cookieStore = await cookies();
     const sessionToken = cookieStore.get("session")?.value;
     
-    if (sessionToken) { // Vérifier si le token de session existe
+    if (sessionToken) { // Vérifier si le token de session existe si oui on le supprime
       await deleteSession(sessionToken);
     }
     
@@ -77,7 +78,7 @@ export async function login(credentials: { email: string; mot_de_passe: string; 
       };
     }
 
-    // Vérifier si le mot de passe est correct
+    // Vérifier si le mot de passe est correct #OWASP A3
     const isValid = await bcrypt.compare(credentials.mot_de_passe, user.mot_de_passe);
 
     // Si le mot de passe est incorrect, on renvoie une erreur
@@ -199,13 +200,12 @@ export async function resetPassword(token: string, newPassword: string) {
       },
     });
 
-    // Si l'utilisateur n'existe pas, on renvoie une erreur
     if (!user) {
       return { success: false, error: "Lien invalide ou expiré." };
     }
 
     // Hasher le nouveau mot de passe
-    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     // Mettre à jour le mot de passe et supprimer le token
     await prisma.utilisateur.update({
