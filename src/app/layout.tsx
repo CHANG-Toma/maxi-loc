@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "MaxiLoc - CodeByToma",
-  description: "MaxiLoc est une application web qui permet de gérer les locations de véhicules dans une entreprise. Avec MaxiLoc, vous pouvez gérer les locations, les retours, les paiements et bien plus encore.",
+  description: "Maxi Loc est une application web de gestion immobilière conçue pour optimiser la rentabilité des investissements locatifs. Cette plateforme permet aux propriétaires et investisseurs de suivre, analyser et maximiser les performances de leurs biens immobiliers en location.",
   authors: [{ name: "CodeByToma", url: "https://codebytoma.com" }],
-  keywords: ["MaxiLoc", "Location", "Véhicule", "Entreprise", "Gestion", "CodeByToma"],
+  keywords: ["MaxiLoc", "Location", "immobiliers", "maison", "Appartement", "CodeByToma"],
 };
 
 export default function RootLayout({
