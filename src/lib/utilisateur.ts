@@ -131,10 +131,10 @@ export async function getAllUtilisateurs() {
 // Insertion d'un utilisateur en bdd
 export async function createUtilisateur(data: CreateUtilisateurData) {
   try {
-    // Validation des données (OWASP #1)
+    // Validation des données de l'utilisateur (OWASP #1)
     const validatedData = utilisateurSchema.parse(data);
 
-    // Vérification si l'email existe déjà (OWASP #2)
+    // Vérification si l'email existe déjà dans la base de données (OWASP #2)
     const existingUser = await prisma.utilisateur.findFirst({
       where: { email: validatedData.email },
     });
