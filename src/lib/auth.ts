@@ -199,12 +199,13 @@ export async function resetPassword(token: string, newPassword: string) {
       },
     });
 
+    // Si l'utilisateur n'existe pas, on renvoie une erreur
     if (!user) {
       return { success: false, error: "Lien invalide ou expiré." };
     }
 
     // Hasher le nouveau mot de passe
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
 
     // Mettre à jour le mot de passe et supprimer le token
     await prisma.utilisateur.update({

@@ -147,7 +147,7 @@ export async function createUtilisateur(data: CreateUtilisateurData) {
     }
 
     // Hashage du mot de passe avec bcrypt (OWASP #2)
-    const hashedPassword = await bcrypt.hash(validatedData.mot_de_passe, 10);
+    const hashedPassword = await bcrypt.hash(validatedData.mot_de_passe, 12);
 
     // Création de l'utilisateur avec le mot de passe hashé
     const utilisateur = await prisma.utilisateur.create({
