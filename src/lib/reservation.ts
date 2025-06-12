@@ -25,7 +25,7 @@ interface ReservationData {
 }
 
 export async function getReservations() {
-  const token = cookies().get('session')?.value;
+  const token = (await cookies()).get('session')?.value;
 
   if (!token) {
     return { success: false, error: "Vous devez être connecté pour voir les réservations" };
@@ -70,7 +70,7 @@ export async function getReservations() {
 }
 
 export async function createReservation(data: ReservationData) {
-  const token = cookies().get('session')?.value;
+  const token = (await cookies()).get('session')?.value;
 
   if (!token) {
     return { success: false, error: "Vous devez être connecté pour créer une réservation" };
@@ -97,7 +97,7 @@ export async function createReservation(data: ReservationData) {
         date_debut: new Date(data.date_debut),
         date_fin: new Date(data.date_fin),
         prix_total: data.prix_total,
-        id_statut_reservation: data.id_statut_reservation
+        id_statut_reservation: Number(data.id_statut_reservation)
       },
       include: {
         propriete: true,
@@ -113,7 +113,7 @@ export async function createReservation(data: ReservationData) {
 }
 
 export async function updateReservation(id: number, data: ReservationData) {
-  const token = cookies().get('session')?.value;
+  const token = (await cookies()).get('session')?.value;
 
   if (!token) {
     return { success: false, error: "Vous devez être connecté pour modifier une réservation" };
@@ -141,7 +141,7 @@ export async function updateReservation(id: number, data: ReservationData) {
         date_debut: new Date(data.date_debut),
         date_fin: new Date(data.date_fin),
         prix_total: data.prix_total,
-        id_statut_reservation: data.id_statut_reservation
+        id_statut_reservation: Number(data.id_statut_reservation)
       },
       include: {
         propriete: true,
@@ -157,7 +157,7 @@ export async function updateReservation(id: number, data: ReservationData) {
 }
 
 export async function deleteReservation(id: number) {
-  const token = cookies().get('session')?.value;
+  const token = (await cookies()).get('session')?.value;
 
   if (!token) {
     return { success: false, error: "Vous devez être connecté pour supprimer une réservation" };
