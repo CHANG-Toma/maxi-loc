@@ -148,7 +148,7 @@ export async function updateCharge(id: number, data: ChargeData) {
         id_propriete: data.id_propriete,
         date_paiement: new Date(data.date_paiement),
         montant: data.montant,
-        id_type_charge: data.id_type_charge,
+        id_type_charge: Number(data.id_type_charge),
         description: data.description
       },
       include: {

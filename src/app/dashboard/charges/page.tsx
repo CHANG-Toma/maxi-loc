@@ -299,159 +299,156 @@ export default function ChargesPage() {
           </p>
         </div>
 
+        <ChargeTable
+          charges={charges}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+
         {isFormOpen && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white p-6 rounded-xl shadow-sm"
+            className="bg-white p-6 rounded-xl shadow-sm fixed inset-0 z-50 flex items-center justify-center"
           >
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {editingCharge ? "Modifier la charge" : "Nouvelle charge"}
-              </h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setIsFormOpen(false);
-                  setEditingCharge(null);
-                  setFormData({
-                    id_propriete: "",
-                    date_paiement: "",
-                    montant: "",
-                    id_type_charge: 1,
-                    description: "",
-                  });
-                }}
-                className="text-gray-500 hover:text-gray-900"
-              >
-                <X className="w-4 h-4" />
-              </Button>
+            <div className="w-full max-w-2xl">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {editingCharge ? "Modifier la charge" : "Nouvelle charge"}
+                </h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setIsFormOpen(false);
+                    setEditingCharge(null);
+                    setFormData({
+                      id_propriete: "",
+                      date_paiement: "",
+                      montant: "",
+                      id_type_charge: 1,
+                      description: "",
+                    });
+                  }}
+                  className="text-gray-500 hover:text-gray-900"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="id_propriete" className="block text-sm font-medium text-gray-700 mb-1">
+                      Propriété
+                    </label>
+                    <select
+                      id="id_propriete"
+                      name="id_propriete"
+                      value={formData.id_propriete}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                      required
+                    >
+                      <option value="">Sélectionnez une propriété</option>
+                      {proprietes.map((prop) => (
+                        <option key={prop.id_propriete} value={prop.id_propriete}>
+                          {prop.nom}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="date_paiement" className="block text-sm font-medium text-gray-700 mb-1">
+                      Date
+                    </label>
+                    <Input
+                      id="date_paiement"
+                      name="date_paiement"
+                      type="date"
+                      value={formData.date_paiement}
+                      onChange={handleInputChange}
+                      required
+                      className="bg-white text-gray-900"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="id_type_charge" className="block text-sm font-medium text-gray-700 mb-1">
+                      Type
+                    </label>
+                    <select
+                      id="id_type_charge"
+                      name="id_type_charge"
+                      value={formData.id_type_charge}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                      required
+                    >
+                      <option value="">Sélectionnez un type</option>
+                      {typeCharges.map((type) => (
+                        <option key={type.id_type_charge} value={type.id_type_charge}>
+                          {type.libelle}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="montant" className="block text-sm font-medium text-gray-700 mb-1">
+                      Montant (€)
+                    </label>
+                    <Input
+                      id="montant"
+                      name="montant"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={formData.montant}
+                      onChange={handleInputChange}
+                      required
+                      className="bg-white text-gray-900"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                      Description
+                    </label>
+                    <Input
+                      id="description"
+                      name="description"
+                      type="text"
+                      value={formData.description}
+                      onChange={handleInputChange}
+                      className="bg-white text-gray-900"
+                      placeholder="Description optionnelle"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end space-x-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setIsFormOpen(false);
+                      setEditingCharge(null);
+                      setFormData({
+                        id_propriete: "",
+                        date_paiement: "",
+                        montant: "",
+                        id_type_charge: 1,
+                        description: "",
+                      });
+                    }}
+                  >
+                    Annuler
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="bg-black text-white hover:bg-primary/90"
+                  >
+                    {editingCharge ? "Modifier la charge" : "Créer la charge"}
+                  </Button>
+                </div>
+              </form>
             </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label
-                    htmlFor="id_propriete"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Propriété
-                  </label>
-                  <select
-                    id="id_propriete"
-                    name="id_propriete"
-                    value={formData.id_propriete}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                    required
-                  >
-                    <option value="">Sélectionnez une propriété</option>
-                    {proprietes.map((prop) => (
-                      <option key={prop.id_propriete} value={prop.id_propriete}>
-                        {prop.nom}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="date"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Date
-                  </label>
-                  <Input
-                    id="date"
-                    name="date_paiement"
-                    type="date"
-                    value={formData.date_paiement}
-                    onChange={handleInputChange}
-                    required
-                    className="bg-white text-gray-900"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="type"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Type
-                  </label>
-                  <select
-                    id="type"
-                    name="id_type_charge"
-                    value={formData.id_type_charge}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                    required
-                  >
-                    <option value="">Sélectionnez un type</option>
-                    {typeCharges.map((type) => (
-                      <option key={type.id_type_charge} value={type.id_type_charge}>
-                        {type.libelle}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="montant"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Montant (€)
-                  </label>
-                  <Input
-                    id="montant"
-                    name="montant"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={formData.montant}
-                    onChange={handleInputChange}
-                    required
-                    className="bg-white text-gray-900"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="description"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Description
-                  </label>
-                  <Input
-                    id="description"
-                    name="description"
-                    type="text"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    className="bg-white text-gray-900"
-                    placeholder="Description optionnelle"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end space-x-4 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsFormOpen(false)}
-                >
-                  Annuler
-                </Button>
-                <Button
-                  type="submit"
-                  className="bg-black text-white hover:bg-primary/90"
-                >
-                  {editingCharge ? "Modifier la charge" : "Créer la charge"}
-                </Button>
-              </div>
-            </form>
           </motion.div>
         )}
       </div>
@@ -492,24 +489,155 @@ export default function ChargesPage() {
 
       <ChargeTable
         charges={charges}
-        onEdit={(charge) => {
-          setSelectedCharge(charge);
-          setIsFormOpen(true);
-        }}
-        onDelete={handleDeleteCharge}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
       />
 
-      {selectedCharge && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
-            <ChargeForm
-              onSubmit={handleUpdateChargeWrapper}
-              onCancel={() => setSelectedCharge(null)}
-              typeCharges={typeCharges}
-              proprietes={proprietes}
-            />
+      {isFormOpen && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white p-6 rounded-xl shadow-sm fixed inset-0 z-50 flex items-center justify-center"
+        >
+          <div className="w-full max-w-2xl">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {editingCharge ? "Modifier la charge" : "Nouvelle charge"}
+              </h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setIsFormOpen(false);
+                  setEditingCharge(null);
+                  setFormData({
+                    id_propriete: "",
+                    date_paiement: "",
+                    montant: "",
+                    id_type_charge: 1,
+                    description: "",
+                  });
+                }}
+                className="text-gray-500 hover:text-gray-900"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="id_propriete" className="block text-sm font-medium text-gray-700 mb-1">
+                    Propriété
+                  </label>
+                  <select
+                    id="id_propriete"
+                    name="id_propriete"
+                    value={formData.id_propriete}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                    required
+                  >
+                    <option value="">Sélectionnez une propriété</option>
+                    {proprietes.map((prop) => (
+                      <option key={prop.id_propriete} value={prop.id_propriete}>
+                        {prop.nom}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="date_paiement" className="block text-sm font-medium text-gray-700 mb-1">
+                    Date
+                  </label>
+                  <Input
+                    id="date_paiement"
+                    name="date_paiement"
+                    type="date"
+                    value={formData.date_paiement}
+                    onChange={handleInputChange}
+                    required
+                    className="bg-white text-gray-900"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="id_type_charge" className="block text-sm font-medium text-gray-700 mb-1">
+                    Type
+                  </label>
+                  <select
+                    id="id_type_charge"
+                    name="id_type_charge"
+                    value={formData.id_type_charge}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                    required
+                  >
+                    <option value="">Sélectionnez un type</option>
+                    {typeCharges.map((type) => (
+                      <option key={type.id_type_charge} value={type.id_type_charge}>
+                        {type.libelle}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="montant" className="block text-sm font-medium text-gray-700 mb-1">
+                    Montant (€)
+                  </label>
+                  <Input
+                    id="montant"
+                    name="montant"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.montant}
+                    onChange={handleInputChange}
+                    required
+                    className="bg-white text-gray-900"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                    Description
+                  </label>
+                  <Input
+                    id="description"
+                    name="description"
+                    type="text"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    className="bg-white text-gray-900"
+                    placeholder="Description optionnelle"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end space-x-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setIsFormOpen(false);
+                    setEditingCharge(null);
+                    setFormData({
+                      id_propriete: "",
+                      date_paiement: "",
+                      montant: "",
+                      id_type_charge: 1,
+                      description: "",
+                    });
+                  }}
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-black text-white hover:bg-primary/90"
+                >
+                  {editingCharge ? "Modifier la charge" : "Créer la charge"}
+                </Button>
+              </div>
+            </form>
           </div>
-        </div>
+        </motion.div>
       )}
     </div>
   );
