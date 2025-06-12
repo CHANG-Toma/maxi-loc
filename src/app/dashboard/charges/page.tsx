@@ -25,13 +25,14 @@ import {
   createCharge,
   updateCharge,
   deleteCharge,
+  getTypeCharges
 } from "@/lib/charge";
 import { getProprietes } from "@/lib/propriete";
 import { toast } from "sonner";
 import { Charge } from "@/types/charge";
 import { ChargeService } from "@/services/chargeService";
 import { ChargeTable } from "./components/ChargeTable";
-import { ChargeForm } from "./components/ChargeForm";
+import ChargeForm from "./components/ChargeForm";
 
 interface FormData {
   id_propriete: string;
@@ -44,10 +45,11 @@ interface FormData {
 export default function ChargesPage() {
   const [charges, setCharges] = useState<Charge[]>([]);
   const [proprietes, setProprietes] = useState<any[]>([]);
+  const [typeCharges, setTypeCharges] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [showForm, setShowForm] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingCharge, setEditingCharge] = useState<Charge | null>(null);
   const [formData, setFormData] = useState<FormData>({
     id_propriete: "",
@@ -56,7 +58,6 @@ export default function ChargesPage() {
     id_type_charge: 1,
     description: "",
   });
-  const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedCharge, setSelectedCharge] = useState<Charge | null>(null);
 
   const loadCharges = async () => {
@@ -64,21 +65,28 @@ export default function ChargesPage() {
       setIsLoading(true);
       setError(null);
 
-      const result = await getCharges();
+      const [chargesResult, propResult, typeChargesResult] = await Promise.all([
+        getCharges(),
+        getProprietes(),
+        getTypeCharges()
+      ]);
 
-      if (result.success && result.charges) {
-        setCharges(result.charges);
+      if (chargesResult.success && chargesResult.charges) {
+        setCharges(chargesResult.charges);
       } else {
-        setError(result.error || "Erreur lors du chargement des charges");
+        setError(chargesResult.error || "Erreur lors du chargement des charges");
       }
 
-      const propResult = await getProprietes();
       if (propResult.success && propResult.proprietes) {
         setProprietes(propResult.proprietes);
       }
+
+      if (typeChargesResult.success && typeChargesResult.typeCharges) {
+        setTypeCharges(typeChargesResult.typeCharges);
+      }
     } catch (error) {
-      console.error("Erreur lors du chargement des charges:", error);
-      setError("Une erreur est survenue lors du chargement des charges");
+      console.error("Erreur lors du chargement des données:", error);
+      setError("Une erreur est survenue lors du chargement des données");
     } finally {
       setIsLoading(false);
     }
@@ -140,7 +148,7 @@ export default function ChargesPage() {
             ? "Charge modifiée avec succès"
             : "Charge créée avec succès"
         );
-        setShowForm(false);
+        setIsFormOpen(false);
         setFormData({
           id_propriete: "",
           date_paiement: "",
@@ -175,7 +183,19 @@ export default function ChargesPage() {
       id_type_charge: charge.type_charge.id_type_charge,
       description: charge.description || "",
     });
-    setShowForm(true);
+    setIsFormOpen(true);
+  };
+
+  const handleCreateClick = () => {
+    setEditingCharge(null);
+    setFormData({
+      id_propriete: "",
+      date_paiement: "",
+      montant: "",
+      id_type_charge: 1,
+      description: "",
+    });
+    setIsFormOpen(true);
   };
 
   // Gérer la suppression de la charge
@@ -193,10 +213,6 @@ export default function ChargesPage() {
       console.error("Erreur:", error);
       toast.error("Erreur lors de la suppression de la charge");
     }
-  };
-
-  const handleCreateClick = () => {
-    setShowForm(true);
   };
 
   // Gérer la création de la charge
@@ -247,6 +263,12 @@ export default function ChargesPage() {
     }
   };
 
+  const handleUpdateChargeWrapper = async (data: any) => {
+    if (selectedCharge) {
+      await handleUpdateCharge(selectedCharge.id_charge, data);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -263,10 +285,7 @@ export default function ChargesPage() {
           <h2 className="text-2xl font-bold text-gray-900">Charges</h2>
           <Button
             className="bg-black text-white hover:bg-primary/90 cursor-pointer"
-            onClick={() => {
-              setIsFormOpen(true);
-              setSelectedCharge(null);
-            }}
+            onClick={handleCreateClick}
           >
             <Plus className="w-4 h-4 mr-2" />
             Nouvelle charge
@@ -280,7 +299,7 @@ export default function ChargesPage() {
           </p>
         </div>
 
-        {showForm && (
+        {isFormOpen && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -294,7 +313,7 @@ export default function ChargesPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  setShowForm(false);
+                  setIsFormOpen(false);
                   setEditingCharge(null);
                   setFormData({
                     id_propriete: "",
@@ -314,14 +333,14 @@ export default function ChargesPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label
-                    htmlFor="proprieteId"
+                    htmlFor="id_propriete"
                     className="block text-sm font-medium text-gray-700 mb-1"
                   >
                     Propriété
                   </label>
                   <select
-                    id="proprieteId"
-                    name="proprieteId"
+                    id="id_propriete"
+                    name="id_propriete"
                     value={formData.id_propriete}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
@@ -370,12 +389,11 @@ export default function ChargesPage() {
                     required
                   >
                     <option value="">Sélectionnez un type</option>
-                    <option value="Entretien">Entretien</option>
-                    <option value="Fonctionnement">Fonctionnement</option>
-                    <option value="Financière">Financière</option>
-                    <option value="Fiscal">Fiscal</option>
-                    <option value="Copropriété">Copropriété</option>
-                    <option value="Travaux">Travaux</option>
+                    {typeCharges.map((type) => (
+                      <option key={type.id_type_charge} value={type.id_type_charge}>
+                        {type.libelle}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -422,7 +440,7 @@ export default function ChargesPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setShowForm(false)}
+                  onClick={() => setIsFormOpen(false)}
                 >
                   Annuler
                 </Button>
@@ -446,10 +464,7 @@ export default function ChargesPage() {
         <h2 className="text-2xl font-bold text-gray-900">Charges</h2>
         <Button
           className="bg-black text-white hover:bg-primary/90 cursor-pointer"
-          onClick={() => {
-            setIsFormOpen(true);
-            setSelectedCharge(null);
-          }}
+          onClick={handleCreateClick}
         >
           <Plus className="w-4 h-4 mr-2" />
           Nouvelle charge
@@ -484,19 +499,17 @@ export default function ChargesPage() {
         onDelete={handleDeleteCharge}
       />
 
-      {isFormOpen && (
-        <ChargeForm
-          charge={selectedCharge}
-          onClose={() => {
-            setIsFormOpen(false);
-            setSelectedCharge(null);
-          }}
-          onSubmit={
-            selectedCharge
-              ? (charge) => handleUpdateCharge(selectedCharge.id_charge, charge)
-              : handleCreateCharge
-          }
-        />
+      {selectedCharge && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
+            <ChargeForm
+              onSubmit={handleUpdateChargeWrapper}
+              onCancel={() => setSelectedCharge(null)}
+              typeCharges={typeCharges}
+              proprietes={proprietes}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

@@ -1,4 +1,6 @@
-import { Charge } from "@/types/charge";
+import { useState } from 'react';
+import { TypeCharge } from '@/lib/typeCharge';
+import { Propriete } from '@/lib/propriete';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,77 +13,44 @@ import {
 } from "@/components/ui/select";
 import { X } from "lucide-react";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { getTypeCharges } from "@/lib/charge";
 import { getProprietes } from "@/lib/propriete";
 
-interface TypeCharge {
-  id_type_charge: number;
-  libelle: string;
-}
-
-interface Propriete {
-  id_propriete: number;
-  nom: string;
-}
-
 interface ChargeFormProps {
-  charge?: Charge | null;
-  onClose: () => void;
-  onSubmit: (charge: Omit<Charge, "id_charge">) => Promise<void>;
+  onSubmit: (data: any) => Promise<void>;
+  onCancel: () => void;
+  typeCharges: TypeCharge[];
+  proprietes: Propriete[];
 }
 
-export function ChargeForm({ charge, onClose, onSubmit }: ChargeFormProps) {
-  const [typeCharges, setTypeCharges] = useState<TypeCharge[]>([]);
-  const [proprietes, setProprietes] = useState<Propriete[]>([]);
-  const [error, setError] = useState<string | null>(null);
+export default function ChargeForm({ onSubmit, onCancel, typeCharges, proprietes }: ChargeFormProps) {
+  const [formData, setFormData] = useState({
+    id_propriete: '',
+    date_paiement: '',
+    montant: '',
+    id_type_charge: '',
+    description: ''
+  });
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const [typeChargesResult, proprietesResult] = await Promise.all([
-          getTypeCharges(),
-          getProprietes()
-        ]);
-
-        if (typeChargesResult.success && typeChargesResult.typeCharges) {
-          setTypeCharges(typeChargesResult.typeCharges);
-        } else {
-          setError(typeChargesResult.error || "Erreur lors du chargement des types de charges");
-        }
-
-        if (proprietesResult.success && proprietesResult.proprietes) {
-          setProprietes(proprietesResult.proprietes);
-        } else {
-          setError(proprietesResult.error || "Erreur lors du chargement des propriétés");
-        }
-      } catch (error) {
-        setError("Une erreur est survenue lors du chargement des données");
-      }
-    };
-
-    loadData();
-  }, []);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    
-    const chargeData: Omit<Charge, "id_charge"> = {
-      propriete: {
-        id_propriete: Number(formData.get("id_propriete")),
-        nom: proprietes.find(p => p.id_propriete === Number(formData.get("id_propriete")))?.nom || ""
-      },
-      date_paiement: formData.get("date_paiement") as string,
-      montant: Number(formData.get("montant")),
-      type_charge: {
-        id_type_charge: Number(formData.get("id_type_charge")),
-        libelle: typeCharges.find(tc => tc.id_type_charge === Number(formData.get("id_type_charge")))?.libelle || ""
-      },
-      description: formData.get("description") as string || null
+    const chargeData = {
+      id_propriete: parseInt(formData.id_propriete),
+      date_paiement: formData.date_paiement,
+      montant: parseFloat(formData.montant),
+      id_type_charge: parseInt(formData.id_type_charge),
+      description: formData.description
     };
-
     await onSubmit(chargeData);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   return (
@@ -92,29 +61,23 @@ export function ChargeForm({ charge, onClose, onSubmit }: ChargeFormProps) {
     >
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg font-semibold text-gray-900">
-          {charge ? "Modifier la charge" : "Nouvelle charge"}
+          Nouvelle charge
         </h3>
         <Button
           variant="ghost"
           size="sm"
-          onClick={onClose}
+          onClick={onCancel}
           className="text-gray-500 hover:text-gray-900"
         >
           <X className="w-4 h-4" />
         </Button>
       </div>
 
-      {error && (
-        <div className="mb-4 p-4 bg-red-50 text-red-800 rounded-lg">
-          {error}
-        </div>
-      )}
-
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="id_propriete" className="text-gray-900">Propriété</Label>
-            <Select name="id_propriete" defaultValue={charge?.propriete.id_propriete.toString()}>
+            <Select name="id_propriete" defaultValue={formData.id_propriete}>
               <SelectTrigger className="bg-white text-gray-900 border-gray-200">
                 <SelectValue placeholder="Sélectionnez une propriété" />
               </SelectTrigger>
@@ -138,7 +101,8 @@ export function ChargeForm({ charge, onClose, onSubmit }: ChargeFormProps) {
               id="date_paiement"
               name="date_paiement"
               type="date"
-              defaultValue={charge?.date_paiement.split('T')[0]}
+              value={formData.date_paiement}
+              onChange={handleChange}
               className="bg-white text-gray-900"
               required
             />
@@ -151,7 +115,8 @@ export function ChargeForm({ charge, onClose, onSubmit }: ChargeFormProps) {
               name="montant"
               type="number"
               step="0.01"
-              defaultValue={charge?.montant}
+              value={formData.montant}
+              onChange={handleChange}
               className="bg-white text-gray-900"
               required
             />
@@ -159,7 +124,7 @@ export function ChargeForm({ charge, onClose, onSubmit }: ChargeFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="id_type_charge" className="text-gray-900">Type de charge</Label>
-            <Select name="id_type_charge" defaultValue={charge?.type_charge.id_type_charge.toString()}>
+            <Select name="id_type_charge" defaultValue={formData.id_type_charge}>
               <SelectTrigger className="bg-white text-gray-900 border-gray-200">
                 <SelectValue placeholder="Sélectionnez un type" />
               </SelectTrigger>
@@ -183,18 +148,19 @@ export function ChargeForm({ charge, onClose, onSubmit }: ChargeFormProps) {
               id="description"
               name="description"
               type="text"
-              defaultValue={charge?.description || ""}
+              value={formData.description}
+              onChange={handleChange}
               className="bg-white text-gray-900"
             />
           </div>
         </div>
 
         <div className="flex justify-end space-x-4">
-          <Button type="button" variant="outline" onClick={onClose}>
+          <Button type="button" variant="outline" onClick={onCancel}>
             Annuler
           </Button>
           <Button type="submit" className="bg-black text-white hover:bg-primary/90">
-            {charge ? "Modifier" : "Créer"}
+            Créer la charge
           </Button>
         </div>
       </form>
