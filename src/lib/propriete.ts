@@ -46,8 +46,8 @@ export async function createPropriete(data: CreateProprieteData) {
       data: {
         ...validatedData,
         id_utilisateur: user.id_utilisateur,
-        code_postal: validatedData.code_postal || undefined,
-        description: validatedData.description || undefined
+        code_postal: validatedData.code_postal || "",
+        description: validatedData.description || ""
       },
     });
 
