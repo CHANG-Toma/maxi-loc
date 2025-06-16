@@ -7,15 +7,15 @@ import { z } from "zod";
 
 // Schéma de validation pour les données de propriété
 const proprieteSchema = z.object({
-  nom: z.string().min(1, "Le nom est requis").max(25),
-  adresse: z.string().min(1, "L'adresse est requise").max(100),
-  ville: z.string().min(1, "La ville est requise").max(50),
-  pays: z.string().min(1, "Le pays est requis").max(50),
-  code_postal: z.string().max(10).optional(),
-  nb_pieces: z.number().min(1, "Le nombre de pièces doit être supérieur à 0"),
-  superficie: z.number().min(1, "La superficie doit être supérieure à 0"),
-  description: z.string().max(255).optional(),
-  id_type_propriete: z.number().min(1, "Le type de propriété est requis"),
+  nom: z.string().min(1, "Le nom est requis").max(25), // Le nom de la propriété
+  adresse: z.string().min(1, "L'adresse est requise").max(100), // L'adresse de la propriété
+  ville: z.string().min(1, "La ville est requise").max(50), // La ville de la propriété
+  pays: z.string().min(1, "Le pays est requis").max(50), // Le pays de la propriété
+  code_postal: z.string().max(10).optional(), // Le code postal de la propriété
+  nb_pieces: z.number().min(1, "Le nombre de pièces doit être supérieur à 0"), // Le nombre de pièces de la propriété
+  superficie: z.number().min(1, "La superficie doit être supérieure à 0"), // La superficie de la propriété
+  description: z.string().max(255).optional(), // La description de la propriété
+  id_type_propriete: z.number().min(1, "Le type de propriété est requis"), // L'id du type de propriété
 });
 
 // Type pour les données de création de propriété
@@ -32,7 +32,7 @@ export async function createPropriete(data: CreateProprieteData) {
       return { success: false, error: "Vous devez être connecté pour ajouter une propriété" };
     }
 
-    // Valider la session
+    // Valider la session pour savoir si l'utilisateur est connecté
     const user = await validateSession(sessionToken);
     if (!user) {
       return { success: false, error: "Session invalide" };
@@ -41,7 +41,7 @@ export async function createPropriete(data: CreateProprieteData) {
     // Valider les données
     const validatedData = proprieteSchema.parse(data);
 
-    // Créer la propriété
+    // Créer la propriété dans la base de données
     const propriete = await prisma.propriete.create({
       data: {
         ...validatedData,
@@ -53,7 +53,6 @@ export async function createPropriete(data: CreateProprieteData) {
 
     return { success: true, propriete };
   } catch (error) {
-    console.error("Erreur lors de la création de la propriété:", error);
     if (error instanceof z.ZodError) {
       return { 
         success: false, 
@@ -63,7 +62,6 @@ export async function createPropriete(data: CreateProprieteData) {
     }
     return { 
       success: false, 
-      error: "Une erreur est survenue lors de la création de la propriété" 
     };
   }
 }
@@ -105,7 +103,6 @@ export async function getProprietes() {
 
     return { success: true, proprietes };
   } catch (error) {
-    console.error("Erreur lors de la récupération des propriétés:", error);
     return { 
       success: false, 
       error: "Une erreur est survenue lors de la récupération des propriétés" 
@@ -138,6 +135,7 @@ export async function updatePropriete(id: number, data: Partial<CreateProprieteD
       },
     });
 
+    // Vérifier si la propriété existe
     if (!propriete) {
       return { success: false, error: "Propriété non trouvée ou accès non autorisé" };
     }
@@ -159,7 +157,6 @@ export async function updatePropriete(id: number, data: Partial<CreateProprieteD
 
     return { success: true, propriete: updatedPropriete };
   } catch (error) {
-    console.error("Erreur lors de la mise à jour de la propriété:", error);
     if (error instanceof z.ZodError) {
       return { 
         success: false, 
@@ -212,7 +209,6 @@ export async function deletePropriete(id: number) {
 
     return { success: true };
   } catch (error) {
-    console.error("Erreur lors de la suppression de la propriété:", error);
     return { 
       success: false, 
       error: "Une erreur est survenue lors de la suppression de la propriété" 

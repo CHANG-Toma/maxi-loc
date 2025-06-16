@@ -23,12 +23,19 @@ function validatePasswordStrength(password: string): {
   valid: boolean;
   message: string;
 } {
+  // Vérification de la longueur du mot de passe
   const minLength = 12;
+  // Vérification si le mot de passe contient une majuscule
   const hasUpperCase = /[A-Z]/.test(password);
+  // Vérification si le mot de passe contient une minuscule
   const hasLowerCase = /[a-z]/.test(password);
+  // Vérification si le mot de passe contient un chiffre
   const hasNumbers = /\d/.test(password);
+  // Vérification si le mot de passe contient un caractère spécial
   const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  // Vérification si le mot de passe ne contient pas d'espaces
   const hasNoSpaces = !/\s/.test(password);
+  // Vérification si le mot de passe ne contient pas de caractères répétés
   const hasNoSequentialChars = !/(.)\1{2,}/.test(password);
 
   if (password.length < minLength) {
