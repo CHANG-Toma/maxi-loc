@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { login } from "../../lib/auth";
 import ReCAPTCHA from "react-google-recaptcha";
+import { ZodIssue } from "zod";
 
 export default function Login() {
   const router = useRouter();
@@ -25,11 +26,6 @@ export default function Login() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   // État pour le chargement
   const [isLoading, setIsLoading] = useState(false);
-  // État pour l'acceptation des CGU
-  const [cguAccepted, setCguAccepted] = useState(false);
-
-  // État pour le nombre de tentatives
-  const [loginAttempts, setLoginAttempts] = useState(0);
   // État pour le blocage du compte
   const [isBlocked, setIsBlocked] = useState(false);
   // État pour le temps de blocage
@@ -39,6 +35,9 @@ export default function Login() {
   // Max 5 tentatives si non c'est bloqué pour 15 minutes :)
   const MAX_ATTEMPTS = 5;
   const BLOCK_DURATION = 15 * 60; // 15 minutes en secondes
+
+  // État pour le nombre de tentatives
+  const [loginAttempts, setLoginAttempts] = useState(0);
 
   useEffect(() => {
     // Récupérer les tentatives stockées
@@ -64,7 +63,7 @@ export default function Login() {
         setIsBlocked(false);
       }
     }
-  }, []);
+  }, [BLOCK_DURATION]);
 
   // Gestion du blocage du compte si trop de tentatives
   useEffect(() => {
@@ -139,8 +138,8 @@ export default function Login() {
             const validationErrors: Record<string, string> = {};
 
             // Ajouter les erreurs de validation dans le tableau d'erreurs pour pouvoir les afficher
-            result.details.forEach((error: any) => {
-              const field = error.path[0];
+            result.details.forEach((error: ZodIssue) => {
+              const field = error.path[0].toString();
               validationErrors[field] = error.message;
             });
             setErrors(validationErrors);
@@ -151,6 +150,7 @@ export default function Login() {
         }
       }
     } catch (error) {
+      console.error("Erreur lors de la connexion:", error);
       setMessage("Une erreur est survenue lors de la connexion.");
     } finally {
       setIsLoading(false);

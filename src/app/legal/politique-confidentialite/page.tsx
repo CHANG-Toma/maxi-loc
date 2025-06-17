@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 export default function PolitiqueConfidentialite() {
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode] = useState(true);
   const router = useRouter();
 
   return (
@@ -83,7 +83,7 @@ export default function PolitiqueConfidentialite() {
               </h2>
               <p className="mb-4">Nous collectons les données suivantes :</p>
               <ul className="list-disc pl-6 space-y-2">
-                <li>Données d'identification (nom, prénom, email)</li>
+                <li>Données d&apos;identification (nom, prénom, email)</li>
                 <li>Données de connexion (logs)</li>
                 <li>Données relatives aux biens immobiliers</li>
                 <li>Données de paiement (traitées de manière sécurisée)</li>
@@ -116,9 +116,9 @@ export default function PolitiqueConfidentialite() {
               </h2>
               <p className="mb-4">Le traitement de vos données est fondé sur :</p>
               <ul className="list-disc pl-6 space-y-2">
-                <li>L'exécution du contrat de services</li>
+                <li>L&apos;exécution du contrat de services</li>
                 <li>Votre consentement</li>
-                <li>Le respect d'obligations légales</li>
+                <li>Le respect d&apos;obligations légales</li>
                 <li>Notre intérêt légitime</li>
               </ul>
             </section>
@@ -156,14 +156,20 @@ export default function PolitiqueConfidentialite() {
               </h2>
               <p className="mb-4">Conformément au RGPD, vous disposez des droits suivants :</p>
               <ul className="list-disc pl-6 space-y-2">
-                <li>Droit d'accès à vos données</li>
+                <li>Droit d&apos;accès à vos données</li>
                 <li>Droit de rectification</li>
-                <li>Droit à l'effacement</li>
+                <li>Droit à l&apos;effacement</li>
                 <li>Droit à la limitation du traitement</li>
                 <li>Droit à la portabilité</li>
-                <li>Droit d'opposition</li>
+                <li>Droit d&apos;opposition</li>
                 <li>Droit de retirer votre consentement</li>
               </ul>
+              <p>
+                L&apos;Utilisateur dispose d&apos;un droit d&apos;accès, de rectification, d&apos;effacement et d&apos;opposition aux données le concernant, qu&apos;il peut exercer en contactant MaxiLoc à l&apos;adresse suivante : contact@maxiloc.fr.
+              </p>
+              <p>
+                L&apos;Utilisateur peut également introduire une réclamation auprès de la CNIL s&apos;il estime que ses droits ne sont pas respectés.
+              </p>
             </section>
 
             <section>
@@ -173,7 +179,7 @@ export default function PolitiqueConfidentialite() {
                 Sécurité des données
               </h2>
               <p>
-                Nous mettons en œuvre des mesures techniques et organisationnelles appropriées pour protéger vos données contre toute perte, accès non autorisé, divulgation, altération ou destruction.
+                MaxiLoc s&apos;engage à prendre toutes les mesures nécessaires pour garantir la sécurité et la confidentialité des données personnelles collectées.
               </p>
             </section>
 
@@ -206,7 +212,7 @@ export default function PolitiqueConfidentialite() {
                 Contact
               </h2>
               <p>
-                Pour toute question concernant cette politique de confidentialité ou pour exercer vos droits, vous pouvez nous contacter à l'adresse suivante : ...
+                Pour toute question relative à la présente politique de confidentialité ou pour exercer vos droits, vous pouvez contacter MaxiLoc à l&apos;adresse suivante : contact@maxiloc.fr.
               </p>
             </section>
           </div>

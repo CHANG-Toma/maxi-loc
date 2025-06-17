@@ -36,6 +36,7 @@ export async function validateSession(token: string) {
     // Retourner les données de l'utilisateur
     return session.utilisateur;
   } catch (error) {
+    console.error("Erreur lors de la validation de la session:", error);
     return null;
   }
 }

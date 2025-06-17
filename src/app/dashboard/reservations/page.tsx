@@ -3,13 +3,12 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
-  Calendar,
   Plus,
   Trash2,
   Loader2,
   X,
   MoreVertical,
-  Pencil,
+  Pencil
 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
@@ -19,7 +18,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu";
-import { useRouter } from "next/navigation";
 import {
   ReservationService,
   Reservation,
@@ -27,9 +25,8 @@ import {
 } from "@/services/reservationService";
 
 export default function BookingsPage() {
-  const router = useRouter();
   const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [proprietes, setProprietes] = useState<any[]>([]);
+  const [proprietes, setProprietes] = useState<{ id: number; nom: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -286,10 +283,10 @@ export default function BookingsPage() {
                   <option value="">Sélectionnez une propriété</option>
                   {proprietes.map((propriete) => (
                     <option
-                      key={propriete.id_propriete}
-                      value={propriete.id_propriete}
+                      key={propriete.id}
+                      value={propriete.id}
                     >
-                      {propriete.nom} - {propriete.ville}
+                      {propriete.nom} - {propriete.nom}
                     </option>
                   ))}
                 </select>

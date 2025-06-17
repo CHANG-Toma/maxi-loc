@@ -1,64 +1,70 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import {
-  Euro,
-  Plus,
-  Trash2,
-  X,
-  MoreVertical,
-  Pencil,
-  Loader2,
-} from "lucide-react";
+import { Plus, Loader2, X, Euro } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
-import { Textarea } from "../../../components/ui/textarea";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../../../components/ui/dropdown-menu";
 import {
   getCharges,
   createCharge,
-  updateCharge,
   deleteCharge,
+  updateCharge,
   getTypeCharges
 } from "@/lib/charge";
 import { getProprietes } from "@/lib/propriete";
 import { toast } from "sonner";
-import { Charge } from "@/types/charge";
-import { ChargeService } from "@/services/chargeService";
 import { ChargeTable } from "./components/ChargeTable";
-import ChargeForm from "./components/ChargeForm";
 
 interface FormData {
   id_propriete: string;
   date_paiement: string;
   montant: string;
-  id_type_charge: number;
+  id_type_charge: string;
   description: string;
 }
 
+interface ChargeData {
+  id_charge: number;
+  propriete: {
+    id_propriete: number;
+    nom: string;
+  };
+  type_charge: {
+    id_type_charge: number;
+    libelle: string;
+  };
+  date_paiement: string;
+  montant: number;
+  description: string | null;
+}
+
+interface TypeCharge {
+  id_type_charge: number;
+  libelle: string;
+}
+
+interface Propriete {
+  id_propriete: number;
+  nom: string;
+}
+
 export default function ChargesPage() {
-  const [charges, setCharges] = useState<Charge[]>([]);
-  const [proprietes, setProprietes] = useState<any[]>([]);
-  const [typeCharges, setTypeCharges] = useState<any[]>([]);
+  const [charges, setCharges] = useState<ChargeData[]>([]);
+  const [proprietes, setProprietes] = useState<Propriete[]>([]);
+  const [typeCharges, setTypeCharges] = useState<TypeCharge[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingCharge, setEditingCharge] = useState<Charge | null>(null);
+  const [editingCharge, setEditingCharge] = useState<ChargeData | null>(null);
   const [formData, setFormData] = useState<FormData>({
     id_propriete: "",
     date_paiement: "",
     montant: "",
-    id_type_charge: 1,
+    id_type_charge: "1",
     description: "",
   });
-  const [selectedCharge, setSelectedCharge] = useState<Charge | null>(null);
 
   const loadCharges = async () => {
     try {
@@ -128,7 +134,7 @@ export default function ChargesPage() {
         id_propriete: parseInt(formData.id_propriete),
         date_paiement: formData.date_paiement,
         montant: parseFloat(formData.montant),
-        id_type_charge: formData.id_type_charge,
+        id_type_charge: parseInt(formData.id_type_charge),
         description: formData.description,
       };
 
@@ -153,7 +159,7 @@ export default function ChargesPage() {
           id_propriete: "",
           date_paiement: "",
           montant: "",
-          id_type_charge: 1,
+          id_type_charge: "1",
           description: "",
         });
         setEditingCharge(null); // On réinitialise la charge en cours de modification
@@ -174,13 +180,13 @@ export default function ChargesPage() {
   };
 
   // Gérer l'édition de la charge
-  const handleEdit = (charge: Charge) => {
+  const handleEdit = (charge: ChargeData) => {
     setEditingCharge(charge);
     setFormData({
       id_propriete: charge.propriete.id_propriete.toString(),
-      date_paiement: charge.date_paiement.split("T")[0],
+      date_paiement: charge.date_paiement,
       montant: charge.montant.toString(),
-      id_type_charge: charge.type_charge.id_type_charge,
+      id_type_charge: charge.type_charge.id_type_charge.toString(),
       description: charge.description || "",
     });
     setIsFormOpen(true);
@@ -192,7 +198,7 @@ export default function ChargesPage() {
       id_propriete: "",
       date_paiement: "",
       montant: "",
-      id_type_charge: 1,
+      id_type_charge: "1",
       description: "",
     });
     setIsFormOpen(true);
@@ -212,60 +218,6 @@ export default function ChargesPage() {
     } catch (error) {
       console.error("Erreur:", error);
       toast.error("Erreur lors de la suppression de la charge");
-    }
-  };
-
-  // Gérer la création de la charge
-  const handleCreateCharge = async (charge: Omit<Charge, "id_charge">) => {
-    const result = await createCharge({
-      // On crée les données de la charge
-      id_propriete: parseInt(charge.propriete.id_propriete.toString()),
-      date_paiement: charge.date_paiement,
-      montant: charge.montant,
-      id_type_charge: charge.type_charge.id_type_charge,
-      description: charge.description || undefined,
-    });
-
-    if (result.success) {
-      await loadCharges(); // On recharge les charges pour actualiser la liste
-      setIsFormOpen(false);
-    } else {
-      setError(result.error || "Erreur lors de la création de la charge");
-    }
-  };
-
-  // Gérer la mise à jour de la charge
-  const handleUpdateCharge = async (id: number, charge: Partial<Charge>) => {
-    const result = await updateCharge(id, {
-      id_propriete: parseInt(charge.propriete?.id_propriete.toString() || "0"),
-      date_paiement: charge.date_paiement || "",
-      montant: charge.montant || 0,
-      id_type_charge: charge.type_charge?.id_type_charge || 0,
-      description: charge.description || undefined,
-    });
-
-    if (result.success) {
-      await loadCharges();
-      setIsFormOpen(false);
-      setSelectedCharge(null);
-    } else {
-      setError(result.error || "Erreur lors de la mise à jour de la charge");
-    }
-  };
-
-  // Gérer la suppression de la charge
-  const handleDeleteCharge = async (id: number) => {
-    const result = await deleteCharge(id);
-    if (result.success) {
-      await loadCharges();
-    } else {
-      setError(result.error || "Erreur lors de la suppression de la charge");
-    }
-  };
-
-  const handleUpdateChargeWrapper = async (data: any) => {
-    if (selectedCharge) {
-      await handleUpdateCharge(selectedCharge.id_charge, data);
     }
   };
 
@@ -295,7 +247,7 @@ export default function ChargesPage() {
         <div className="flex flex-col items-center justify-center py-12 space-y-4">
           <Euro className="h-12 w-12 text-gray-400" />
           <p className="text-gray-600">
-            Vous n'avez pas encore de charges. Ajoutez-en une !
+            Vous n&apos;avez pas encore de charges. Ajoutez-en une !
           </p>
         </div>
 
@@ -326,7 +278,7 @@ export default function ChargesPage() {
                       id_propriete: "",
                       date_paiement: "",
                       montant: "",
-                      id_type_charge: 1,
+                      id_type_charge: "1",
                       description: "",
                     });
                   }}
@@ -350,8 +302,8 @@ export default function ChargesPage() {
                       required
                     >
                       <option value="">Sélectionnez une propriété</option>
-                      {proprietes.map((prop) => (
-                        <option key={prop.id_propriete} value={prop.id_propriete}>
+                      {proprietes.map((prop: Propriete) => (
+                        <option key={prop.id_propriete} value={prop.id_propriete.toString()}>
                           {prop.nom}
                         </option>
                       ))}
@@ -384,8 +336,8 @@ export default function ChargesPage() {
                       required
                     >
                       <option value="">Sélectionnez un type</option>
-                      {typeCharges.map((type) => (
-                        <option key={type.id_type_charge} value={type.id_type_charge}>
+                      {typeCharges.map((type: TypeCharge) => (
+                        <option key={type.id_type_charge} value={type.id_type_charge.toString()}>
                           {type.libelle}
                         </option>
                       ))}
@@ -433,7 +385,7 @@ export default function ChargesPage() {
                         id_propriete: "",
                         date_paiement: "",
                         montant: "",
-                        id_type_charge: 1,
+                        id_type_charge: "1",
                         description: "",
                       });
                     }}
@@ -514,7 +466,7 @@ export default function ChargesPage() {
                     id_propriete: "",
                     date_paiement: "",
                     montant: "",
-                    id_type_charge: 1,
+                    id_type_charge: "1",
                     description: "",
                   });
                 }}
@@ -538,8 +490,8 @@ export default function ChargesPage() {
                     required
                   >
                     <option value="">Sélectionnez une propriété</option>
-                    {proprietes.map((prop) => (
-                      <option key={prop.id_propriete} value={prop.id_propriete}>
+                    {proprietes.map((prop: Propriete) => (
+                      <option key={prop.id_propriete} value={prop.id_propriete.toString()}>
                         {prop.nom}
                       </option>
                     ))}
@@ -572,8 +524,8 @@ export default function ChargesPage() {
                     required
                   >
                     <option value="">Sélectionnez un type</option>
-                    {typeCharges.map((type) => (
-                      <option key={type.id_type_charge} value={type.id_type_charge}>
+                    {typeCharges.map((type: TypeCharge) => (
+                      <option key={type.id_type_charge} value={type.id_type_charge.toString()}>
                         {type.libelle}
                       </option>
                     ))}
@@ -621,7 +573,7 @@ export default function ChargesPage() {
                       id_propriete: "",
                       date_paiement: "",
                       montant: "",
-                      id_type_charge: 1,
+                      id_type_charge: "1",
                       description: "",
                     });
                   }}

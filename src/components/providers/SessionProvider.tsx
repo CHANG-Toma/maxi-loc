@@ -39,7 +39,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       const userData = await getCurrentUser();
       setUser(userData);
     } catch (err) {
-      console.error("Erreur lors du chargement de l'utilisateur:", err);
+      console.error("Erreur lors du chargement de l&apos;utilisateur:", err);
       setError("Impossible de charger les données utilisateur");
     } finally {
       setLoading(false);

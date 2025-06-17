@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { motion } from "framer-motion";
@@ -13,12 +12,10 @@ export default function ForgotPassword() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setErrors({});
     setIsLoading(true);
 
     try {
@@ -30,7 +27,7 @@ export default function ForgotPassword() {
       } else {
         setMessage(result.error || "Une erreur est survenue. Veuillez réessayer.");
       }
-    } catch (error) {
+    } catch {
       setMessage("Une erreur est survenue. Veuillez réessayer.");
     } finally {
       setIsLoading(false);
@@ -93,11 +90,8 @@ export default function ForgotPassword() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className={`bg-white ${errors.email ? "border-red-500" : ""}`}
+                  className={`bg-white`}
                 />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-                )}
               </div>
             </div>
 

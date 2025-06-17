@@ -60,8 +60,10 @@ export async function createPropriete(data: CreateProprieteData) {
         details: error.errors 
       };
     }
+    console.error("Erreur lors de la création de la propriété:", error);
     return { 
       success: false, 
+      error: "Une erreur est survenue lors de la création de la propriété"
     };
   }
 }
@@ -103,6 +105,7 @@ export async function getProprietes() {
 
     return { success: true, proprietes };
   } catch (error) {
+    console.error("Erreur lors de la récupération des propriétés:", error);
     return { 
       success: false, 
       error: "Une erreur est survenue lors de la récupération des propriétés" 
@@ -209,6 +212,7 @@ export async function deletePropriete(id: number) {
 
     return { success: true };
   } catch (error) {
+    console.error("Erreur lors de la suppression de la propriété:", error);
     return { 
       success: false, 
       error: "Une erreur est survenue lors de la suppression de la propriété" 

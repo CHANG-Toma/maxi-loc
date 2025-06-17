@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Save,
@@ -44,15 +44,12 @@ export default function SettingsPage() {
   // useSession pour charger les données de l'utilisateur
   const { user, loading } = useSession();
 
-  if (loading) return <div>Chargement...</div>;
-  if (!user) return <div>Session invalide, veuillez vous reconnecter</div>;
-
-  // État pour les données du profil, initialisé avec les infos du user
+  // État pour les données du profil
   const [profile, setProfile] = useState<ProfileData>({
-    firstName: user.prenom || "",
-    lastName: user.nom || "",
-    email: user.email || "",
-    phone: user.telephone || "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
   });
 
   // État pour suivre les modifications
@@ -84,6 +81,29 @@ export default function SettingsPage() {
     confirmPassword: false,
   });
 
+  // État pour les notifications
+  const [notifications, setNotifications] = useState({
+    newBookings: true,
+    payments: true,
+    messages: true,
+    systemUpdates: true,
+  });
+
+  // Mettre à jour le profil avec les données de l'utilisateur une fois chargées
+  useEffect(() => {
+    if (user) {
+      setProfile({
+        firstName: user.prenom || "",
+        lastName: user.nom || "",
+        email: user.email || "",
+        phone: user.telephone || "",
+      });
+    }
+  }, [user]);
+
+  if (loading) return <div>Chargement...</div>;
+  if (!user) return <div>Session invalide, veuillez vous reconnecter</div>;
+
   // Fonction pour mettre à jour un champ
   const handleFieldChange = (field: string, value: string) => {
     setModifiedFields((prev) => ({ ...prev, [field]: value }));
@@ -111,20 +131,13 @@ export default function SettingsPage() {
     } 
     // Afficher le message d'erreur
     catch (error) {
+      console.error("Erreur lors de la sauvegarde du profil:", error);
       setFeedback({
         type: "error",
         message: "Une erreur inattendue est survenue. Veuillez réessayer.",
       });
     }
   };
-
-  // Add state for switch values
-  const [notifications, setNotifications] = useState({
-    newBookings: true,
-    payments: true,
-    messages: true,
-    systemUpdates: true,
-  });
 
   // Handle switch toggle
   const handleSwitchToggle = (name: string) => {

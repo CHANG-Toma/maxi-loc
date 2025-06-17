@@ -20,25 +20,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu";
-import DashboardLayout from "../layout";
-import { useRouter } from "next/navigation";
 import {
   ProprieteService,
   Propriete,
   ProprieteFormData,
 } from "@/services/proprieteService";
 
-// Fonction utilitaire pour récupérer un cookie
-function getCookie(name: string): string | undefined {
-  if (typeof document === "undefined") return undefined;
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(";").shift();
-  return undefined;
-}
-
 export default function PropertiesPage() {
-  const router = useRouter();
   const [proprietes, setProprietes] = useState<Propriete[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -203,7 +191,7 @@ export default function PropertiesPage() {
         <div className="flex flex-col items-center justify-center py-12 space-y-4">
           <Building2 className="h-12 w-12 text-gray-400" />
           <p className="text-gray-600">
-            Vous n'avez pas encore de propriétés. Ajoutez-en une !
+            Vous n&apos;avez pas encore de propriétés. Ajoutez-en une !
           </p>
         </div>
 

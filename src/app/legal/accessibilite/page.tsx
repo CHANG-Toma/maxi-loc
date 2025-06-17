@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 // Composant pour la page d'accessibilité
 
 export default function AccessibilityPage() {
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode] = useState(true);
   const router = useRouter();
 
   return (
@@ -45,7 +45,7 @@ export default function AccessibilityPage() {
           <h1 className={`text-4xl font-bold mb-8 ${
             isDarkMode ? "text-white" : "text-gray-900"
           }`}>
-            Déclaration d'accessibilité
+            Déclaration d&apos;accessibilité
           </h1>
 
           <div className={`space-y-8 ${isDarkMode ? "text-gray-300" : "text-gray-700"}`}>
@@ -56,13 +56,13 @@ export default function AccessibilityPage() {
                 Conformité
               </h2>
               <p className="mb-4">
-                Maxiloc s'engage à rendre son site internet accessible conformément à l'article 47 de la loi n° 2005-102 du 11 février 2005.
+                Maxiloc s&apos;engage à rendre son site internet accessible conformément à l&apos;article 47 de la loi n° 2005-102 du 11 février 2005.
               </p>
               <p>
                 À cette fin, nous mettons en œuvre la stratégie et les actions suivantes :
               </p>
               <ul className="list-disc pl-6 mt-4 space-y-2">
-                <li>Mise en œuvre de la politique d'accessibilité</li>
+                <li>Mise en œuvre de la politique d&apos;accessibilité</li>
                 <li>Formation des équipes</li>
                 <li>Audit de conformité RGAA</li>
                 <li>Correction des non-conformités</li>
@@ -76,7 +76,7 @@ export default function AccessibilityPage() {
                 Résultats des tests
               </h2>
               <p className="mb-4">
-                L'audit de conformité réalisé révèle que le site est conforme au RGAA version 4.1 avec un taux de conformité de 100%.
+                L&apos;audit de conformité réalisé révèle que le site est conforme au RGAA version 4.1 avec un taux de conformité de 100%.
               </p>
               <div className={`p-6 rounded-lg ${
                 isDarkMode ? "bg-gray-800" : "bg-gray-100"
@@ -102,10 +102,10 @@ export default function AccessibilityPage() {
                 Améliorations et contact
               </h2>
               <p className="mb-4">
-                Nous nous engageons à prendre les mesures nécessaires pour atteindre un niveau d'accessibilité conforme aux exigences légales.
+                Nous nous engageons à prendre les mesures nécessaires pour atteindre un niveau d&apos;accessibilité conforme aux exigences légales.
               </p>
               <p className="mb-4">
-                Si vous constatez un défaut d'accessibilité vous empêchant d'accéder à un contenu ou une fonctionnalité du site, merci de nous le signaler par email à l'adresse suivante : accessibility@maxiloc.com
+                Si vous constatez un défaut d&apos;accessibilité vous empêchant d&apos;accéder à un contenu ou une fonctionnalité du site, merci de nous le signaler par email à l&apos;adresse suivante : accessibility@maxiloc.com
               </p>
               <p>
                 Nous nous engageons à vous apporter une réponse dans un délai de 2 jours ouvrés.
@@ -119,7 +119,7 @@ export default function AccessibilityPage() {
                 Défenseur des droits
               </h2>
               <p>
-                Si vous constatez un défaut d'accessibilité vous empêchant d'accéder à un contenu ou une fonctionnalité du site, que vous nous le signalez et que vous ne parvenez pas à obtenir une réponse rapide de notre part, vous êtes en droit de faire parvenir vos doléances ou une demande de saisine au Défenseur des droits.
+                Si vous constatez un défaut d&apos;accessibilité vous empêchant d&apos;accéder à un contenu ou une fonctionnalité du site, que vous nous le signalez et que vous ne parvenez pas à obtenir une réponse rapide de notre part, vous êtes en droit de faire parvenir vos doléances ou une demande de saisine au Défenseur des droits.
               </p>
             </section>
 
@@ -142,15 +142,15 @@ export default function AccessibilityPage() {
               <h2 className={`text-2xl font-semibold mb-4 ${
                 isDarkMode ? "text-white" : "text-gray-900"
               }`}>
-                Agents utilisateurs et technologies d'assistance
+                Agents utilisateurs et technologies d&apos;assistance
               </h2>
               <p className="mb-4">
                 Le site a été testé avec les combinaisons suivantes :
               </p>
               <ul className="list-disc pl-6 space-y-2">
                 <li>Navigateurs : Chrome, Firefox, Safari, Edge</li>
-                <li>Lecteurs d'écran : NVDA, VoiceOver</li>
-                <li>Outils d'agrandissement : ZoomText</li>
+                <li>Lecteurs d&apos;écran : NVDA, VoiceOver</li>
+                <li>Outils d&apos;agrandissement : ZoomText</li>
                 <li>Outils de navigation au clavier</li>
               </ul>
             </section>

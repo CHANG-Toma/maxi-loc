@@ -1,8 +1,6 @@
 import { getProprietes } from "@/lib/propriete";
 import { getReservations } from "@/lib/reservation";
-import { getCharges } from "@/lib/charge";
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
 
 export interface DashboardStats {
   revenus_mensuels: number;
@@ -26,6 +24,15 @@ export interface ReservationRecente {
   date: string;
 }
 
+interface Reservation {
+  date_debut: string;
+  prix_total: number;
+}
+
+interface Propriete {
+  date_creation: string;
+}
+
 export class OverviewService {
   static async getDashboardStats(): Promise<DashboardStats> {
     try {
@@ -40,11 +47,11 @@ export class OverviewService {
       if (reservationsResult.success && reservationsResult.reservations) {
         const now = new Date();
         revenus_mensuels = reservationsResult.reservations
-          .filter((r: any) => {
+          .filter((r: Reservation) => {
             const d = new Date(r.date_debut);
             return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
           })
-          .reduce((sum: number, r: any) => sum + (r.prix_total || 0), 0);
+          .reduce((sum: number, r: Reservation) => sum + (r.prix_total || 0), 0);
       }
 
       // Propriétés actives
@@ -57,7 +64,7 @@ export class OverviewService {
       if (reservationsResult.success && reservationsResult.reservations) {
         const now = new Date();
         reservations = reservationsResult.reservations
-          .filter((r: any) => {
+          .filter((r: Reservation) => {
             const d = new Date(r.date_debut);
             return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
           })
@@ -109,11 +116,11 @@ export class OverviewService {
         // Grouper les réservations par mois
         const revenusParMois = moisLabels.map(({ year, month, label }) => {
           const montant = reservationsResult.reservations
-            .filter((r: any) => {
+            .filter((r: Reservation) => {
               const d = new Date(r.date_debut);
               return d.getFullYear() === year && d.getMonth() === month;
             })
-            .reduce((sum: number, r: any) => sum + (r.prix_total || 0), 0);
+            .reduce((sum: number, r: Reservation) => sum + (r.prix_total || 0), 0);
           return { mois: label.charAt(0).toUpperCase() + label.slice(1), montant };
         });
 
@@ -152,7 +159,7 @@ export class OverviewService {
       const result = await getReservations();
       if (result.success) {
         return result.reservations
-          .sort((a, b) => new Date(b.date_debut).getTime() - new Date(a.date_debut).getTime())
+          .sort((a: Reservation, b: Reservation) => new Date(b.date_debut).getTime() - new Date(a.date_debut).getTime())
           .slice(0, 5);
       }
       return [];
@@ -167,7 +174,7 @@ export class OverviewService {
       const result = await getProprietes();
       if (result.success) {
         return result.proprietes
-          .sort((a, b) => new Date(b.date_creation).getTime() - new Date(a.date_creation).getTime())
+          .sort((a: Propriete, b: Propriete) => new Date(b.date_creation).getTime() - new Date(a.date_creation).getTime())
           .slice(0, 5);
       }
       return [];

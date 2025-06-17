@@ -4,23 +4,11 @@ import { prisma } from "@/lib/prisma";
 import { validateSession } from "@/lib/session";
 import { cookies } from 'next/headers';
 
-// Fonction utilitaire pour récupérer un cookie
-function getCookie(name: string): string | undefined {
-  if (typeof document === 'undefined') return undefined;
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) {
-    const cookieValue = parts.pop()?.split(';').shift();
-    return cookieValue ? decodeURIComponent(cookieValue) : undefined;
-  }
-  return undefined;
-}
-
 interface ReservationData {
   id_propriete: number;
   date_debut: string;
   date_fin: string;
-  prix_total: number;
+  prix_total: number
   id_statut_reservation: number;
 }
 

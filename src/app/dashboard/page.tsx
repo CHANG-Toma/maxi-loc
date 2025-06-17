@@ -1,12 +1,10 @@
 "use client"
 
-import { motion } from "framer-motion";
 import { 
   BarChart3, 
   Building2, 
   Calendar, 
-  DollarSign, 
-  Users2 
+  DollarSign
 } from "lucide-react";
 import {
   BarChart,
@@ -104,7 +102,7 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-black">Taux d'Occupation</CardTitle>
+            <CardTitle className="text-sm font-medium text-black">Taux d&apos;Occupation</CardTitle>
             <BarChart3 className="h-4 w-4 text-black" />
           </CardHeader>
           <CardContent>

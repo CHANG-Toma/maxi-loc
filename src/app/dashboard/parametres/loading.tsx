@@ -1,9 +1,9 @@
-import { validateSession } from "@/lib/session";
 import { cookies } from "next/headers";
+import { validateSession } from "@/lib/session";
 
 export async function getUserData() {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const sessionToken = cookieStore.get("session")?.value;
     
     if (!sessionToken) {

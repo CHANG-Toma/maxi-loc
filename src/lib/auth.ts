@@ -20,7 +20,7 @@ export async function getCurrentUser() {
     // Valider la session et retourner l'utilisateur
     return await validateSession(sessionToken);
   } catch (error) {
-    console.error("Erreur lors de la récupération de l'utilisateur:", error);
+    console.error("Erreur lors de la récupération de l&apos;utilisateur:", error);
     return null;
   }
 }

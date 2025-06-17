@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/sidebar";
 import { DashboardService } from "@/services/dashboardService";
 import { Button } from "@/components/ui/button";
-import { Menu, User, LogOut } from "lucide-react";
-import { motion } from "framer-motion";
+import { User, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,

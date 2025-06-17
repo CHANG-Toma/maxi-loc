@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { BarChart, PieChart, Loader2 } from "lucide-react";
-import { Button } from "../../../components/ui/button";
 import {
   BarChart as RechartsBarChart,
   Bar,
@@ -20,21 +19,24 @@ import {
 import { getChargesParMois, getChargesParType, getChargesParPropriete } from "@/lib/rapport";
 import { Card, CardContent } from "../../../components/ui/card";
 
+interface ChargeType {
+  name: string;
+  value: number;
+}
+
 export default function ReportsPage() {
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [chargesParMois, setChargesParMois] = useState<any[]>([]);
-  const [chargesParType, setChargesParType] = useState<any[]>([]);
-  const [chargesParPropriete, setChargesParPropriete] = useState<any[]>([]);
+  const [chargesParMois, setChargesParMois] = useState<unknown[]>([]);
+  const [chargesParType, setChargesParType] = useState<ChargeType[]>([]);
+  const [chargesParPropriete, setChargesParPropriete] = useState<unknown[]>([]);
   const [totalCharges, setTotalCharges] = useState(0);
   const [nbCharges, setNbCharges] = useState(0);
-  const [topProprietes, setTopProprietes] = useState<any[]>([]);
+  const [topProprietes, setTopProprietes] = useState<unknown[]>([]);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setIsLoading(true);
-        setError(null);
 
         // Charger toutes les données
         const [moisResult, typeResult, proprieteResult] = await Promise.all([
@@ -64,11 +66,10 @@ export default function ReportsPage() {
         }
 
         if (!moisResult.success || !typeResult.success || !proprieteResult.success) {
-          setError("Erreur lors du chargement des données");
+          console.error("Erreur lors du chargement des données");
         }
       } catch (error) {
         console.error("Erreur lors du chargement des données:", error);
-        setError("Une erreur est survenue lors du chargement des données");
       } finally {
         setIsLoading(false);
       }
@@ -194,7 +195,7 @@ export default function ReportsPage() {
             <h3 className="text-lg font-semibold text-gray-900">Répartition des charges par propriété</h3>
           </div>
           <div className="space-y-4">
-            {chargesParPropriete.map((item, index) => (
+            {chargesParPropriete.map((item) => (
               <div key={item.name}>
                 <div className="flex justify-between mb-1">
                   <span className="text-sm font-medium text-gray-900">{item.name}</span>
