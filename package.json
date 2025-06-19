@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate --accelerate",
-    "deploy:db": "prisma db push"
+    "deploy:db": "prisma db push",
+    "vercel-build": "prisma generate --accelerate && prisma db push && next build"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
