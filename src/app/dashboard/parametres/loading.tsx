@@ -1,9 +1,12 @@
-import { validateSession } from "@/lib/session";
 import { cookies } from "next/headers";
+import { validateSession } from "@/lib/session";
+
+// Force dynamic rendering to prevent prerendering issues with Prisma
+export const dynamic = "force-dynamic";
 
 export async function getUserData() {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const sessionToken = cookieStore.get("session")?.value;
     
     if (!sessionToken) {

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { TypeCharge } from '@/lib/typeCharge';
-import { Propriete } from '@/lib/propriete';
+import { TypeCharge } from '@/types/typeCharge';
+import { Propriete } from '@/types/propriete';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,33 +13,39 @@ import {
 } from "@/components/ui/select";
 import { X } from "lucide-react";
 import { motion } from "framer-motion";
-import { useEffect } from "react";
-import { getTypeCharges } from "@/lib/charge";
-import { getProprietes } from "@/lib/propriete";
+import { Charge } from "@/types/charge";
 
-interface ChargeFormProps {
-  onSubmit: (data: any) => Promise<void>;
+type ChargeFormProps = {
+  onSubmit: (data: Charge) => void;
+  initialData?: Charge;
   onCancel: () => void;
   typeCharges: TypeCharge[];
   proprietes: Propriete[];
-}
+};
 
-export default function ChargeForm({ onSubmit, onCancel, typeCharges, proprietes }: ChargeFormProps) {
+export default function ChargeForm({ onSubmit, onCancel, typeCharges, proprietes, initialData }: ChargeFormProps) {
   const [formData, setFormData] = useState({
-    id_propriete: '',
-    date_paiement: '',
-    montant: '',
-    id_type_charge: '',
-    description: ''
+    id_propriete: initialData?.propriete.id_propriete.toString() || '',
+    date_paiement: initialData?.date_paiement || '',
+    montant: initialData?.montant.toString() || '',
+    id_type_charge: initialData?.type_charge.id_type_charge.toString() || '',
+    description: initialData?.description || ''
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const chargeData = {
-      id_propriete: parseInt(formData.id_propriete),
+    const chargeData: Charge = {
+      id_charge: initialData?.id_charge || 0,
+      propriete: {
+        id_propriete: parseInt(formData.id_propriete.toString()),
+        nom: proprietes.find(p => p.id_propriete === parseInt(formData.id_propriete.toString()))?.nom || ''
+      },
       date_paiement: formData.date_paiement,
-      montant: parseFloat(formData.montant),
-      id_type_charge: parseInt(formData.id_type_charge),
+      montant: parseFloat(formData.montant.toString()),
+      type_charge: {
+        id_type_charge: parseInt(formData.id_type_charge.toString()),
+        libelle: typeCharges.find(t => t.id_type_charge === parseInt(formData.id_type_charge.toString()))?.libelle || ''
+      },
       description: formData.description
     };
     await onSubmit(chargeData);

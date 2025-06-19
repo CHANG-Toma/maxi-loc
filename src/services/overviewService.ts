@@ -1,8 +1,6 @@
 import { getProprietes } from "@/lib/propriete";
 import { getReservations } from "@/lib/reservation";
-import { getCharges } from "@/lib/charge";
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
 
 export interface DashboardStats {
   revenus_mensuels: number;
@@ -24,6 +22,59 @@ export interface ReservationRecente {
   id: number;
   propriete: string;
   date: string;
+  prix: number;
+  statut: string;
+  ville: string;
+}
+
+interface Reservation {
+  date_debut: string;
+  prix_total: number;
+}
+
+interface ReservationWithDetails {
+  id_reservation: number;
+  propriete: {
+    id_propriete: number;
+    nom: string;
+    ville: string;
+    pays: string;
+  };
+  date_debut: string;
+  date_fin: string;
+  id_statut_reservation: number;
+  prix_total: number;
+  statutReservation?: {
+    id_statut_reservation: number;
+    libelle: string;
+  };
+}
+
+interface Propriete {
+  id_propriete: number;
+  nom: string;
+  adresse: string;
+  ville: string;
+  code_postal: string;
+  pays: string;
+  nb_pieces: number;
+  superficie: number;
+  description: string | null;
+  id_utilisateur: number;
+  id_type_propriete: number;
+  typePropriete: {
+    id_type_propriete: number;
+    libelle: string;
+  };
+  plateformes: Array<{
+    id_propriete: number;
+    id_plateforme: number;
+    plateforme: {
+      nom: string | null;
+      id_plateforme: number;
+      site_web: string | null;
+    };
+  }>;
 }
 
 export class OverviewService {
@@ -40,11 +91,11 @@ export class OverviewService {
       if (reservationsResult.success && reservationsResult.reservations) {
         const now = new Date();
         revenus_mensuels = reservationsResult.reservations
-          .filter((r: any) => {
+          .filter((r: Reservation) => {
             const d = new Date(r.date_debut);
             return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
           })
-          .reduce((sum: number, r: any) => sum + (r.prix_total || 0), 0);
+          .reduce((sum: number, r: Reservation) => sum + (r.prix_total || 0), 0);
       }
 
       // Propriétés actives
@@ -57,7 +108,7 @@ export class OverviewService {
       if (reservationsResult.success && reservationsResult.reservations) {
         const now = new Date();
         reservations = reservationsResult.reservations
-          .filter((r: any) => {
+          .filter((r: Reservation) => {
             const d = new Date(r.date_debut);
             return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
           })
@@ -109,11 +160,11 @@ export class OverviewService {
         // Grouper les réservations par mois
         const revenusParMois = moisLabels.map(({ year, month, label }) => {
           const montant = reservationsResult.reservations
-            .filter((r: any) => {
+            .filter((r: Reservation) => {
               const d = new Date(r.date_debut);
               return d.getFullYear() === year && d.getMonth() === month;
             })
-            .reduce((sum: number, r: any) => sum + (r.prix_total || 0), 0);
+            .reduce((sum: number, r: Reservation) => sum + (r.prix_total || 0), 0);
           return { mois: label.charAt(0).toUpperCase() + label.slice(1), montant };
         });
 
@@ -127,32 +178,37 @@ export class OverviewService {
   }
 
   static async getReservationsRecentes(): Promise<ReservationRecente[]> {
-    // Simuler un appel API
-    return [
-      {
-        id: 1,
-        propriete: "Appartement Paris 15",
-        date: format(new Date(), 'dd/MM/yyyy')
-      },
-      {
-        id: 2,
-        propriete: "Appartement Paris 13",
-        date: format(new Date(Date.now() - 86400000), 'dd/MM/yyyy')
-      },
-      {
-        id: 3,
-        propriete: "Appartement Paris 15",
-        date: format(new Date(Date.now() - 172800000), 'dd/MM/yyyy')
+    try {
+      const result = await getReservations();
+      if (result.success && result.reservations) {
+        // Trier par date de début (les plus récentes en premier) et prendre les 5 dernières
+        const reservationsRecentes = result.reservations
+          .sort((a: ReservationWithDetails, b: ReservationWithDetails) => new Date(b.date_debut).getTime() - new Date(a.date_debut).getTime())
+          .slice(0, 5)
+          .map((reservation: ReservationWithDetails) => ({
+            id: reservation.id_reservation,
+            propriete: reservation.propriete.nom,
+            date: format(new Date(reservation.date_debut), 'dd/MM/yyyy'),
+            prix: reservation.prix_total || 0,
+            statut: reservation.statutReservation?.libelle || 'En attente',
+            ville: reservation.propriete.ville
+          }));
+        
+        return reservationsRecentes;
       }
-    ];
+      return [];
+    } catch (error) {
+      console.error("Erreur lors de la récupération des réservations récentes:", error);
+      return [];
+    }
   }
 
   static async getRecentReservations() {
     try {
       const result = await getReservations();
-      if (result.success) {
+      if (result.success && result.reservations) {
         return result.reservations
-          .sort((a, b) => new Date(b.date_debut).getTime() - new Date(a.date_debut).getTime())
+          .sort((a: Reservation, b: Reservation) => new Date(b.date_debut).getTime() - new Date(a.date_debut).getTime())
           .slice(0, 5);
       }
       return [];
@@ -165,9 +221,9 @@ export class OverviewService {
   static async getRecentProprietes() {
     try {
       const result = await getProprietes();
-      if (result.success) {
+      if (result.success && result.proprietes) {
         return result.proprietes
-          .sort((a, b) => new Date(b.date_creation).getTime() - new Date(a.date_creation).getTime())
+          .sort((a: Propriete, b: Propriete) => b.id_propriete - a.id_propriete)
           .slice(0, 5);
       }
       return [];

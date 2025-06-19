@@ -1,13 +1,5 @@
 "use client"
 
-import { motion } from "framer-motion";
-import { 
-  BarChart3, 
-  Building2, 
-  Calendar, 
-  DollarSign, 
-  Users2 
-} from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -17,36 +9,10 @@ import {
   Tooltip,
   ResponsiveContainer
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { OverviewService, DashboardStats, RevenusData, ReservationRecente } from "@/services/overviewService";
 import { useEffect, useState } from "react";
-import { cn } from "@/lib/utils";
-
-interface Reservation {
-  id_reservation: number;
-  propriete: {
-    id_propriete: number;
-    nom: string;
-  };
-  date_debut: string;
-  date_fin: string;
-  id_statut_reservation: number;
-  prix_total: number;
-  montant_total?: number;
-  statut?: string;
-}
-
-interface Propriete {
-  id_propriete: number;
-  nom: string;
-  ville: string;
-  pays: string;
-  typePropriete: {
-    id_type_propriete: number;
-    libelle: string;
-  };
-  nb_pieces: number;
-}
+import { Calendar } from "lucide-react";
 
 const formatNumber = (value: number | null): string => {
   if (value === null || value === undefined) return '0';
@@ -126,7 +92,7 @@ const Overview = () => {
         <Card className="bg-white">
           <CardContent className="p-6">
             <div className="flex flex-col space-y-1">
-              <span className="text-sm text-gray-500">Taux d'Occupation</span>
+              <span className="text-sm text-gray-500">Taux d&apos;Occupation</span>
               <span className="text-2xl font-bold">{formatNumber(stats.taux_occupation)}%</span>
               <span className="text-xs text-green-500">+{formatNumber(stats.variation_occupation)}% vs le dernier mois</span>
             </div>

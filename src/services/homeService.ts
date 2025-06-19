@@ -1,4 +1,3 @@
-import { LucideIcon } from "lucide-react";
 import { Rocket, Atom, CircuitBoard, Star, Globe2, Laptop2, LineChart, Shield } from "lucide-react";
 
 export interface Feature {

@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
 import {
   Home,
   Building2,
@@ -10,12 +8,9 @@ import {
   DollarSign,
   BarChart3,
   Settings,
-  LogOut,
-  User,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { DashboardService } from "@/services/dashboardService";
@@ -45,7 +40,7 @@ interface SidebarProps {
   onClose: () => void;
   navigationItems: ReturnType<typeof DashboardService.getNavigationItems>;
   userMenuItems: ReturnType<typeof DashboardService.getUserMenuItems>;
-  onLogout: () => void;
+  onLogout: () => Promise<void>;
 }
 
 export function Sidebar({
@@ -114,6 +109,44 @@ export function Sidebar({
             </TooltipProvider>
           ))}
         </nav>
+
+        <div className="p-4 border-t border-gray-200">
+          <div className="space-y-2">
+            {userMenuItems.map((item) => (
+              <TooltipProvider key={item.label}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className={cn(
+                        "w-full gap-3 mb-1 h-12 text-gray-900",
+                        "hover:bg-gray-100",
+                        isOpen ? "justify-start px-4" : "justify-center px-0"
+                      )}
+                      onClick={() => {
+                        if (item.action === 'logout') {
+                          onLogout();
+                        } else if (item.path) {
+                          router.push(item.path);
+                        }
+                      }}
+                    >
+                      <div className={cn("min-w-[20px] flex justify-center")}>
+                        {getIconComponent(item.icon)}
+                      </div>
+                      {isOpen && <span className="font-medium">{item.label}</span>}
+                    </Button>
+                  </TooltipTrigger>
+                  {!isOpen && (
+                    <TooltipContent side="right">
+                      <p>{item.label}</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -3,7 +3,6 @@
 // Backend pour la gestion des utilisateurs et des sessions
 
 import { prisma } from "@/lib/prisma";
-import { Utilisateur } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { cookies } from "next/headers";

@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { createUtilisateur } from "../../lib/utilisateur";
 import { Checkbox } from "../../components/ui/checkbox";
+import { ZodIssue } from "zod";
 
 export default function Signup() {
   const router = useRouter();
@@ -59,8 +59,8 @@ export default function Signup() {
         if (result.details) {
           // Gestion des erreurs de validation
           const validationErrors: Record<string, string> = {};
-          result.details.forEach((error: any) => {
-            const field = error.path[0];
+          result.details.forEach((error: ZodIssue) => {
+            const field = error.path[0].toString();
             validationErrors[field] = error.message;
           });
           setErrors(validationErrors);
@@ -69,6 +69,7 @@ export default function Signup() {
         }
       }
     } catch (error) {
+      console.error("Erreur lors de la création du compte:", error);
       setMessage('Une erreur est survenue lors de la création du compte.');
     } finally {
       setIsLoading(false);

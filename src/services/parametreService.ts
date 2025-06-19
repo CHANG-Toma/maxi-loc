@@ -1,6 +1,5 @@
 import { updateProfile, updatePassword } from "@/lib/utilisateur";
 import { validateSession } from "@/lib/session";
-import { getCookie } from "@/lib/cookie";
 
 export interface ProfileData {
   firstName: string;
@@ -84,7 +83,7 @@ export class ParametreService {
       if (Object.keys(dataToUpdate).length === 0) {
         return {
           success: false,
-          error: "Aucune modification n'a été effectuée"
+          error: "Aucune modification n&apos;a été effectuée"
         };
       }
 

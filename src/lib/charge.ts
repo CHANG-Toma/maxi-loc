@@ -4,6 +4,16 @@ import { prisma } from '@/lib/prisma'
 import { validateSession } from "@/lib/session";
 import { cookies } from 'next/headers';
 
+// Type pour les objets charge retournés par Prisma
+type PrismaCharge = {
+  id_charge: number;
+  propriete: { id_propriete: number; nom: string };
+  date_paiement: Date;
+  montant: number;
+  typeCharge: { id_type_charge: number; libelle: string };
+  description: string | null;
+};
+
 interface ChargeData {
   id_propriete: number;
   date_paiement: string;
@@ -50,7 +60,7 @@ export async function getCharges() {
       }
     });
 
-    const formattedCharges = charges.map(charge => ({
+    const formattedCharges = charges.map((charge: PrismaCharge) => ({
       id_charge: charge.id_charge,
       propriete: {
         id_propriete: charge.propriete.id_propriete,

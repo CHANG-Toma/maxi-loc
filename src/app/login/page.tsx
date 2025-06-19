@@ -25,11 +25,6 @@ export default function Login() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   // État pour le chargement
   const [isLoading, setIsLoading] = useState(false);
-  // État pour l'acceptation des CGU
-  const [cguAccepted, setCguAccepted] = useState(false);
-
-  // État pour le nombre de tentatives
-  const [loginAttempts, setLoginAttempts] = useState(0);
   // État pour le blocage du compte
   const [isBlocked, setIsBlocked] = useState(false);
   // État pour le temps de blocage
@@ -39,6 +34,9 @@ export default function Login() {
   // Max 5 tentatives si non c'est bloqué pour 15 minutes :)
   const MAX_ATTEMPTS = 5;
   const BLOCK_DURATION = 15 * 60; // 15 minutes en secondes
+
+  // État pour le nombre de tentatives
+  const [loginAttempts, setLoginAttempts] = useState(0);
 
   useEffect(() => {
     // Récupérer les tentatives stockées
@@ -64,7 +62,7 @@ export default function Login() {
         setIsBlocked(false);
       }
     }
-  }, []);
+  }, [BLOCK_DURATION]);
 
   // Gestion du blocage du compte si trop de tentatives
   useEffect(() => {
@@ -134,23 +132,12 @@ export default function Login() {
           setBlockTimeRemaining(BLOCK_DURATION);
           setMessage(`Trop de tentatives échouées. Compte bloqué pour ${BLOCK_DURATION / 60} minutes.`);
         } else {
-          // Si il y a des erreurs de validation
-          if (result.details) {
-            const validationErrors: Record<string, string> = {};
-
-            // Ajouter les erreurs de validation dans le tableau d'erreurs pour pouvoir les afficher
-            result.details.forEach((error: any) => {
-              const field = error.path[0];
-              validationErrors[field] = error.message;
-            });
-            setErrors(validationErrors);
-          } else {
-            // Si il n'y a pas d'erreurs de validation et que le compte n'est pas bloqué alors on affiche le message d'erreur
-            setMessage(result.error || `Erreur lors de la connexion. Il vous reste ${MAX_ATTEMPTS - newAttempts} tentative(s).`);
-          }
+          // Si il n'y a pas d'erreurs de validation et que le compte n'est pas bloqué alors on affiche le message d'erreur
+          setMessage(result.error || `Erreur lors de la connexion. Il vous reste ${MAX_ATTEMPTS - newAttempts} tentative(s).`);
         }
       }
     } catch (error) {
+      console.error("Erreur lors de la connexion:", error);
       setMessage("Une erreur est survenue lors de la connexion.");
     } finally {
       setIsLoading(false);

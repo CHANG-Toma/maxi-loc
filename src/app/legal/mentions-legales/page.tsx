@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { motion } from "framer-motion";
 import { useState } from "react";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 
 // Composant pour la page des mentions légales
 export default function MentionsLegales() {
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode] = useState(true);
   const router = useRouter();
 
   return (
@@ -109,7 +109,7 @@ export default function MentionsLegales() {
                 Propriété intellectuelle
               </h2>
               <p>
-                L'ensemble des éléments constituant le site (textes, graphismes, logiciels, photographies, images, vidéos, sons, plans, logos, marques, etc.) sont la propriété exclusive de Maxiloc ou de ses partenaires. Toute reproduction ou représentation, totale ou partielle, du site et de son contenu est interdite sans autorisation préalable.
+                L&apos;ensemble des éléments constituant le site (textes, graphismes, logiciels, photographies, images, vidéos, sons, plans, logos, marques, etc.) sont la propriété exclusive de Maxiloc ou de ses partenaires. Toute reproduction ou représentation, totale ou partielle, du site et de son contenu est interdite sans autorisation préalable.
               </p>
             </section>
 
@@ -120,7 +120,7 @@ export default function MentionsLegales() {
                 Protection des données personnelles
               </h2>
               <p>
-                Les données personnelles collectées sur le site sont traitées conformément à notre politique de confidentialité, accessible sur le site. Conformément à la loi "Informatique et Libertés" du 6 janvier 1978 modifiée et au Règlement Général sur la Protection des Données (RGPD), vous disposez d'un droit d'accès, de rectification et de suppression de vos données personnelles.
+                Les données personnelles collectées sur le site sont traitées conformément à notre politique de confidentialité, accessible sur le site. Conformément à la loi &quot;Informatique et Libertés&quot; du 6 janvier 1978 modifiée et au Règlement Général sur la Protection des Données (RGPD), vous disposez d&apos;un droit d&apos;accès, de rectification et de suppression de vos données personnelles.
               </p>
             </section>
 
@@ -131,7 +131,7 @@ export default function MentionsLegales() {
                 Cookies
               </h2>
               <p>
-                Le site utilise des cookies pour améliorer votre expérience de navigation. Pour plus d'informations sur l'utilisation des cookies, veuillez consulter notre politique de cookies.
+                Le site utilise des cookies pour améliorer votre expérience de navigation. Pour plus d&apos;informations sur l&apos;utilisation des cookies, veuillez consulter notre politique de cookies.
               </p>
             </section>
 

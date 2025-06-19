@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { motion } from "framer-motion";
@@ -13,12 +12,16 @@ export default function ForgotPassword() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Éviter l'hydratation côté serveur
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setErrors({});
     setIsLoading(true);
 
     try {
@@ -30,12 +33,25 @@ export default function ForgotPassword() {
       } else {
         setMessage(result.error || "Une erreur est survenue. Veuillez réessayer.");
       }
-    } catch (error) {
+    } catch {
       setMessage("Une erreur est survenue. Veuillez réessayer.");
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Éviter le rendu côté serveur pour éviter les problèmes de casse
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div className="sm:mx-auto sm:w-full sm:max-w-md">
+          <h2 className="text-center text-3xl font-bold tracking-tight text-gray-900">
+            Mot de passe oublié
+          </h2>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -93,11 +109,8 @@ export default function ForgotPassword() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className={`bg-white ${errors.email ? "border-red-500" : ""}`}
+                  className={`bg-white`}
                 />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-                )}
               </div>
             </div>
 

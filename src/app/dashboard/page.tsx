@@ -1,12 +1,10 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion";
 import { 
   BarChart3, 
   Building2, 
   Calendar, 
-  DollarSign, 
-  Users2 
+  DollarSign
 } from "lucide-react";
 import {
   BarChart,
@@ -104,7 +102,7 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-black">Taux d'Occupation</CardTitle>
+            <CardTitle className="text-sm font-medium text-black">Taux d&apos;Occupation</CardTitle>
             <BarChart3 className="h-4 w-4 text-black" />
           </CardHeader>
           <CardContent>
@@ -181,17 +179,38 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {reservationsRecentes.map((reservation) => (
-              <div key={reservation.id} className="flex items-center space-x-4 border-b border-gray-100 pb-4 last:border-0 last:pb-0">
-                <div className="p-2 bg-blue-50 rounded-full">
-                  <Calendar className="w-4 h-4 text-blue-500" />
+            {reservationsRecentes.length > 0 ? (
+              reservationsRecentes.map((reservation) => (
+                <div key={reservation.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center space-x-4">
+                    <div className="p-2 bg-blue-50 rounded-full">
+                      <Calendar className="w-4 h-4 text-blue-500" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-black">{reservation.propriete}</span>
+                      <span className="text-sm text-gray-500">{reservation.ville}</span>
+                      <span className="text-xs text-gray-400">Réservé le {reservation.date}</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end space-y-1">
+                    <span className="text-sm font-semibold text-green-600">{formatNumber(reservation.prix)} €</span>
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      reservation.statut === 'Confirmée' ? 'bg-green-100 text-green-700' :
+                      reservation.statut === 'En attente' ? 'bg-yellow-100 text-yellow-700' :
+                      reservation.statut === 'Annulée' ? 'bg-red-100 text-red-700' :
+                      'bg-gray-100 text-gray-700'
+                    }`}>
+                      {reservation.statut}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium text-black">Nouvelle réservation</span>
-                  <span className="text-sm text-gray-500">{reservation.propriete}</span>
-                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <Calendar className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                <p>Aucune réservation récente</p>
               </div>
-            ))}
+            )}
           </div>
         </CardContent>
       </Card>

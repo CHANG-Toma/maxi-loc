@@ -6,17 +6,17 @@ export class ChargeService {
     return [];
   }
 
-  static async createCharge(charge: Omit<Charge, "id_charge">): Promise<Charge> {
+  static async createCharge(/* TODO: charge: Omit<Charge, "id_charge"> */): Promise<Charge> {
     // TODO: Implémenter l'appel API pour créer une charge
     return {} as Charge;
   }
 
-  static async updateCharge(id: number, charge: Partial<Charge>): Promise<Charge> {
+  static async updateCharge(/* TODO: id: number, charge: Partial<Charge> */): Promise<Charge> {
     // TODO: Implémenter l'appel API pour mettre à jour une charge
     return {} as Charge;
   }
 
-  static async deleteCharge(id: number): Promise<void> {
+  static async deleteCharge(/* TODO: id: number */): Promise<void> {
     // TODO: Implémenter l'appel API pour supprimer une charge
   }
 } 
