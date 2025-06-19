@@ -22,11 +22,32 @@ export interface ReservationRecente {
   id: number;
   propriete: string;
   date: string;
+  prix: number;
+  statut: string;
+  ville: string;
 }
 
 interface Reservation {
   date_debut: string;
   prix_total: number;
+}
+
+interface ReservationWithDetails {
+  id_reservation: number;
+  propriete: {
+    id_propriete: number;
+    nom: string;
+    ville: string;
+    pays: string;
+  };
+  date_debut: string;
+  date_fin: string;
+  id_statut_reservation: number;
+  prix_total: number;
+  statutReservation?: {
+    id_statut_reservation: number;
+    libelle: string;
+  };
 }
 
 interface Propriete {
@@ -157,24 +178,29 @@ export class OverviewService {
   }
 
   static async getReservationsRecentes(): Promise<ReservationRecente[]> {
-    // Simuler un appel API
-    return [
-      {
-        id: 1,
-        propriete: "Appartement Paris 15",
-        date: format(new Date(), 'dd/MM/yyyy')
-      },
-      {
-        id: 2,
-        propriete: "Appartement Paris 13",
-        date: format(new Date(Date.now() - 86400000), 'dd/MM/yyyy')
-      },
-      {
-        id: 3,
-        propriete: "Appartement Paris 15",
-        date: format(new Date(Date.now() - 172800000), 'dd/MM/yyyy')
+    try {
+      const result = await getReservations();
+      if (result.success && result.reservations) {
+        // Trier par date de début (les plus récentes en premier) et prendre les 5 dernières
+        const reservationsRecentes = result.reservations
+          .sort((a: ReservationWithDetails, b: ReservationWithDetails) => new Date(b.date_debut).getTime() - new Date(a.date_debut).getTime())
+          .slice(0, 5)
+          .map((reservation: ReservationWithDetails) => ({
+            id: reservation.id_reservation,
+            propriete: reservation.propriete.nom,
+            date: format(new Date(reservation.date_debut), 'dd/MM/yyyy'),
+            prix: reservation.prix_total || 0,
+            statut: reservation.statutReservation?.libelle || 'En attente',
+            ville: reservation.propriete.ville
+          }));
+        
+        return reservationsRecentes;
       }
-    ];
+      return [];
+    } catch (error) {
+      console.error("Erreur lors de la récupération des réservations récentes:", error);
+      return [];
+    }
   }
 
   static async getRecentReservations() {
