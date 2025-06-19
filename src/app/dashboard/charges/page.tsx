@@ -16,6 +16,9 @@ import { getProprietes } from "@/lib/propriete";
 import { toast } from "sonner";
 import { ChargeTable } from "./components/ChargeTable";
 
+// Force dynamic rendering to prevent prerendering issues with Prisma
+export const dynamic = "force-dynamic";
+
 interface FormData {
   id_propriete: string;
   date_paiement: string;

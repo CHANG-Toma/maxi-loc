@@ -1,23 +1,26 @@
+'use server'
+
 import { prisma } from '@/lib/prisma'
+import { validateSession } from "@/lib/session";
+import { cookies } from 'next/headers';
 
-export class PlateformeService {
-  async getAll() {
-    return await prisma.plateforme.findMany()
+export async function getPlateformes() {
+  const token = (await cookies()).get('session')?.value;
+
+  if (!token) {
+    return { success: false, error: "Vous devez être connecté pour voir les plateformes" };
   }
 
-  async create(data: { nom: string, description: string, url: string }) {
-    return await prisma.plateforme.create({ data })
-  }
+  try {
+    const user = await validateSession(token);
+    if (!user) {
+      return { success: false, error: "Session invalide" };
+    }
 
-  async getById(id: number) {
-    return await prisma.plateforme.findUnique({ where: { id_plateforme: id } })
-  }
-
-  async update(id: number, data: { nom: string, description: string, url: string }) {
-    return await prisma.plateforme.update({ where: { id_plateforme: id }, data })
-  }
-
-  async delete(id: number) {
-    return await prisma.plateforme.delete({ where: { id_plateforme: id } })
+    const plateformes = await prisma.plateforme.findMany();
+    return { success: true, plateformes };
+  } catch (error) {
+    console.error("Erreur lors de la récupération des plateformes:", error);
+    return { success: false, error: "Une erreur est survenue lors de la récupération des plateformes" };
   }
 }

@@ -4,6 +4,16 @@ import { prisma } from "@/lib/prisma";
 import { validateSession } from "@/lib/session";
 import { cookies } from 'next/headers';
 
+// Type pour les objets reservation retournés par Prisma
+type PrismaReservation = {
+  id_reservation: number;
+  propriete: { id_propriete: number; nom: string; ville: string; pays: string };
+  date_debut: Date;
+  date_fin: Date;
+  prix_total: number | null;
+  statutReservation: { id_statut_reservation: number; libelle: string };
+};
+
 interface ReservationData {
   id_propriete: number;
   date_debut: string;
@@ -38,11 +48,13 @@ export async function getReservations() {
     });
 
     // Transformer les données pour correspondre à l'interface Reservation
-    const formattedReservations = reservations.map(res => ({
+    const formattedReservations = reservations.map((res: PrismaReservation) => ({
       id_reservation: res.id_reservation,
       propriete: {
         id_propriete: res.propriete.id_propriete,
-        nom: res.propriete.nom
+        nom: res.propriete.nom,
+        ville: res.propriete.ville,
+        pays: res.propriete.pays
       },
       date_debut: res.date_debut.toISOString(),
       date_fin: res.date_fin.toISOString(),

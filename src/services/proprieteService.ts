@@ -1,4 +1,6 @@
 import { getProprietes, createPropriete, updatePropriete, deletePropriete } from "@/lib/propriete";
+import { getTypesPropriete } from "@/lib/type_propriete";
+import { getPlateformes } from "@/lib/plateforme";
 
 export interface TypePropriete {
   id_type_propriete: number;
@@ -158,8 +160,12 @@ export class ProprieteService {
 
   static async getTypesPropriete(): Promise<{ success: boolean; types?: TypePropriete[]; error?: string }> {
     try {
-      const types = await db.typePropriete.findMany();
-      return { success: true, types };
+      const result = await getTypesPropriete();
+      if (result.success && result.types) {
+        return { success: true, types: result.types };
+      } else {
+        return { success: false, error: result.error || "Erreur lors de la récupération des types de propriété" };
+      }
     } catch (error) {
       console.error("Erreur lors de la récupération des types de propriété:", error);
       return { 
@@ -171,8 +177,12 @@ export class ProprieteService {
 
   static async getPlateformes(): Promise<{ success: boolean; plateformes?: Plateforme[]; error?: string }> {
     try {
-      const plateformes = await db.plateforme.findMany();
-      return { success: true, plateformes };
+      const result = await getPlateformes();
+      if (result.success && result.plateformes) {
+        return { success: true, plateformes: result.plateformes };
+      } else {
+        return { success: false, error: result.error || "Erreur lors de la récupération des plateformes" };
+      }
     } catch (error) {
       console.error("Erreur lors de la récupération des plateformes:", error);
       return { 

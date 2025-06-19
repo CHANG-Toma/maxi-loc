@@ -30,7 +30,30 @@ interface Reservation {
 }
 
 interface Propriete {
-  date_creation: string;
+  id_propriete: number;
+  nom: string;
+  adresse: string;
+  ville: string;
+  code_postal: string;
+  pays: string;
+  nb_pieces: number;
+  superficie: number;
+  description: string | null;
+  id_utilisateur: number;
+  id_type_propriete: number;
+  typePropriete: {
+    id_type_propriete: number;
+    libelle: string;
+  };
+  plateformes: Array<{
+    id_propriete: number;
+    id_plateforme: number;
+    plateforme: {
+      nom: string | null;
+      id_plateforme: number;
+      site_web: string | null;
+    };
+  }>;
 }
 
 export class OverviewService {
@@ -157,7 +180,7 @@ export class OverviewService {
   static async getRecentReservations() {
     try {
       const result = await getReservations();
-      if (result.success) {
+      if (result.success && result.reservations) {
         return result.reservations
           .sort((a: Reservation, b: Reservation) => new Date(b.date_debut).getTime() - new Date(a.date_debut).getTime())
           .slice(0, 5);
@@ -172,9 +195,9 @@ export class OverviewService {
   static async getRecentProprietes() {
     try {
       const result = await getProprietes();
-      if (result.success) {
+      if (result.success && result.proprietes) {
         return result.proprietes
-          .sort((a: Propriete, b: Propriete) => new Date(b.date_creation).getTime() - new Date(a.date_creation).getTime())
+          .sort((a: Propriete, b: Propriete) => b.id_propriete - a.id_propriete)
           .slice(0, 5);
       }
       return [];

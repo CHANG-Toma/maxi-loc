@@ -9,7 +9,6 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { login } from "../../lib/auth";
 import ReCAPTCHA from "react-google-recaptcha";
-import { ZodIssue } from "zod";
 
 export default function Login() {
   const router = useRouter();
@@ -133,20 +132,8 @@ export default function Login() {
           setBlockTimeRemaining(BLOCK_DURATION);
           setMessage(`Trop de tentatives échouées. Compte bloqué pour ${BLOCK_DURATION / 60} minutes.`);
         } else {
-          // Si il y a des erreurs de validation
-          if (result.details) {
-            const validationErrors: Record<string, string> = {};
-
-            // Ajouter les erreurs de validation dans le tableau d'erreurs pour pouvoir les afficher
-            result.details.forEach((error: ZodIssue) => {
-              const field = error.path[0].toString();
-              validationErrors[field] = error.message;
-            });
-            setErrors(validationErrors);
-          } else {
-            // Si il n'y a pas d'erreurs de validation et que le compte n'est pas bloqué alors on affiche le message d'erreur
-            setMessage(result.error || `Erreur lors de la connexion. Il vous reste ${MAX_ATTEMPTS - newAttempts} tentative(s).`);
-          }
+          // Si il n'y a pas d'erreurs de validation et que le compte n'est pas bloqué alors on affiche le message d'erreur
+          setMessage(result.error || `Erreur lors de la connexion. Il vous reste ${MAX_ATTEMPTS - newAttempts} tentative(s).`);
         }
       }
     } catch (error) {

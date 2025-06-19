@@ -26,7 +26,7 @@ import {
 
 export default function BookingsPage() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [proprietes, setProprietes] = useState<{ id: number; nom: string }[]>([]);
+  const [proprietes, setProprietes] = useState<{ id_propriete: number; nom: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -143,9 +143,9 @@ export default function BookingsPage() {
   const handleEdit = (reservation: Reservation) => {
     setEditingReservation(reservation);
     setFormData({
-      id_propriete: reservation.id_propriete.toString(),
-      date_debut: reservation.date_debut.toISOString().split("T")[0],
-      date_fin: reservation.date_fin.toISOString().split("T")[0],
+      id_propriete: reservation.propriete.id_propriete.toString(),
+      date_debut: reservation.date_debut.split("T")[0],
+      date_fin: reservation.date_fin.split("T")[0],
       id_statut_reservation: reservation.id_statut_reservation,
       prix_total: reservation.prix_total.toString(),
     });
@@ -283,10 +283,10 @@ export default function BookingsPage() {
                   <option value="">Sélectionnez une propriété</option>
                   {proprietes.map((propriete) => (
                     <option
-                      key={propriete.id}
-                      value={propriete.id}
+                      key={propriete.id_propriete}
+                      value={propriete.id_propriete}
                     >
-                      {propriete.nom} - {propriete.nom}
+                      {propriete.nom}
                     </option>
                   ))}
                 </select>

@@ -31,6 +31,9 @@ import {
 } from "@/services/parametreService";
 import { useSession } from "@/components/providers/SessionProvider";
 
+// Force dynamic rendering to prevent prerendering issues with Prisma
+export const dynamic = "force-dynamic";
+
 // Fonctionnalités de la page de paramètres :
 // - Afficher les informations du profil de l'utilisateur
 // - Modifier les informations du profil de l'utilisateur

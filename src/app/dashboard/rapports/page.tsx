@@ -18,20 +18,19 @@ import {
 } from "recharts";
 import { getChargesParMois, getChargesParType, getChargesParPropriete } from "@/lib/rapport";
 import { Card, CardContent } from "../../../components/ui/card";
+import { ChargeMois, ChargeType, ChargePropriete } from "@/types/rapport";
 
-interface ChargeType {
-  name: string;
-  value: number;
-}
+// Force dynamic rendering to prevent prerendering issues with Prisma
+export const dynamic = "force-dynamic";
 
 export default function ReportsPage() {
   const [isLoading, setIsLoading] = useState(true);
-  const [chargesParMois, setChargesParMois] = useState<unknown[]>([]);
+  const [chargesParMois, setChargesParMois] = useState<ChargeMois[]>([]);
   const [chargesParType, setChargesParType] = useState<ChargeType[]>([]);
-  const [chargesParPropriete, setChargesParPropriete] = useState<unknown[]>([]);
+  const [chargesParPropriete, setChargesParPropriete] = useState<ChargePropriete[]>([]);
   const [totalCharges, setTotalCharges] = useState(0);
   const [nbCharges, setNbCharges] = useState(0);
-  const [topProprietes, setTopProprietes] = useState<unknown[]>([]);
+  const [topProprietes, setTopProprietes] = useState<ChargePropriete[]>([]);
 
   useEffect(() => {
     const loadData = async () => {

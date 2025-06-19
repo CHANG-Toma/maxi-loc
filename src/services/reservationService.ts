@@ -3,21 +3,36 @@ import { getProprietes } from "@/lib/propriete";
 
 export interface Reservation {
   id_reservation: number;
-  id_propriete: number;
-  date_debut: Date;
-  date_fin: Date;
+  propriete: {
+    id_propriete: number;
+    nom: string;
+    ville?: string;
+    pays?: string;
+  };
+  date_debut: string;
+  date_fin: string;
   prix_total: number;
   id_statut_reservation: number;
-  propriete: {
-    nom: string;
-    ville: string;
-    pays: string;
-  };
-  statutReservation?: {
+  statutReservation: {
     id_statut_reservation: number;
     libelle: string;
   };
 }
+
+// Type pour les données brutes retournées par getReservations
+type RawReservation = {
+  id_reservation: number;
+  propriete: {
+    id_propriete: number;
+    nom: string;
+    ville?: string;
+    pays?: string;
+  };
+  date_debut: string;
+  date_fin: string;
+  prix_total: number;
+  id_statut_reservation: number;
+};
 
 export interface ReservationFormData {
   id_propriete: string;
@@ -33,9 +48,19 @@ export class ReservationService {
       const result = await getReservations();
       
       if (result.success && result.reservations) {
-        // Ajouter les statuts de réservation par défaut
-        const reservationsWithStatus = result.reservations.map(reservation => ({
-          ...reservation,
+        // Transformer les données pour correspondre à l'interface Reservation
+        const reservationsWithStatus = result.reservations.map((reservation: RawReservation) => ({
+          id_reservation: reservation.id_reservation,
+          propriete: {
+            id_propriete: reservation.propriete.id_propriete,
+            nom: reservation.propriete.nom,
+            ville: reservation.propriete.ville || '',
+            pays: reservation.propriete.pays || ''
+          },
+          date_debut: reservation.date_debut,
+          date_fin: reservation.date_fin,
+          prix_total: reservation.prix_total,
+          id_statut_reservation: reservation.id_statut_reservation,
           statutReservation: {
             id_statut_reservation: reservation.id_statut_reservation,
             libelle: this.getStatusLabel(reservation.id_statut_reservation)
@@ -108,8 +133,8 @@ export class ReservationService {
       // Préparer les données
       const reservationData = {
         id_propriete,
-        date_debut: new Date(formData.date_debut),
-        date_fin: new Date(formData.date_fin),
+        date_debut: formData.date_debut,
+        date_fin: formData.date_fin,
         id_statut_reservation: formData.id_statut_reservation,
         prix_total
       };
@@ -130,10 +155,7 @@ export class ReservationService {
         };
       } else {
         // si non on affiche un message d'erreur
-        let errorMessage = result.error || `Erreur lors de la ${editingReservation ? 'modification' : 'création'} de la réservation`;
-        if (result.details) {
-          errorMessage = `${errorMessage}\n${result.details}`;
-        }
+        const errorMessage = result.error || `Erreur lors de la ${editingReservation ? 'modification' : 'création'} de la réservation`;
         return { success: false, error: errorMessage };
       }
     } catch (error) {

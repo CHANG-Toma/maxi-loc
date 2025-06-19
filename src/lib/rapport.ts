@@ -3,8 +3,19 @@
 import { prisma } from '@/lib/prisma'
 import { validateSession } from "@/lib/session";
 import { cookies } from 'next/headers';
+import { ChargeMois, ChargeType, ChargePropriete, RapportResponse } from '@/types/rapport';
 
-export async function getChargesParMois() {
+// Type pour les objets charge retournés par Prisma
+type PrismaCharge = {
+  id_charge: number;
+  propriete: { id_propriete: number; nom: string };
+  date_paiement: Date;
+  montant: number;
+  typeCharge: { id_type_charge: number; libelle: string };
+  description: string | null;
+};
+
+export async function getChargesParMois(): Promise<RapportResponse<ChargeMois>> {
   const token = (await cookies()).get('session')?.value;
 
   if (!token) {
@@ -30,21 +41,22 @@ export async function getChargesParMois() {
     });
 
     // Grouper les charges par mois
-    const chargesParMois = charges.reduce((acc, charge) => {
+    const chargesParMois: Record<string, number> = {};
+    
+    charges.forEach((charge: PrismaCharge) => {
       const date = new Date(charge.date_paiement);
       const mois = date.toLocaleString('fr-FR', { month: 'short' });
       
-      if (!acc[mois]) {
-        acc[mois] = 0;
+      if (!chargesParMois[mois]) {
+        chargesParMois[mois] = 0;
       }
-      acc[mois] += charge.montant;
-      return acc;
-    }, {} as Record<string, number>);
+      chargesParMois[mois] += Number(charge.montant);
+    });
 
     // Convertir en format pour le graphique
-    const data = Object.entries(chargesParMois).map(([name, montant]) => ({
+    const data: ChargeMois[] = Object.entries(chargesParMois).map(([name, montant]) => ({
       name,
-      montant
+      montant: Number(montant)
     }));
 
     return { success: true, data };
@@ -54,7 +66,7 @@ export async function getChargesParMois() {
   }
 }
 
-export async function getChargesParType() {
+export async function getChargesParType(): Promise<RapportResponse<ChargeType>> {
   const token = (await cookies()).get('session')?.value;
 
   if (!token) {
@@ -80,20 +92,21 @@ export async function getChargesParType() {
     });
 
     // Grouper les charges par type
-    const chargesParType = charges.reduce((acc, charge) => {
+    const chargesParType: Record<string, number> = {};
+    
+    charges.forEach((charge: PrismaCharge) => {
       const type = charge.typeCharge.libelle;
       
-      if (!acc[type]) {
-        acc[type] = 0;
+      if (!chargesParType[type]) {
+        chargesParType[type] = 0;
       }
-      acc[type] += charge.montant;
-      return acc;
-    }, {} as Record<string, number>);
+      chargesParType[type] += Number(charge.montant);
+    });
 
     // Convertir en format pour le graphique
-    const data = Object.entries(chargesParType).map(([name, value]) => ({
+    const data: ChargeType[] = Object.entries(chargesParType).map(([name, value]) => ({
       name,
-      value
+      value: Number(value)
     }));
 
     return { success: true, data };
@@ -103,7 +116,7 @@ export async function getChargesParType() {
   }
 }
 
-export async function getChargesParPropriete() {
+export async function getChargesParPropriete(): Promise<RapportResponse<ChargePropriete>> {
   const token = (await cookies()).get('session')?.value;
 
   if (!token) {
@@ -129,22 +142,23 @@ export async function getChargesParPropriete() {
     });
 
     // Grouper les charges par propriété
-    const chargesParPropriete = charges.reduce((acc, charge) => {
+    const chargesParPropriete: Record<string, number> = {};
+    
+    charges.forEach((charge: PrismaCharge) => {
       const propriete = charge.propriete.nom;
       
-      if (!acc[propriete]) {
-        acc[propriete] = 0;
+      if (!chargesParPropriete[propriete]) {
+        chargesParPropriete[propriete] = 0;
       }
-      acc[propriete] += charge.montant;
-      return acc;
-    }, {} as Record<string, number>);
+      chargesParPropriete[propriete] += Number(charge.montant);
+    });
 
     // Convertir en format pour le graphique et calculer le total
-    const total = Object.values(chargesParPropriete).reduce((sum, val) => sum + val, 0);
-    const data = Object.entries(chargesParPropriete).map(([name, montant]) => ({
+    const total = Object.values(chargesParPropriete).reduce((sum, val) => sum + Number(val), 0);
+    const data: ChargePropriete[] = Object.entries(chargesParPropriete).map(([name, montant]) => ({
       name,
-      montant,
-      pourcentage: (montant / total) * 100
+      montant: Number(montant),
+      pourcentage: (Number(montant) / total) * 100
     }));
 
     return { success: true, data };

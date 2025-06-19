@@ -1,27 +1,26 @@
+'use server'
+
 import { prisma } from "@/lib/prisma";
+import { validateSession } from "@/lib/session";
+import { cookies } from 'next/headers';
 
-export class TypeProprieteService {
-  async getAll() {
-    return await prisma.typePropriete.findMany();
+export async function getTypesPropriete() {
+  const token = (await cookies()).get('session')?.value;
+
+  if (!token) {
+    return { success: false, error: "Vous devez être connecté pour voir les types de propriété" };
   }
 
-  async create(data: { nom: string }) {
-    return await prisma.typePropriete.create({ data: { libelle: data.nom } });
-  }
+  try {
+    const user = await validateSession(token);
+    if (!user) {
+      return { success: false, error: "Session invalide" };
+    }
 
-  async update(id: number, data: { nom: string }) {
-    return await prisma.typePropriete.update({ where: { id_type_propriete: id }, data });
-  }
-
-  async delete(id: number) {
-    return await prisma.typePropriete.delete({ where: { id_type_propriete: id } });
-  }
-
-  async getById(id: number) {
-    return await prisma.typePropriete.findUnique({ where: { id_type_propriete: id } });
-  }
-
-  async getProprietesByTypePropriete(id: number) {
-    return await prisma.propriete.findMany({ where: { id_type_propriete: id } });
+    const types = await prisma.typePropriete.findMany();
+    return { success: true, types };
+  } catch (error) {
+    console.error("Erreur lors de la récupération des types de propriété:", error);
+    return { success: false, error: "Une erreur est survenue lors de la récupération des types de propriété" };
   }
 }
