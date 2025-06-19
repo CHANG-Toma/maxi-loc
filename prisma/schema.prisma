@@ -4,8 +4,9 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
 }
 
 model Charge {
@@ -18,8 +19,8 @@ model Charge {
   propriete      Propriete  @relation(fields: [id_propriete], references: [id_propriete])
   typeCharge     TypeCharge @relation(fields: [id_type_charge], references: [id_type_charge])
 
-  @@index([id_propriete], map: "Charge_id_propriete_fkey")
-  @@index([id_type_charge], map: "Charge_id_type_charge_fkey")
+  @@index([id_propriete])
+  @@index([id_type_charge])
   @@map("Charge")
 }
 
@@ -39,7 +40,7 @@ model PlateformePropriete {
   propriete     Propriete  @relation(fields: [id_propriete], references: [id_propriete])
 
   @@id([id_propriete, id_plateforme])
-  @@index([id_plateforme], map: "Plateforme_propriete_id_plateforme_fkey")
+  @@index([id_plateforme])
   @@map("Plateforme_propriete")
 }
 
@@ -61,8 +62,8 @@ model Propriete {
   utilisateur       Utilisateur           @relation(fields: [id_utilisateur], references: [id_utilisateur])
   reservations      Reservation[]
 
-  @@index([id_type_propriete], map: "Propriete_id_type_propriete_fkey")
-  @@index([id_utilisateur], map: "Propriete_id_utilisateur_fkey")
+  @@index([id_type_propriete])
+  @@index([id_utilisateur])
   @@map("Propriete")
 }
 
@@ -76,8 +77,8 @@ model Reservation {
   propriete             Propriete         @relation(fields: [id_propriete], references: [id_propriete])
   statutReservation     StatutReservation @relation(fields: [id_statut_reservation], references: [id_statut_reservation])
 
-  @@index([id_propriete], map: "Reservation_id_propriete_fkey")
-  @@index([id_statut_reservation], map: "Reservation_id_statut_reservation_fkey")
+  @@index([id_propriete])
+  @@index([id_statut_reservation])
   @@map("Reservation")
 }
 
