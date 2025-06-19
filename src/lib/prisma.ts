@@ -1,18 +1,9 @@
-import { PrismaClient } from '../../prisma/generated/client'
-import { PrismaPlanetScale } from '@prisma/adapter-planetscale'
-import { fetch as undiciFetch } from 'undici'
+import { PrismaClient } from '@prisma/client'
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient }
 
-const connectionString = process.env.DATABASE_URL!
-
-// Utiliser l'adaptateur PlanetScale pour l'environnement de production
-const adapter = new PrismaPlanetScale({ 
-  url: connectionString, 
-  fetch: undiciFetch 
-})
-
 export const prisma = 
-  globalForPrisma.prisma || new PrismaClient({ adapter })
+  globalForPrisma.prisma || new PrismaClient()
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+

@@ -4,12 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "prisma generate && prisma db push && next build",
+    "build": "prisma generate --data-proxy && prisma db push && next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate",
+    "postinstall": "prisma generate --data-proxy",
     "deploy:db": "prisma db push",
-    "vercel-build": "prisma generate && prisma db push && next build"
+    "vercel-build": "prisma generate --data-proxy && prisma db push && next build"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
