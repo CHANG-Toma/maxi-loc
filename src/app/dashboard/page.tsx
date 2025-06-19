@@ -1,89 +1,219 @@
+"use client";
 
-"use client"
-
-import { motion } from "framer-motion";
 import { 
   BarChart3, 
   Building2, 
   Calendar, 
-  CreditCard, 
-  DollarSign, 
-  Home, 
-  Menu, 
-  Settings, 
-  Users2 
+  DollarSign
 } from "lucide-react";
-import { Button } from "../../components/ui/button";
-import { useState } from "react";
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import Overview from "./components/Overview";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
+} from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { OverviewService, DashboardStats, RevenusData, ReservationRecente } from "@/services/overviewService";
+import { useEffect, useState } from "react";
 
-export default function Dashboard() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const pathname = usePathname();
+const formatNumber = (value: number | null): string => {
+  if (value === null || value === undefined) return '0';
+  return value.toLocaleString('fr-FR');
+};
 
-  const navigationItems = [
-    { icon: <Home className="w-5 h-5" />, label: "Accueil", path: "/dashboard" },
-    { icon: <Building2 className="w-5 h-5" />, label: "Propriétés", path: "/dashboard/properties" },
-    { icon: <Calendar className="w-5 h-5" />, label: "Réservations", path: "/dashboard/bookings" },
-    { icon: <Users2 className="w-5 h-5" />, label: "Clients", path: "/dashboard/clients" },
-    { icon: <CreditCard className="w-5 h-5" />, label: "Paiements", path: "/dashboard/payments" },
-    { icon: <BarChart3 className="w-5 h-5" />, label: "Rapports", path: "/dashboard/reports" },
-    { icon: <Settings className="w-5 h-5" />, label: "Paramètres", path: "/dashboard/settings" }
-  ];
+export default function DashboardPage() {
+  const [stats, setStats] = useState<DashboardStats>({
+    revenus_mensuels: 0,
+    proprietes_actives: 0,
+    taux_occupation: 0,
+    reservations: 0,
+    variation_revenus: 0,
+    variation_proprietes: 0,
+    variation_occupation: 0,
+    variation_reservations: 0
+  });
+  const [revenusData, setRevenusData] = useState<RevenusData[]>([]);
+  const [reservationsRecentes, setReservationsRecentes] = useState<ReservationRecente[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [dashboardStats, revenus, reservations] = await Promise.all([
+          OverviewService.getDashboardStats(),
+          OverviewService.getRevenusData(),
+          OverviewService.getReservationsRecentes()
+        ]);
+
+        setStats(dashboardStats);
+        setRevenusData(revenus);
+        setReservationsRecentes(reservations);
+      } catch (error) {
+        console.error("Erreur lors du chargement des données:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <motion.div
-        initial={{ x: -250 }}
-        animate={{ x: isSidebarOpen ? 0 : -250 }}
-        className="w-64 bg-white border-r border-gray-200 fixed h-full z-30"
-      >
-        <div className="p-4">
-          <h2 className="text-xl font-bold text-gray-800 mb-6">Dashboard</h2>
-          <nav className="space-y-2">
-            {navigationItems.map((item, index) => (
-              <Link 
-                key={index}
-                href={item.path}
-                className={`flex items-center space-x-3 text-gray-600 hover:text-primary hover:bg-gray-50 w-full p-2 rounded-lg transition-colors ${
-                  pathname === item.path ? 'bg-gray-50 text-primary' : ''
-                }`}
-              >
-                {item.icon}
-                <span>{item.label}</span>
-              </Link>
-            ))}
-          </nav>
-        </div>
-      </motion.div>
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold text-black">Tableau de bord</h1>
+      
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-black">Revenus mensuels</CardTitle>
+            <DollarSign className="h-4 w-4 text-black" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-black">{formatNumber(stats.revenus_mensuels)} €</div>
+            <p className="text-xs text-green-500">
+              +{formatNumber(stats.variation_revenus)}% vs le dernier mois
+            </p>
+          </CardContent>
+        </Card>
 
-      {/* Main Content */}
-      <div className={`flex-1 ${isSidebarOpen ? 'ml-64' : 'ml-0'} transition-all duration-300`}>
-        {/* Top Bar */}
-        <header className="bg-white border-b border-gray-200 p-4 flex justify-between items-center">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          >
-            <Menu className="w-5 h-5" />
-          </Button>
-          <div className="flex items-center space-x-4">
-            <Button variant="outline" size="sm">
-              Aide
-            </Button>
-            <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
-          </div>
-        </header>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-black">Propriétés Actives</CardTitle>
+            <Building2 className="h-4 w-4 text-black" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-black">{formatNumber(stats.proprietes_actives)}</div>
+            <p className="text-xs text-green-500">
+              +{formatNumber(stats.variation_proprietes)} vs le dernier mois
+            </p>
+          </CardContent>
+        </Card>
 
-        {/* Dashboard Content */}
-        <main className="p-6">
-          <Overview />
-        </main>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-black">Taux d&apos;Occupation</CardTitle>
+            <BarChart3 className="h-4 w-4 text-black" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-black">{formatNumber(stats.taux_occupation)}%</div>
+            <p className="text-xs text-green-500">
+              +{formatNumber(stats.variation_occupation)}% vs le dernier mois
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-black">Réservations</CardTitle>
+            <Calendar className="h-4 w-4 text-black" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-black">{formatNumber(stats.reservations)}</div>
+            <p className="text-xs text-green-500">
+              +{formatNumber(stats.variation_reservations)} vs le dernier mois
+            </p>
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Graphique des revenus mensuels */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-black">Revenus mensuels</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={revenusData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis 
+                  dataKey="mois" 
+                  axisLine={false}
+                  tickLine={false}
+                  fontSize={12}
+                  tickMargin={8}
+                />
+                <YAxis 
+                  axisLine={false}
+                  tickLine={false}
+                  fontSize={12}
+                  tickMargin={8}
+                  tickFormatter={(value) => formatNumber(value)}
+                />
+                <Tooltip 
+                  formatter={(value: number) => [formatNumber(value) + ' €', 'Revenus']}
+                  labelStyle={{ color: '#374151' }}
+                  contentStyle={{ 
+                    backgroundColor: 'white',
+                    border: '1px solid #E5E7EB',
+                    borderRadius: '6px',
+                    padding: '8px'
+                  }}
+                />
+                <Bar 
+                  dataKey="montant" 
+                  fill="#3B82F6"
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Activité récente */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-black">Activité récente</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {reservationsRecentes.length > 0 ? (
+              reservationsRecentes.map((reservation) => (
+                <div key={reservation.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center space-x-4">
+                    <div className="p-2 bg-blue-50 rounded-full">
+                      <Calendar className="w-4 h-4 text-blue-500" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-black">{reservation.propriete}</span>
+                      <span className="text-sm text-gray-500">{reservation.ville}</span>
+                      <span className="text-xs text-gray-400">Réservé le {reservation.date}</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end space-y-1">
+                    <span className="text-sm font-semibold text-green-600">{formatNumber(reservation.prix)} €</span>
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      reservation.statut === 'Confirmée' ? 'bg-green-100 text-green-700' :
+                      reservation.statut === 'En attente' ? 'bg-yellow-100 text-yellow-700' :
+                      reservation.statut === 'Annulée' ? 'bg-red-100 text-red-700' :
+                      'bg-gray-100 text-gray-700'
+                    }`}>
+                      {reservation.statut}
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <Calendar className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                <p>Aucune réservation récente</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
-}
+} 
